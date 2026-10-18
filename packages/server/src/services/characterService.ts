@@ -134,6 +134,7 @@ export class CharacterService {
           pos_y: 160,
           hp: baseAttrs.maxHp,
           mp: baseAttrs.maxMp,
+          version: 1,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         },
@@ -169,6 +170,81 @@ export class CharacterService {
     };
 
     return this.formatPlayerData(char, inventorySlots, equipment);
+  }
+
+  public async getCharacterRecord(characterId: string): Promise<CharacterRecord | null> {
+    return this.characterRepo.findById(characterId);
+  }
+
+  public async saveAuthoritativePlayer(
+    playerId: string,
+    state: {
+      level: number;
+      currentXp: number;
+      gold: number;
+      hp: number;
+      mp: number;
+      x: number;
+      y: number;
+      version: number;
+      inventory: (InventorySlot | null)[];
+      equipped: { weapon: string | null; armor: string | null; accessory: string | null };
+    }
+  ): Promise<PlayerData> {
+    return await this.db.transaction(async tx => {
+      const charRepo = new CharacterRepository(tx);
+      const invRepo = new InventoryRepository(tx);
+      const eqRepo = new EquipmentRepository(tx);
+      const goldRepo = new GoldLedgerRepository(tx);
+
+      const char = await charRepo.findById(playerId);
+      if (!char) {
+        throw new Error(`Personagem ${playerId} não encontrado para persistência.`);
+      }
+
+      // Auditoria de variação financeira
+      const goldDiff = state.gold - char.gold;
+      if (goldDiff !== 0) {
+        await goldRepo.recordTransaction(
+          playerId,
+          goldDiff,
+          state.gold,
+          'simulation_reward',
+          tx
+        );
+      }
+
+      // Atualiza com versionamento atômico
+      const updatedChar = await charRepo.updateProgression(
+        playerId,
+        {
+          level: state.level,
+          current_xp: state.currentXp,
+          gold: state.gold,
+          hp: state.hp,
+          mp: state.mp,
+          pos_x: Math.round(state.x),
+          pos_y: Math.round(state.y),
+          expectedVersion: state.version
+        },
+        tx
+      );
+
+      // Persiste inventário de 24 slots
+      const slotsToSave: { slotIndex: number; itemId: string; quantity: number }[] = [];
+      for (let i = 0; i < state.inventory.length; i++) {
+        const slot = state.inventory[i];
+        if (slot && slot.itemId && slot.quantity > 0) {
+          slotsToSave.push({ slotIndex: i, itemId: slot.itemId, quantity: slot.quantity });
+        }
+      }
+      await invRepo.saveSlots(playerId, slotsToSave, tx);
+
+      // Persiste equipamentos
+      await eqRepo.saveEquipment(playerId, state.equipped, tx);
+
+      return this.formatPlayerData(updatedChar, slotsToSave, state.equipped);
+    });
   }
 
   public async saveCharacter(

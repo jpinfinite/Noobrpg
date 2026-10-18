@@ -3,6 +3,7 @@ dotenv.config();
 
 import { initDatabase, closeDatabase } from './db/index.js';
 import { createApp } from './app.js';
+import { GameSimulation } from './simulation/GameSimulation.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 4000;
 
@@ -12,7 +13,11 @@ async function bootstrap() {
     const db = await initDatabase();
     console.log('[Server] Banco de dados pronto e migrações aplicadas.');
 
-    const app = createApp(db);
+    const simulation = new GameSimulation();
+    simulation.start();
+    console.log('[Server] Motor de Simulação Autoritativa iniciado a 20 Hz (50ms).');
+
+    const app = createApp(db, simulation);
 
     const server = app.listen(PORT, () => {
       console.log(`[Server] NoobRPG Server rodando em http://localhost:${PORT}`);
@@ -20,6 +25,7 @@ async function bootstrap() {
 
     const shutdown = async () => {
       console.log('\n[Server] Encerrando servidor graciosamente...');
+      simulation.stop();
       server.close(async () => {
         await closeDatabase();
         console.log('[Server] Recursos liberados.');

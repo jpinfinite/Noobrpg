@@ -65,6 +65,13 @@ export class WorldScene extends Phaser.Scene {
     const charClass = this.initialPlayerData?.characterClass || CharacterClass.WARRIOR;
     this.player = new Player(this, spawnX, spawnY, charClass, this.initialPlayerData);
 
+    // Conecta à simulação autoritativa do servidor se for personagem persistido
+    if (this.initialPlayerData && this.initialPlayerData.id !== 'local_player_1') {
+      ApiClient.joinSimulation(this.initialPlayerData.id).catch(err => {
+        console.warn('[Simulation] Servidor em modo offline ou simulação local:', err);
+      });
+    }
+
     // 6. Monstros
     this.monstersGroup = this.physics.add.group();
     this.spawnMonsters();
@@ -240,31 +247,44 @@ export class WorldScene extends Phaser.Scene {
 
     // Evento de pedido de salvamento e saída
     this.events.on('request-save-and-exit', async () => {
-      await this.saveProgress();
+      await this.saveProgress(true);
       this.scene.stop('UIScene');
       this.scene.start('CharacterSelectScene');
     });
   }
 
-  public async saveProgress(): Promise<void> {
+  public async saveProgress(isLeaving: boolean = false): Promise<void> {
     if (!this.player || !this.player.playerData) return;
     const charId = this.player.playerData.id;
     if (charId === 'local_player_1') return; // Ignora em sessões puramente locais
 
     try {
-      const payload = {
-        position: { x: Math.round(this.player.x), y: Math.round(this.player.y) },
-        hp: this.player.playerData.attributes.currentHp,
-        mp: this.player.playerData.attributes.currentMp,
-        inventory: this.player.playerData.inventory,
-        equipped: this.player.playerData.equipped
-      };
+      if (isLeaving) {
+        try {
+          await ApiClient.leaveSimulation(charId);
+        } catch {
+          // Fallback se não estava na simulação
+          await ApiClient.saveCharacter(charId, {
+            position: { x: Math.round(this.player.x), y: Math.round(this.player.y) },
+            hp: this.player.playerData.attributes.currentHp,
+            mp: this.player.playerData.attributes.currentMp,
+            inventory: this.player.playerData.inventory,
+            equipped: this.player.playerData.equipped
+          });
+        }
+      } else {
+        // Envia ping de sincronização de posição para a simulação autoritativa
+        await ApiClient.sendSimulationAction(charId, 'MOVE', {
+          x: Math.round(this.player.x),
+          y: Math.round(this.player.y),
+          timestamp: Date.now()
+        }).catch(() => {});
+      }
 
-      await ApiClient.saveCharacter(charId, payload);
       this.events.emit('floating-text', {
         x: this.player.x,
         y: this.player.y - 14,
-        text: '💾 PROGRESSO SALVO',
+        text: '💾 PROGRESSO SINCRONIZADO',
         color: '#34d399'
       });
     } catch (err) {

@@ -70,7 +70,7 @@ describe('NoobRPG Fase 4 - Persistência, Autenticação e Contas', () => {
     // Roda migrações novamente para testar idempotência
     await runMigrations(db);
     const migrations = await db.query('SELECT * FROM schema_migrations;');
-    assert.equal(migrations.length, 5);
+    assert.equal(migrations.length, 6);
   });
 
   it('2. Registro de conta com Argon2id e bloqueio de nomes duplicados', async () => {

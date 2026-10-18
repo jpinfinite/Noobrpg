@@ -12,8 +12,10 @@ import { CharacterService } from './services/characterService.js';
 import { createAuthMiddleware } from './middleware/authMiddleware.js';
 import { createAuthRoutes } from './routes/authRoutes.js';
 import { createCharacterRoutes } from './routes/characterRoutes.js';
+import { GameSimulation } from './simulation/GameSimulation.js';
+import { createSimulationRoutes } from './routes/simulationRoutes.js';
 
-export function createApp(db: IDatabase): Express {
+export function createApp(db: IDatabase, simulationInstance?: GameSimulation): Express {
   const app = express();
 
   // Repositórios
@@ -33,6 +35,9 @@ export function createApp(db: IDatabase): Express {
     equipmentRepo,
     goldLedgerRepo
   );
+
+  // Simulação Autoritativa
+  const simulation = simulationInstance || new GameSimulation();
 
   // Middlewares
   const clientOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:3000';
@@ -55,6 +60,7 @@ export function createApp(db: IDatabase): Express {
 
   app.use('/api/auth', createAuthRoutes(authService, authMiddleware));
   app.use('/api/characters', createCharacterRoutes(characterService, authMiddleware));
+  app.use('/api/simulation', createSimulationRoutes(simulation, characterService, authMiddleware));
 
   // Handler 404
   app.use((req, res) => {

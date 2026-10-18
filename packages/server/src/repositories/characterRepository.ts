@@ -3,12 +3,12 @@ import { IDatabase, CharacterRecord } from '../db/index.js';
 export class CharacterRepository {
   constructor(private db: IDatabase) {}
 
-  public async create(record: Omit<CharacterRecord, 'created_at' | 'updated_at'>, tx?: IDatabase): Promise<CharacterRecord> {
+  public async create(record: Omit<CharacterRecord, 'created_at' | 'updated_at' | 'version'>, tx?: IDatabase): Promise<CharacterRecord> {
     const client = tx || this.db;
     await client.execute(
       `INSERT INTO characters (
-        id, account_id, name, character_class, level, current_xp, gold, merit_points, pos_x, pos_y, hp, mp
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+        id, account_id, name, character_class, level, current_xp, gold, merit_points, pos_x, pos_y, hp, mp, version
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1);`,
       [
         record.id,
         record.account_id,
@@ -74,6 +74,7 @@ export class CharacterRepository {
       pos_y?: number;
       hp?: number;
       mp?: number;
+      expectedVersion?: number;
     },
     tx?: IDatabase
   ): Promise<CharacterRecord> {
@@ -114,13 +115,25 @@ export class CharacterRepository {
       values.push(updates.mp);
     }
 
+    fields.push('version = version + 1');
     fields.push("updated_at = CURRENT_TIMESTAMP");
 
     values.push(id);
-    await client.execute(
-      `UPDATE characters SET ${fields.join(', ')} WHERE id = ?;`,
+
+    let whereClause = 'WHERE id = ?';
+    if (updates.expectedVersion !== undefined) {
+      whereClause += ' AND version = ?';
+      values.push(updates.expectedVersion);
+    }
+
+    const result = await client.execute(
+      `UPDATE characters SET ${fields.join(', ')} ${whereClause};`,
       values
     );
+
+    if (updates.expectedVersion !== undefined && result.changes === 0) {
+      throw new Error('Conflito de versão: o estado do personagem foi modificado por outra sessão.');
+    }
 
     const rows = await client.query<CharacterRecord>(
       'SELECT * FROM characters WHERE id = ?;',

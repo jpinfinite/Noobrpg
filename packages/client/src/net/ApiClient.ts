@@ -108,4 +108,36 @@ export class ApiClient {
     });
     return res.player;
   }
+
+  // --- MÉTODOS DE SIMULAÇÃO AUTORITATIVA (FASE 5A) ---
+
+  public static async joinSimulation(characterId: string): Promise<{ player: PlayerData; worldSnapshot: any }> {
+    return this.request<{ player: PlayerData; worldSnapshot: any }>('/simulation/join', {
+      method: 'POST',
+      body: JSON.stringify({ characterId })
+    });
+  }
+
+  public static async sendSimulationAction(
+    characterId: string,
+    action: string,
+    payload: any = {}
+  ): Promise<{ action: string; result: any; player: PlayerData; combatEvents: any[] }> {
+    return this.request<{ action: string; result: any; player: PlayerData; combatEvents: any[] }>('/simulation/action', {
+      method: 'POST',
+      body: JSON.stringify({ characterId, action, payload })
+    });
+  }
+
+  public static async getSimulationState(): Promise<any> {
+    return this.request<any>('/simulation/state');
+  }
+
+  public static async leaveSimulation(characterId: string): Promise<{ player: PlayerData }> {
+    return this.request<{ player: PlayerData }>('/simulation/leave', {
+      method: 'POST',
+      body: JSON.stringify({ characterId })
+    });
+  }
 }
+
