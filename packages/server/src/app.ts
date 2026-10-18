@@ -14,6 +14,7 @@ import { createAuthRoutes } from './routes/authRoutes.js';
 import { createCharacterRoutes } from './routes/characterRoutes.js';
 import { GameSimulation } from './simulation/GameSimulation.js';
 import { createSimulationRoutes } from './routes/simulationRoutes.js';
+import { RoomManager } from './multiplayer/RoomManager.js';
 
 export function createApp(db: IDatabase, simulationInstance?: GameSimulation): Express {
   const app = express();
@@ -38,6 +39,17 @@ export function createApp(db: IDatabase, simulationInstance?: GameSimulation): E
 
   // Simulação Autoritativa
   const simulation = simulationInstance || new GameSimulation();
+
+  // Gerenciador de Salas Multiplayer (Fase 5B)
+  const roomManager = new RoomManager(characterService, simulation);
+
+  // Armazena no app.locals para consumo pelo servidor HTTP/WebSocket e testes
+  app.locals.db = db;
+  app.locals.authService = authService;
+  app.locals.characterService = characterService;
+  app.locals.characterRepo = characterRepo;
+  app.locals.roomManager = roomManager;
+  app.locals.simulation = simulation;
 
   // Middlewares
   const clientOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:3000';

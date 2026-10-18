@@ -12,6 +12,7 @@ import {
 import { Player } from './Player.js';
 
 export class Monster extends Phaser.Physics.Arcade.Sprite {
+  public id: string;
   public monsterConfig: MonsterConfig;
   public currentHp: number;
   public aiState: MonsterAIState = MonsterAIState.IDLE_PATROL;
@@ -24,7 +25,7 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
   private patrolTarget: Vector2D;
   private patrolTimer: number = 0;
 
-  constructor(scene: Phaser.Scene, x: number, y: number, type: MonsterType = MonsterType.SLIME) {
+  constructor(scene: Phaser.Scene, x: number, y: number, type: MonsterType = MonsterType.SLIME, id?: string) {
     const config = MONSTER_DEFINITIONS[type];
     const textureKey = type === MonsterType.SLIME ? 'mob_slime' : 'mob_goblin';
 
@@ -33,6 +34,7 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
+    this.id = id || `mob_${type.toLowerCase()}_${Math.floor(x)}_${Math.floor(y)}`;
     this.monsterConfig = { ...config };
     this.currentHp = config.maxHp;
     this.spawnPoint = { x, y };

@@ -48,8 +48,14 @@
 
 ---
 
-## ADR-007: Gestão de Execução no Ambiente Windows Local
+---
+
+## ADR-008: Camada de Transporte Multiplayer em Tempo Real (WebSocket Puro vs Colyseus)
 - **Status:** Aprovado
-- **Contexto:** A política de execução do PowerShell no ambiente Windows do usuário bloqueia a execução direta do script `npm.ps1`.
-- **Decisão:** Todos os comandos de tooling (instalação, compilação, testes) devem invocar explicitamente `npm.cmd` e `npx.cmd`.
-- **Consequências:** Execução confiável e sem erros de permissão em qualquer terminal do ambiente.
+- **Contexto:** A Fase 5B exige que múltiplos jogadores autenticados compartilhem a mesma instância de mapa em tempo real a 20 Hz, com baixa latência, rate limiting, chat seguro e sincronização contínua de estado.
+- **Comparação Técnica:**
+  - *Colyseus:* Oferece abstração de salas e serialização binária com `@colyseus/schema`. Contudo, impõe forte acoplamento a decoradores proprietários incompatíveis com as interfaces puras de `@noobrpg/shared`, além de introduzir sobreposição com o loop autoritativo de 20 Hz já consolidado no `GameSimulation`.
+  - *WebSocket Puro (`ws`):* Protocolo padrão da web, sem dependências opacas ou decorators. Permite integrar o handshake de upgrade HTTP diretamente com o sistema de autenticação via cookies `session_token` HttpOnly (prevenindo vazamento de tokens em query strings e logs). Possibilita arquitetura limpa de salas (`PlainsRoom`), rate limiting granular por conexão e uso direto dos contratos de `@noobrpg/shared`.
+- **Decisão:** Adotar **WebSocket Puro via biblioteca `ws`** estruturado no padrão de Salas (`RoomManager` / `PlainsRoom`), acoplado diretamente à `GameSimulation` autoritativa a 20 Hz.
+- **Consequências:** Controle total sobre o ciclo de vida das mensagens e rate limiting; preservação integral da simulação da Fase 5A; simplicidade de depuração e testes automatizados sem dependência de schemas proprietários.
+
