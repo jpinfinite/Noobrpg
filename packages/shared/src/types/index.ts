@@ -28,12 +28,12 @@ export interface CharacterAttributes {
   currentMp: number;
   attack: number;
   defense: number;
-  speed: number; // Pixels por segundo
+  speed: number;
 }
 
 export interface ClassCombatConfig {
-  attackRange: number;       // Alcance do ataque em pixels
-  attackCooldownMs: number;  // Intervalo entre ataques em milissegundos
+  attackRange: number;
+  attackCooldownMs: number;
   skill1Name: string;
   skill1CooldownMs: number;
   skill1CostMp: number;
@@ -44,6 +44,69 @@ export interface ClassGrowthRate {
   mpPerLevel: number;
   attackPerLevel: number;
   defensePerLevel: number;
+}
+
+// --- MODELO DE ITENS E INVENTÁRIO ---
+
+export enum ItemCategory {
+  RESOURCE = 'RESOURCE',
+  CONSUMABLE = 'CONSUMABLE',
+  CRAFTING_MATERIAL = 'CRAFTING_MATERIAL',
+  WEAPON = 'WEAPON',
+  ARMOR = 'ARMOR',
+  ACCESSORY = 'ACCESSORY'
+}
+
+export enum ItemRarity {
+  COMMON = 'COMMON',
+  UNCOMMON = 'UNCOMMON',
+  RARE = 'RARE',
+  EPIC = 'EPIC'
+}
+
+export enum EquipmentSlot {
+  WEAPON = 'WEAPON',
+  ARMOR = 'ARMOR',
+  ACCESSORY = 'ACCESSORY'
+}
+
+export interface ItemAttributesBonus {
+  attack?: number;
+  defense?: number;
+  maxHp?: number;
+  maxMp?: number;
+  speed?: number;
+}
+
+export interface ItemDefinition {
+  id: string;
+  name: string;
+  description: string;
+  category: ItemCategory;
+  rarity: ItemRarity;
+  maxStack: number;
+  goldValue: number;
+  equipSlot?: EquipmentSlot;
+  requiredLevel?: number;
+  requiredClass?: CharacterClass;
+  attributesBonus?: ItemAttributesBonus;
+  consumableEffect?: {
+    hpRestore?: number;
+    mpRestore?: number;
+  };
+  iconKey: string;
+}
+
+export interface InventorySlot {
+  slotIndex: number; // 0 a 23 (24 slots)
+  itemId: string;
+  quantity: number;
+}
+
+export interface EquippedSlots {
+  weapon: string | null;
+  armor: string | null;
+  accessory: string | null;
 }
 
 export interface PlayerData {
@@ -57,9 +120,11 @@ export interface PlayerData {
   attributes: CharacterAttributes;
   position: Vector2D;
   direction: Direction;
+  inventory: (InventorySlot | null)[];
+  equipped: EquippedSlots;
 }
 
-// --- TIPOS DE MONSTROS E IA ---
+// --- TIPOS DE MONSTROS E LOOT ---
 
 export enum MonsterType {
   SLIME = 'SLIME',
@@ -72,6 +137,13 @@ export enum MonsterAIState {
   ATTACK = 'ATTACK',
   RETURN = 'RETURN',
   DEAD = 'DEAD'
+}
+
+export interface MonsterDropEntry {
+  itemId: string;
+  chance: number; // 0.0 a 1.0 (ex: 0.8 = 80%)
+  minAmount: number;
+  maxAmount: number;
 }
 
 export interface MonsterConfig {
@@ -89,4 +161,41 @@ export interface MonsterConfig {
   goldRewardMin: number;
   goldRewardMax: number;
   respawnTimeMs: number;
+  lootTable: MonsterDropEntry[];
+}
+
+// --- COLETA E RECURSOS ---
+
+export enum GatheringNodeType {
+  TREE = 'TREE',
+  ORE_VEIN = 'ORE_VEIN',
+  HERB_BUSH = 'HERB_BUSH'
+}
+
+export interface GatheringNodeConfig {
+  type: GatheringNodeType;
+  name: string;
+  gatherDurationMs: number;
+  respawnTimeMs: number;
+  droppedItemId: string;
+  dropAmountMin: number;
+  dropAmountMax: number;
+}
+
+// --- CRAFTING ---
+
+export interface CraftingIngredient {
+  itemId: string;
+  quantity: number;
+}
+
+export interface CraftingRecipe {
+  id: string;
+  name: string;
+  description: string;
+  category: ItemCategory;
+  resultItemId: string;
+  resultAmount: number;
+  requiredLevel: number;
+  ingredients: CraftingIngredient[];
 }

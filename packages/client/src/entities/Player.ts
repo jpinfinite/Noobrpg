@@ -3,12 +3,18 @@ import {
   CharacterClass,
   Direction,
   PlayerData,
+  EquipmentSlot,
   CLASS_COMBAT_CONFIG,
-  calculateAttributesForLevel,
+  ITEM_DEFINITIONS,
+  createEmptyInventory,
+  addItemToInventory,
+  removeItemFromSlot,
+  calculateTotalPlayerAttributes,
   evaluateLevelProgression,
   calculateDamage,
   calculateDistance,
-  normalizeVector
+  normalizeVector,
+  executeCrafting
 } from '@noobrpg/shared';
 import { Monster } from './Monster.js';
 
@@ -16,6 +22,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   public playerData: PlayerData;
   public isDead: boolean = false;
   public isInvulnerable: boolean = false;
+  public isInteractDown: boolean = false;
 
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasdKeys!: {
@@ -27,6 +34,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private actionKeys!: {
     attack: Phaser.Input.Keyboard.Key;
     skill1: Phaser.Input.Keyboard.Key;
+    interact: Phaser.Input.Keyboard.Key;
+    inventory: Phaser.Input.Keyboard.Key;
+    crafting: Phaser.Input.Keyboard.Key;
     class1: Phaser.Input.Keyboard.Key;
     class2: Phaser.Input.Keyboard.Key;
     class3: Phaser.Input.Keyboard.Key;
@@ -45,7 +55,23 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
-    const initialAttrs = calculateAttributesForLevel(characterClass, 1);
+    // Inicializa o inventário de 24 slots e equipamentos vazios
+    const inventory = createEmptyInventory();
+    const equipped = {
+      weapon: null,
+      armor: null,
+      accessory: null
+    };
+
+    // Itens iniciais de teste para demonstrar a Fase 3
+    addItemToInventory(inventory, 'pickaxe_copper', 1);
+    addItemToInventory(inventory, 'potion_hp_minor', 3);
+    addItemToInventory(inventory, 'herb_green', 4);
+    addItemToInventory(inventory, 'slime_gel', 2);
+    addItemToInventory(inventory, 'iron_ore', 6);
+    addItemToInventory(inventory, 'wood_log', 4);
+
+    const initialAttrs = calculateTotalPlayerAttributes(characterClass, 1, equipped);
     this.playerData = {
       id: 'local_player_1',
       name: 'HeroiIniciante',
@@ -56,7 +82,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       meritPoints: 0,
       attributes: { ...initialAttrs },
       position: { x, y },
-      direction: Direction.DOWN
+      direction: Direction.DOWN,
+      inventory,
+      equipped
     };
 
     this.respawnPoint = { x, y };
@@ -100,6 +128,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.actionKeys = {
       attack: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
       skill1: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.E),
+      interact: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F),
+      inventory: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.I),
+      crafting: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.C),
       class1: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE),
       class2: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO),
       class3: keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE),
@@ -113,6 +144,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.handleMovement();
     this.handleCombatInputs(time, monsters);
     this.handleClassSwitchInputs();
+    this.handleInterfaceToggles();
+
+    this.isInteractDown = this.actionKeys.interact.isDown;
 
     this.setDepth(this.y);
     this.playerData.position.x = Math.round(this.x);
@@ -135,7 +169,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.setVelocity(normalized.x * speed, normalized.y * speed);
 
     const isMoving = inputX !== 0 || inputY !== 0;
-    const animPrefix = this.getAnimPrefix();
+    const animPrefix = 'hero';
 
     if (isMoving) {
       if (inputY > 0) {
@@ -172,14 +206,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
-  private getAnimPrefix(): string {
-    return 'hero';
-  }
-
   private handleCombatInputs(time: number, monsters: Monster[]): void {
     const combatConfig = CLASS_COMBAT_CONFIG[this.playerData.characterClass];
 
-    // Ataque básico (Tecla ESPAÇO)
     if (Phaser.Input.Keyboard.JustDown(this.actionKeys.attack)) {
       if (time - this.lastAttackTime >= combatConfig.attackCooldownMs) {
         this.lastAttackTime = time;
@@ -187,7 +216,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       }
     }
 
-    // Habilidade 1 (Tecla E)
     if (Phaser.Input.Keyboard.JustDown(this.actionKeys.skill1)) {
       if (time - this.lastSkill1Time >= combatConfig.skill1CooldownMs) {
         if (this.playerData.attributes.currentMp >= combatConfig.skill1CostMp) {
@@ -206,14 +234,21 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
+  private handleInterfaceToggles(): void {
+    if (Phaser.Input.Keyboard.JustDown(this.actionKeys.inventory)) {
+      this.scene.events.emit('toggle-inventory');
+    }
+    if (Phaser.Input.Keyboard.JustDown(this.actionKeys.crafting)) {
+      this.scene.events.emit('toggle-crafting');
+    }
+  }
+
   private executeBasicAttack(monsters: Monster[], attackRange: number): void {
-    // Efeito visual na frente do personagem
     const attackOffset = this.getDirectionOffset(20);
     const fx = this.scene.add.sprite(this.x + attackOffset.x, this.y + attackOffset.y, 'fx_slash');
     fx.setDepth(this.depth + 2);
     this.scene.time.delayedCall(150, () => fx.destroy());
 
-    // Procura monstro vivo mais próximo dentro do alcance
     let closestTarget: Monster | null = null;
     let minDistance = attackRange;
 
@@ -230,7 +265,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       const damage = calculateDamage(this.playerData.attributes.attack, closestTarget.monsterConfig.defense);
       const result = closestTarget.takeDamage(damage);
 
-      // Emite texto flutuante de dano no monstro
       this.scene.events.emit('floating-text', {
         x: closestTarget.x,
         y: closestTarget.y - 15,
@@ -247,6 +281,13 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
           text: `+${result.xpReward} XP  +${result.goldReward} Gold`,
           color: '#facc15'
         });
+
+        // Dispara sorteio de loot físico no chão
+        this.scene.events.emit('spawn-monster-loot', {
+          x: closestTarget.x,
+          y: closestTarget.y,
+          lootTable: closestTarget.monsterConfig.lootTable
+        });
       }
     }
   }
@@ -255,7 +296,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const charClass = this.playerData.characterClass;
 
     if (charClass === CharacterClass.DRUID) {
-      // Bênção da Natureza: Cura o próprio herói
       const healAmount = 35;
       this.playerData.attributes.currentHp = Math.min(
         this.playerData.attributes.maxHp,
@@ -270,7 +310,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       return;
     }
 
-    // Para Guerreiro, Arqueiro e Mago: Habilidade de dano aumentado
     const multiplier = charClass === CharacterClass.RANGER ? 1.8 : 1.5;
     const range = charClass === CharacterClass.WARRIOR ? 36 : 140;
 
@@ -301,6 +340,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       if (result.isDead && result.xpReward > 0) {
         this.gainXp(result.xpReward);
         this.playerData.gold += result.goldReward;
+        this.scene.events.emit('spawn-monster-loot', {
+          x: target.x,
+          y: target.y,
+          lootTable: target.monsterConfig.lootTable
+        });
       }
     }
   }
@@ -325,7 +369,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     this.playerData.attributes.currentHp = Math.max(0, this.playerData.attributes.currentHp - amount);
 
-    // Texto flutuante de dano sofrido
     this.scene.events.emit('floating-text', {
       x: this.x,
       y: this.y - 25,
@@ -333,7 +376,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       color: '#ef4444'
     });
 
-    // Flash avermelhado de dano
     this.setTint(0xff5555);
     this.scene.time.delayedCall(150, () => {
       if (this.active && !this.isDead) this.clearTint();
@@ -356,7 +398,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       color: '#ef4444'
     });
 
-    // Retorna ao ponto de renascimento após 2.5s
     this.scene.time.delayedCall(2500, () => {
       this.respawnAtTown();
     });
@@ -370,7 +411,6 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.isDead = false;
     this.clearTint();
 
-    // 3 segundos de imunidade temporária pós-morte
     this.isInvulnerable = true;
     this.setAlpha(0.6);
 
@@ -388,11 +428,8 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     if (progression.didLevelUp) {
       this.playerData.level = progression.newLevel;
-      // Atualiza atributos automaticamente de acordo com as regras canônicas
-      const newAttrs = calculateAttributesForLevel(this.playerData.characterClass, this.playerData.level);
-      this.playerData.attributes = { ...newAttrs };
+      this.recalculateAttributes();
 
-      // Alerta de Level Up
       this.scene.events.emit('floating-text', {
         x: this.x,
         y: this.y - 35,
@@ -420,8 +457,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (this.playerData.characterClass === newClass) return;
 
     this.playerData.characterClass = newClass;
-    const newAttrs = calculateAttributesForLevel(newClass, this.playerData.level);
-    this.playerData.attributes = { ...newAttrs };
+    this.recalculateAttributes();
 
     const textureKey = Player.getTextureKeyForClass(newClass);
     this.setTexture(textureKey, 0);
@@ -434,5 +470,207 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     });
 
     this.scene.events.emit('player-updated', this.playerData);
+  }
+
+  // --- MÉTODOS DE INVENTÁRIO, EQUIPAMENTOS E CRAFTING (FASE 3) ---
+
+  public tryCollectItem(itemId: string, quantity: number): { success: boolean; added: number } {
+    const result = addItemToInventory(this.playerData.inventory, itemId, quantity);
+    if (result.addedQuantity > 0) {
+      this.scene.events.emit('player-updated', this.playerData);
+    }
+    return { success: result.success, added: result.addedQuantity };
+  }
+
+  public equipItem(slotIndex: number): boolean {
+    const slot = this.playerData.inventory[slotIndex];
+    if (!slot) return false;
+
+    const itemDef = ITEM_DEFINITIONS[slot.itemId];
+    if (!itemDef || !itemDef.equipSlot) return false;
+
+    // Validação de requisitos de nível e classe
+    if (itemDef.requiredLevel && this.playerData.level < itemDef.requiredLevel) {
+      this.scene.events.emit('floating-text', {
+        x: this.x,
+        y: this.y - 25,
+        text: `Requer Nível ${itemDef.requiredLevel}!`,
+        color: '#ef4444'
+      });
+      return false;
+    }
+
+    if (itemDef.requiredClass && this.playerData.characterClass !== itemDef.requiredClass) {
+      this.scene.events.emit('floating-text', {
+        x: this.x,
+        y: this.y - 25,
+        text: `Exclusivo para ${itemDef.requiredClass}!`,
+        color: '#ef4444'
+      });
+      return false;
+    }
+
+    const targetSlotKey =
+      itemDef.equipSlot === EquipmentSlot.WEAPON
+        ? 'weapon'
+        : itemDef.equipSlot === EquipmentSlot.ARMOR
+        ? 'armor'
+        : 'accessory';
+
+    const currentEquipped = this.playerData.equipped[targetSlotKey];
+
+    // Troca de item: coloca o anterior no inventário ou remove o item atual
+    this.playerData.equipped[targetSlotKey] = slot.itemId;
+
+    if (currentEquipped) {
+      this.playerData.inventory[slotIndex] = {
+        slotIndex,
+        itemId: currentEquipped,
+        quantity: 1
+      };
+    } else {
+      this.playerData.inventory[slotIndex] = null;
+    }
+
+    this.recalculateAttributes();
+    this.scene.events.emit('floating-text', {
+      x: this.x,
+      y: this.y - 25,
+      text: `Equipado: ${itemDef.name}`,
+      color: '#38bdf8'
+    });
+    this.scene.events.emit('player-updated', this.playerData);
+    return true;
+  }
+
+  public unequipItem(slot: EquipmentSlot): boolean {
+    const targetSlotKey =
+      slot === EquipmentSlot.WEAPON ? 'weapon' : slot === EquipmentSlot.ARMOR ? 'armor' : 'accessory';
+
+    const itemId = this.playerData.equipped[targetSlotKey];
+    if (!itemId) return false;
+
+    const addRes = addItemToInventory(this.playerData.inventory, itemId, 1);
+    if (!addRes.success) {
+      this.scene.events.emit('floating-text', {
+        x: this.x,
+        y: this.y - 25,
+        text: 'Sem espaço no inventário!',
+        color: '#ef4444'
+      });
+      return false;
+    }
+
+    this.playerData.equipped[targetSlotKey] = null;
+    this.recalculateAttributes();
+    this.scene.events.emit('player-updated', this.playerData);
+    return true;
+  }
+
+  public useConsumable(slotIndex: number): boolean {
+    const slot = this.playerData.inventory[slotIndex];
+    if (!slot) return false;
+
+    const itemDef = ITEM_DEFINITIONS[slot.itemId];
+    if (!itemDef?.consumableEffect) return false;
+
+    if (itemDef.consumableEffect.hpRestore) {
+      const heal = itemDef.consumableEffect.hpRestore;
+      this.playerData.attributes.currentHp = Math.min(
+        this.playerData.attributes.maxHp,
+        this.playerData.attributes.currentHp + heal
+      );
+      this.scene.events.emit('floating-text', {
+        x: this.x,
+        y: this.y - 25,
+        text: `+${heal} HP`,
+        color: '#22c55e'
+      });
+    }
+
+    if (itemDef.consumableEffect.mpRestore) {
+      const mana = itemDef.consumableEffect.mpRestore;
+      this.playerData.attributes.currentMp = Math.min(
+        this.playerData.attributes.maxMp,
+        this.playerData.attributes.currentMp + mana
+      );
+      this.scene.events.emit('floating-text', {
+        x: this.x,
+        y: this.y - 25,
+        text: `+${mana} MP`,
+        color: '#0284c7'
+      });
+    }
+
+    removeItemFromSlot(this.playerData.inventory, slotIndex, 1);
+    this.scene.events.emit('player-updated', this.playerData);
+    return true;
+  }
+
+  public dropItemFromInventory(slotIndex: number, quantity: number = 1): void {
+    const slot = this.playerData.inventory[slotIndex];
+    if (!slot) return;
+
+    const toDrop = Math.min(slot.quantity, quantity);
+    const itemId = slot.itemId;
+
+    removeItemFromSlot(this.playerData.inventory, slotIndex, toDrop);
+
+    // Spawna o item no chão próximo ao personagem
+    this.scene.events.emit('spawn-ground-item', {
+      x: this.x + (Math.random() * 20 - 10),
+      y: this.y + (Math.random() * 20 - 10),
+      itemId,
+      quantity: toDrop
+    });
+
+    this.scene.events.emit('player-updated', this.playerData);
+  }
+
+  public craftItem(recipeId: string): boolean {
+    const result = executeCrafting(this.playerData.inventory, recipeId, this.playerData.level);
+
+    if (result.success && result.resultItemId) {
+      const def = ITEM_DEFINITIONS[result.resultItemId];
+      this.scene.events.emit('floating-text', {
+        x: this.x,
+        y: this.y - 30,
+        text: `★ Forjado: ${def.name}!`,
+        color: '#f59e0b'
+      });
+      this.scene.events.emit('player-updated', this.playerData);
+      return true;
+    } else {
+      let reasonMsg = 'Falha no Crafting!';
+      if (result.reason === 'MISSING_INGREDIENTS') reasonMsg = 'Materiais insuficientes!';
+      if (result.reason === 'INVENTORY_FULL') reasonMsg = 'Inventário cheio!';
+      if (result.reason === 'LEVEL_TOO_LOW') reasonMsg = 'Nível insuficiente!';
+
+      this.scene.events.emit('floating-text', {
+        x: this.x,
+        y: this.y - 25,
+        text: reasonMsg,
+        color: '#ef4444'
+      });
+      return false;
+    }
+  }
+
+  private recalculateAttributes(): void {
+    const totalAttrs = calculateTotalPlayerAttributes(
+      this.playerData.characterClass,
+      this.playerData.level,
+      this.playerData.equipped
+    );
+
+    // Mantém a proporção do HP/MP atual
+    const hpRatio = this.playerData.attributes.currentHp / this.playerData.attributes.maxHp;
+    const mpRatio = this.playerData.attributes.currentMp / this.playerData.attributes.maxMp;
+
+    this.playerData.attributes = {
+      ...totalAttrs,
+      currentHp: Math.max(1, Math.round(totalAttrs.maxHp * hpRatio)),
+      currentMp: Math.max(0, Math.round(totalAttrs.maxMp * mpRatio))
+    };
   }
 }

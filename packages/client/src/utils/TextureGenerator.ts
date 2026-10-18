@@ -1,9 +1,5 @@
 import Phaser from 'phaser';
 
-/**
- * Utilitário responsável por gerar texturas procedurais em pixel art limpas e de alta qualidade
- * diretamente no gerenciador de texturas do Phaser para o NoobRPG.
- */
 export class TextureGenerator {
   public static generateAll(scene: Phaser.Scene): void {
     if (!scene.textures.exists('tileset_prototype')) {
@@ -23,7 +19,7 @@ export class TextureGenerator {
       this.generateHeroSpritesheet(scene, 'hero_druid', '#4d7c0f', '#84cc16', '#eab308');
     }
 
-    // Props
+    // Props básicos
     if (!scene.textures.exists('prop_tree')) {
       this.generateTreeProp(scene);
     }
@@ -46,6 +42,23 @@ export class TextureGenerator {
     if (!scene.textures.exists('fx_projectile')) {
       this.generateProjectileFx(scene);
     }
+
+    // --- ASSETS DA FASE 3: ITENS, NÓS DE COLETA E CRAFTING ---
+    if (!scene.textures.exists('node_ore')) {
+      this.generateOreNode(scene);
+    }
+    if (!scene.textures.exists('node_herb')) {
+      this.generateHerbNode(scene);
+    }
+    if (!scene.textures.exists('prop_anvil')) {
+      this.generateAnvilProp(scene);
+    }
+    if (!scene.textures.exists('item_drop_bag')) {
+      this.generateDropBag(scene);
+    }
+
+    // Ícones de itens
+    this.generateItemIcons(scene);
   }
 
   private static generateTileset(scene: Phaser.Scene): void {
@@ -55,7 +68,7 @@ export class TextureGenerator {
 
     ctx.clearRect(0, 0, 128, 32);
 
-    // 1. Grama Verde Rica (Tile 1: x=0..15, y=0..15)
+    // 1. Grama Verde Rica (Tile 1)
     ctx.fillStyle = '#2d6a4f';
     ctx.fillRect(0, 0, 16, 16);
     ctx.fillStyle = '#40916c';
@@ -68,7 +81,7 @@ export class TextureGenerator {
     ctx.fillRect(9, 6, 1, 1);
     ctx.fillRect(5, 11, 1, 1);
 
-    // 2. Terra / Caminho Rústico (Tile 2: x=16..31, y=0..15)
+    // 2. Terra / Caminho Rústico (Tile 2)
     ctx.fillStyle = '#8b5e34';
     ctx.fillRect(16, 0, 16, 16);
     ctx.fillStyle = '#a06a3b';
@@ -79,7 +92,7 @@ export class TextureGenerator {
     ctx.fillRect(20, 5, 2, 1);
     ctx.fillRect(22, 12, 1, 1);
 
-    // 3. Pavimento de Pedra Cinza (Tile 3: x=32..47, y=0..15)
+    // 3. Pavimento de Pedra Cinza (Tile 3)
     ctx.fillStyle = '#6c757d';
     ctx.fillRect(32, 0, 16, 16);
     ctx.fillStyle = '#495057';
@@ -91,7 +104,7 @@ export class TextureGenerator {
     ctx.fillRect(33, 1, 5, 2);
     ctx.fillRect(41, 9, 3, 2);
 
-    // 4. Parede de Masmorra / Tijolos Sólidos (Tile 4: x=48..63, y=0..15)
+    // 4. Parede de Masmorra / Tijolos Sólidos (Tile 4)
     ctx.fillStyle = '#343a40';
     ctx.fillRect(48, 0, 16, 16);
     ctx.fillStyle = '#212529';
@@ -103,7 +116,7 @@ export class TextureGenerator {
     ctx.fillRect(49, 1, 5, 3);
     ctx.fillRect(56, 9, 3, 3);
 
-    // 5. Água Azul com Ondulação (Tile 5: x=64..79, y=0..15)
+    // 5. Água Azul com Ondulação (Tile 5)
     ctx.fillStyle = '#0077b6';
     ctx.fillRect(64, 0, 16, 16);
     ctx.fillStyle = '#0096c7';
@@ -114,7 +127,7 @@ export class TextureGenerator {
     ctx.fillRect(67, 3, 2, 1);
     ctx.fillRect(73, 8, 3, 1);
 
-    // 6. Flores Amarelas sobre Grama (Tile 6: x=80..95, y=0..15)
+    // 6. Flores Amarelas sobre Grama (Tile 6)
     ctx.fillStyle = '#2d6a4f';
     ctx.fillRect(80, 0, 16, 16);
     ctx.fillStyle = '#fef08a';
@@ -124,7 +137,7 @@ export class TextureGenerator {
     ctx.fillRect(84, 5, 1, 1);
     ctx.fillRect(90, 10, 1, 1);
 
-    // 7. Flores Vermelhas sobre Grama (Tile 7: x=96..111, y=0..15)
+    // 7. Flores Vermelhas sobre Grama (Tile 7)
     ctx.fillStyle = '#2d6a4f';
     ctx.fillRect(96, 0, 16, 16);
     ctx.fillStyle = '#f43f5e';
@@ -134,7 +147,7 @@ export class TextureGenerator {
     ctx.fillRect(100, 5, 1, 1);
     ctx.fillRect(105, 11, 1, 1);
 
-    // 8. Cerca de Madeira Rústica (Tile 8: x=112..127, y=0..15)
+    // 8. Cerca de Madeira Rústica (Tile 8)
     ctx.fillStyle = '#2d6a4f';
     ctx.fillRect(112, 0, 16, 16);
     ctx.fillStyle = '#78350f';
@@ -147,9 +160,6 @@ export class TextureGenerator {
     canvas.refresh();
   }
 
-  /**
-   * Gera spritesheet de 64x72 para uma classe de herói customizada
-   */
   private static generateHeroSpritesheet(
     scene: Phaser.Scene,
     textureKey: string,
@@ -272,9 +282,6 @@ export class TextureGenerator {
     }
   }
 
-  /**
-   * Spritesheet de Slime Verde (32x16 px, 2 quadros 16x16)
-   */
   private static generateSlimeSpritesheet(scene: Phaser.Scene): void {
     const canvas = scene.textures.createCanvas('mob_slime', 32, 16);
     if (!canvas) return;
@@ -282,22 +289,20 @@ export class TextureGenerator {
 
     ctx.clearRect(0, 0, 32, 16);
 
-    // Frame 0: Idle gelatinoso
     ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
     ctx.beginPath();
     ctx.ellipse(8, 14, 6, 2, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = '#10b981'; // Verde esmeralda base
+    ctx.fillStyle = '#10b981';
     ctx.beginPath();
     ctx.arc(8, 9, 6, Math.PI, 0);
     ctx.fillRect(2, 9, 12, 4);
     ctx.fill();
 
-    ctx.fillStyle = '#34d399'; // Brilho superior
+    ctx.fillStyle = '#34d399';
     ctx.fillRect(5, 5, 4, 2);
 
-    // Olhos do Slime
     ctx.fillStyle = '#064e3b';
     ctx.fillRect(5, 8, 2, 3);
     ctx.fillRect(9, 8, 2, 3);
@@ -305,7 +310,6 @@ export class TextureGenerator {
     ctx.fillRect(5, 8, 1, 1);
     ctx.fillRect(9, 8, 1, 1);
 
-    // Frame 1: Salto / Ataque (achatado e projetado)
     const x2 = 16;
     ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
     ctx.beginPath();
@@ -328,9 +332,6 @@ export class TextureGenerator {
     canvas.refresh();
   }
 
-  /**
-   * Spritesheet de Goblin Soldado (32x24 px, 2 quadros 16x24)
-   */
   private static generateGoblinSpritesheet(scene: Phaser.Scene): void {
     const canvas = scene.textures.createCanvas('mob_goblin', 32, 24);
     if (!canvas) return;
@@ -338,38 +339,31 @@ export class TextureGenerator {
 
     ctx.clearRect(0, 0, 32, 24);
 
-    // Frame 0: Goblin postura de guarda
     ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
     ctx.beginPath();
     ctx.ellipse(8, 22, 5, 2, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Pernas e tanga de couro
     ctx.fillStyle = '#78350f';
     ctx.fillRect(5, 16, 6, 5);
 
-    // Tronco verde oliva
     ctx.fillStyle = '#65a30d';
     ctx.fillRect(4, 10, 8, 6);
 
-    // Cabeça e orelhas pontudas
     ctx.fillStyle = '#84cc16';
     ctx.fillRect(5, 4, 6, 6);
-    ctx.fillRect(2, 5, 3, 2); // Orelha esquerda
-    ctx.fillRect(11, 5, 3, 2); // Orelha direita
+    ctx.fillRect(2, 5, 3, 2);
+    ctx.fillRect(11, 5, 3, 2);
 
-    // Olhos vermelhos malévolos
     ctx.fillStyle = '#dc2626';
     ctx.fillRect(6, 6, 1, 2);
     ctx.fillRect(9, 6, 1, 2);
 
-    // Adaga enferrujada
     ctx.fillStyle = '#94a3b8';
     ctx.fillRect(12, 12, 2, 6);
     ctx.fillStyle = '#475569';
     ctx.fillRect(11, 14, 4, 1);
 
-    // Frame 1: Goblin atacando (avanço da adaga)
     const x2 = 16;
     ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
     ctx.beginPath();
@@ -391,7 +385,6 @@ export class TextureGenerator {
     ctx.fillRect(x2 + 8, 6, 1, 2);
     ctx.fillRect(x2 + 10, 6, 1, 2);
 
-    // Adaga projetada para a frente
     ctx.fillStyle = '#f87171';
     ctx.fillRect(x2 + 11, 10, 4, 2);
 
@@ -468,9 +461,6 @@ export class TextureGenerator {
     canvas.refresh();
   }
 
-  /**
-   * Efeito visual de corte de espada (16x16 px)
-   */
   private static generateSlashFx(scene: Phaser.Scene): void {
     const canvas = scene.textures.createCanvas('fx_slash', 16, 16);
     if (!canvas) return;
@@ -490,9 +480,6 @@ export class TextureGenerator {
     canvas.refresh();
   }
 
-  /**
-   * Efeito visual de projétil arcano / flecha (12x12 px)
-   */
   private static generateProjectileFx(scene: Phaser.Scene): void {
     const canvas = scene.textures.createCanvas('fx_projectile', 12, 12);
     if (!canvas) return;
@@ -508,5 +495,268 @@ export class TextureGenerator {
     ctx.fillRect(5, 5, 2, 2);
 
     canvas.refresh();
+  }
+
+  // --- NÓS DE COLETA (GATHERING NODES) ---
+
+  private static generateOreNode(scene: Phaser.Scene): void {
+    const canvas = scene.textures.createCanvas('node_ore', 20, 20);
+    if (!canvas) return;
+    const ctx = canvas.getContext();
+
+    ctx.clearRect(0, 0, 20, 20);
+
+    // Sombra
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+    ctx.beginPath();
+    ctx.ellipse(10, 17, 8, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Rocha base
+    ctx.fillStyle = '#475569';
+    ctx.beginPath();
+    ctx.moveTo(3, 16);
+    ctx.lineTo(6, 6);
+    ctx.lineTo(14, 5);
+    ctx.lineTo(17, 16);
+    ctx.closePath();
+    ctx.fill();
+
+    // Veios de ferro metálico brilhante
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillRect(8, 8, 4, 3);
+    ctx.fillRect(11, 11, 3, 3);
+    ctx.fillStyle = '#e2e8f0';
+    ctx.fillRect(9, 8, 1, 2);
+    ctx.fillRect(12, 11, 1, 1);
+
+    canvas.refresh();
+  }
+
+  private static generateHerbNode(scene: Phaser.Scene): void {
+    const canvas = scene.textures.createCanvas('node_herb', 16, 16);
+    if (!canvas) return;
+    const ctx = canvas.getContext();
+
+    ctx.clearRect(0, 0, 16, 16);
+
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.beginPath();
+    ctx.ellipse(8, 14, 6, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Folhagem da erva medicinal
+    ctx.fillStyle = '#15803d';
+    ctx.fillRect(4, 8, 8, 6);
+    ctx.fillStyle = '#22c55e';
+    ctx.fillRect(6, 4, 4, 6);
+    ctx.fillRect(3, 6, 3, 3);
+    ctx.fillRect(10, 6, 3, 3);
+
+    // Flor medicinal lilás no topo
+    ctx.fillStyle = '#c084fc';
+    ctx.fillRect(7, 3, 2, 2);
+    ctx.fillStyle = '#fef08a';
+    ctx.fillRect(7, 4, 1, 1);
+
+    canvas.refresh();
+  }
+
+  private static generateAnvilProp(scene: Phaser.Scene): void {
+    const canvas = scene.textures.createCanvas('prop_anvil', 20, 24);
+    if (!canvas) return;
+    const ctx = canvas.getContext();
+
+    ctx.clearRect(0, 0, 20, 24);
+
+    // Sombra
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+    ctx.beginPath();
+    ctx.ellipse(10, 21, 8, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Tronco base de suporte
+    ctx.fillStyle = '#78350f';
+    ctx.fillRect(6, 12, 8, 9);
+    ctx.fillStyle = '#92400e';
+    ctx.fillRect(7, 12, 6, 9);
+
+    // Bigorna de metal fundido
+    ctx.fillStyle = '#334155';
+    ctx.fillRect(4, 7, 12, 5);
+    ctx.fillStyle = '#64748b';
+    ctx.fillRect(2, 6, 16, 3);
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillRect(3, 6, 13, 1);
+
+    canvas.refresh();
+  }
+
+  private static generateDropBag(scene: Phaser.Scene): void {
+    const canvas = scene.textures.createCanvas('item_drop_bag', 12, 12);
+    if (!canvas) return;
+    const ctx = canvas.getContext();
+
+    ctx.clearRect(0, 0, 12, 12);
+
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+    ctx.beginPath();
+    ctx.ellipse(6, 10, 5, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Saquinho de couro com fita dourada
+    ctx.fillStyle = '#b45309';
+    ctx.fillRect(3, 4, 6, 6);
+    ctx.fillStyle = '#f59e0b';
+    ctx.fillRect(4, 3, 4, 2);
+    ctx.fillRect(5, 5, 2, 1);
+
+    canvas.refresh();
+  }
+
+  /**
+   * Gera ícones de 16x16 pixels para cada um dos itens definidos
+   */
+  private static generateItemIcons(scene: Phaser.Scene): void {
+    const icons: Array<{ key: string; draw: (ctx: CanvasRenderingContext2D) => void }> = [
+      {
+        key: 'icon_wood',
+        draw: ctx => {
+          ctx.fillStyle = '#78350f';
+          ctx.fillRect(3, 5, 10, 6);
+          ctx.fillStyle = '#d97706';
+          ctx.fillRect(3, 6, 2, 4);
+          ctx.fillRect(11, 6, 2, 4);
+        }
+      },
+      {
+        key: 'icon_ore',
+        draw: ctx => {
+          ctx.fillStyle = '#475569';
+          ctx.beginPath();
+          ctx.arc(8, 8, 5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#cbd5e1';
+          ctx.fillRect(6, 6, 3, 2);
+          ctx.fillRect(9, 9, 2, 2);
+        }
+      },
+      {
+        key: 'icon_herb',
+        draw: ctx => {
+          ctx.fillStyle = '#16a34a';
+          ctx.beginPath();
+          ctx.ellipse(8, 8, 4, 6, Math.PI / 4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#86efac';
+          ctx.fillRect(7, 7, 2, 2);
+        }
+      },
+      {
+        key: 'icon_gel',
+        draw: ctx => {
+          ctx.fillStyle = '#10b981';
+          ctx.beginPath();
+          ctx.arc(8, 9, 5, Math.PI, 0);
+          ctx.fillRect(3, 9, 10, 3);
+          ctx.fill();
+          ctx.fillStyle = '#a7f3d0';
+          ctx.fillRect(6, 6, 2, 2);
+        }
+      },
+      {
+        key: 'icon_leather',
+        draw: ctx => {
+          ctx.fillStyle = '#92400e';
+          ctx.fillRect(3, 4, 10, 8);
+          ctx.fillStyle = '#fde68a';
+          ctx.fillRect(5, 7, 6, 1);
+        }
+      },
+      {
+        key: 'icon_potion_hp',
+        draw: ctx => {
+          ctx.fillStyle = '#78350f'; // Rolha
+          ctx.fillRect(6, 2, 4, 2);
+          ctx.fillStyle = '#e11d48'; // Vidro e líquido vermelho
+          ctx.beginPath();
+          ctx.arc(8, 10, 5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#fecdd3'; // Brilho
+          ctx.fillRect(6, 8, 2, 2);
+        }
+      },
+      {
+        key: 'icon_potion_mp',
+        draw: ctx => {
+          ctx.fillStyle = '#78350f';
+          ctx.fillRect(6, 2, 4, 2);
+          ctx.fillStyle = '#0284c7'; // Líquido azul
+          ctx.beginPath();
+          ctx.arc(8, 10, 5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#bae6fd';
+          ctx.fillRect(6, 8, 2, 2);
+        }
+      },
+      {
+        key: 'icon_pickaxe',
+        draw: ctx => {
+          ctx.fillStyle = '#92400e'; // Cabo
+          ctx.fillRect(4, 11, 2, 2);
+          ctx.fillRect(6, 9, 2, 2);
+          ctx.fillRect(8, 7, 2, 2);
+          ctx.fillStyle = '#94a3b8'; // Lâmina curva
+          ctx.fillRect(6, 3, 7, 2);
+          ctx.fillRect(11, 4, 2, 3);
+          ctx.fillRect(5, 4, 2, 3);
+        }
+      },
+      {
+        key: 'icon_sword',
+        draw: ctx => {
+          ctx.fillStyle = '#94a3b8'; // Lâmina
+          ctx.fillRect(9, 3, 2, 7);
+          ctx.fillRect(8, 4, 4, 1);
+          ctx.fillStyle = '#f59e0b'; // Guarda
+          ctx.fillRect(6, 10, 8, 2);
+          ctx.fillStyle = '#78350f'; // Empunhadura
+          ctx.fillRect(9, 12, 2, 3);
+        }
+      },
+      {
+        key: 'icon_armor',
+        draw: ctx => {
+          ctx.fillStyle = '#92400e';
+          ctx.fillRect(4, 3, 8, 10);
+          ctx.fillStyle = '#b45309';
+          ctx.fillRect(3, 4, 10, 4);
+          ctx.fillStyle = '#f59e0b';
+          ctx.fillRect(6, 7, 4, 2);
+        }
+      },
+      {
+        key: 'icon_ring',
+        draw: ctx => {
+          ctx.strokeStyle = '#f59e0b';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(5, 6, 6, 6);
+          ctx.fillStyle = '#ef4444'; // Gema vermelha
+          ctx.fillRect(7, 3, 2, 3);
+        }
+      }
+    ];
+
+    icons.forEach(item => {
+      if (!scene.textures.exists(item.key)) {
+        const canvas = scene.textures.createCanvas(item.key, 16, 16);
+        if (canvas) {
+          const ctx = canvas.getContext();
+          ctx.clearRect(0, 0, 16, 16);
+          item.draw(ctx);
+          canvas.refresh();
+        }
+      }
+    });
   }
 }

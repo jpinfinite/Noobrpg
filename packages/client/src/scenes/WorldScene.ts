@@ -1,14 +1,20 @@
 import Phaser from 'phaser';
-import { MonsterType } from '@noobrpg/shared';
+import { MonsterType, GatheringNodeType, MonsterDropEntry } from '@noobrpg/shared';
 import { Player } from '../entities/Player.js';
 import { Monster } from '../entities/Monster.js';
 import { EnvironmentProp } from '../entities/EnvironmentProp.js';
+import { GatheringNode } from '../entities/GatheringNode.js';
+import { CraftingStation } from '../entities/CraftingStation.js';
+import { GroundItem } from '../entities/GroundItem.js';
 
 export class WorldScene extends Phaser.Scene {
   private player!: Player;
   private monsters: Monster[] = [];
   private monstersGroup!: Phaser.Physics.Arcade.Group;
   private propsGroup!: Phaser.Physics.Arcade.StaticGroup;
+  private gatheringNodes: GatheringNode[] = [];
+  private groundItems: GroundItem[] = [];
+  private craftingStation!: CraftingStation;
   private map!: Phaser.Tilemaps.Tilemap;
   private collisionLayer!: Phaser.Tilemaps.TilemapLayer;
 
@@ -17,7 +23,7 @@ export class WorldScene extends Phaser.Scene {
   }
 
   public create(): void {
-    // 1. Criação do Tilemap
+    // 1. Tilemap
     this.map = this.make.tilemap({ key: 'map_prototype' });
     const tileset = this.map.addTilesetImage('tileset_prototype', 'tileset_prototype');
 
@@ -33,25 +39,32 @@ export class WorldScene extends Phaser.Scene {
     this.collisionLayer?.setDepth(1);
     this.collisionLayer.setCollisionByProperty({ collides: true });
 
-    // 2. Props do cenário (Árvores e Pilares)
+    // 2. Props decorativos
     this.propsGroup = this.physics.add.staticGroup();
     this.spawnEnvironmentProps();
 
-    // 3. Spawning do Jogador
+    // 3. Forja de Crafting na praça
+    this.craftingStation = new CraftingStation(this, 190, 140);
+    this.propsGroup.add(this.craftingStation);
+
+    // 4. Nós de Coleta
+    this.spawnGatheringNodes();
+
+    // 5. Jogador
     this.player = new Player(this, 180, 160);
 
-    // 4. Spawning dos Monstros
+    // 6. Monstros
     this.monstersGroup = this.physics.add.group();
     this.spawnMonsters();
 
-    // 5. Colisores Físicos
+    // 7. Colisões
     this.physics.add.collider(this.player, this.collisionLayer);
     this.physics.add.collider(this.player, this.propsGroup);
     this.physics.add.collider(this.monstersGroup, this.collisionLayer);
     this.physics.add.collider(this.monstersGroup, this.propsGroup);
     this.physics.add.collider(this.player, this.monstersGroup);
 
-    // 6. Câmera
+    // 8. Câmera
     const mapWidthPx = this.map.widthInPixels;
     const mapHeightPx = this.map.heightInPixels;
 
@@ -59,10 +72,10 @@ export class WorldScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, mapWidthPx, mapHeightPx);
     this.cameras.main.startFollow(this.player, true, 0.08, 0.08);
 
-    // 7. Sistema de Texto Flutuante de Dano e Eventos
-    this.setupFloatingTextListener();
+    // 9. Handlers de eventos de loot e textos flutuantes
+    this.setupEventListeners();
 
-    // 8. Inicializa UIScene
+    // 10. UIScene
     this.scene.launch('UIScene', { player: this.player });
   }
 
@@ -76,10 +89,50 @@ export class WorldScene extends Phaser.Scene {
         mob.updateAI(time, delta, this.player);
       }
     }
+
+    // Atualiza nós de coleta (madeira, minério, ervas)
+    for (const node of this.gatheringNodes) {
+      node.updateNode(delta, this.player, this.player.isInteractDown);
+    }
+
+    // Atualiza interação com a bigorna
+    if (this.craftingStation) {
+      this.craftingStation.updateStation(this.player, this.player.isInteractDown);
+    }
+
+    // Checa coleta de itens soltos no chão
+    for (let i = this.groundItems.length - 1; i >= 0; i--) {
+      const item = this.groundItems[i];
+      if (item && item.active) {
+        item.checkPlayerPickup(this.player);
+      } else {
+        this.groundItems.splice(i, 1);
+      }
+    }
+  }
+
+  private spawnGatheringNodes(): void {
+    // Nós de madeira (árvores colhíveis)
+    const treeNode1 = new GatheringNode(this, 90, 80, GatheringNodeType.TREE);
+    const treeNode2 = new GatheringNode(this, 300, 210, GatheringNodeType.TREE);
+    this.gatheringNodes.push(treeNode1, treeNode2);
+    this.propsGroup.add(treeNode1);
+    this.propsGroup.add(treeNode2);
+
+    // Nós de minério de ferro
+    const oreNode1 = new GatheringNode(this, 140, 60, GatheringNodeType.ORE_VEIN);
+    const oreNode2 = new GatheringNode(this, 260, 60, GatheringNodeType.ORE_VEIN);
+    this.gatheringNodes.push(oreNode1, oreNode2);
+    this.propsGroup.add(oreNode1);
+    this.propsGroup.add(oreNode2);
+
+    // Nós de ervas medicinais
+    const herbNode1 = new GatheringNode(this, 100, 150, GatheringNodeType.HERB_BUSH);
+    const herbNode2 = new GatheringNode(this, 270, 160, GatheringNodeType.HERB_BUSH);
+    this.gatheringNodes.push(herbNode1, herbNode2);
   }
 
   private spawnMonsters(): void {
-    // 3 Slimes em diferentes áreas
     const slimeSpawns = [
       { x: 220, y: 130 },
       { x: 120, y: 190 },
@@ -92,7 +145,6 @@ export class WorldScene extends Phaser.Scene {
       this.monstersGroup.add(slime);
     });
 
-    // 1 Goblin na área nordeste
     const goblin = new Monster(this, 280, 70, MonsterType.GOBLIN);
     this.monsters.push(goblin);
     this.monstersGroup.add(goblin);
@@ -102,8 +154,6 @@ export class WorldScene extends Phaser.Scene {
     const treePositions = [
       { x: 120, y: 110 },
       { x: 260, y: 110 },
-      { x: 100, y: 220 },
-      { x: 280, y: 220 },
       { x: 200, y: 80 }
     ];
 
@@ -123,7 +173,8 @@ export class WorldScene extends Phaser.Scene {
     });
   }
 
-  private setupFloatingTextListener(): void {
+  private setupEventListeners(): void {
+    // Efeito de textos flutuantes
     this.events.on('floating-text', (data: { x: number; y: number; text: string; color: string }) => {
       const text = this.add.text(data.x, data.y, data.text, {
         fontFamily: 'monospace',
@@ -146,6 +197,26 @@ export class WorldScene extends Phaser.Scene {
           text.destroy();
         }
       });
+    });
+
+    // Spawna drop único no chão
+    this.events.on('spawn-ground-item', (data: { x: number; y: number; itemId: string; quantity: number }) => {
+      const groundItem = new GroundItem(this, data.x, data.y, data.itemId, data.quantity);
+      this.groundItems.push(groundItem);
+    });
+
+    // Spawna loot de monstros baseado na tabela de probabilidades
+    this.events.on('spawn-monster-loot', (data: { x: number; y: number; lootTable: MonsterDropEntry[] }) => {
+      for (const entry of data.lootTable) {
+        if (Math.random() <= entry.chance) {
+          const qty =
+            Math.floor(Math.random() * (entry.maxAmount - entry.minAmount + 1)) + entry.minAmount;
+          const offsetX = Math.random() * 16 - 8;
+          const offsetY = Math.random() * 16 - 8;
+          const groundItem = new GroundItem(this, data.x + offsetX, data.y + offsetY, entry.itemId, qty);
+          this.groundItems.push(groundItem);
+        }
+      }
     });
   }
 }
