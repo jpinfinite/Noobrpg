@@ -148,6 +148,23 @@ export class UIScene extends Phaser.Scene {
       fontSize: '7px',
       color: '#a78bfa'
     });
+
+    // Botão Salvar e Sair
+    const btnExit = this.add.rectangle(440, 19, 28, 14, 0x1e1b4b)
+      .setStrokeStyle(1, 0x6366f1)
+      .setInteractive({ useHandCursor: true });
+
+    const txtExit = this.add.text(440, 19, 'SAIR', {
+      fontFamily: 'monospace',
+      fontSize: '6.5px',
+      color: '#f87171',
+      fontStyle: 'bold'
+    }).setOrigin(0.5);
+
+    btnExit.on('pointerdown', () => {
+      const worldScene = this.scene.get('WorldScene');
+      worldScene.events.emit('request-save-and-exit');
+    });
   }
 
   private createControlsHintPanel(): void {

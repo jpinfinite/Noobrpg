@@ -11,7 +11,7 @@ export class PreloadScene extends Phaser.Scene {
 
   public create(): void {
     this.createHeroAnimations();
-    this.scene.start('WorldScene');
+    this.scene.start('LoginScene');
   }
 
   private createHeroAnimations(): void {

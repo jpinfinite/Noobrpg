@@ -1,0 +1,111 @@
+import { CharacterClass, PlayerData, InventorySlot } from '@noobrpg/shared';
+
+export interface AuthAccount {
+  id: string;
+  username: string;
+  createdAt: string;
+}
+
+export interface CharacterSummary {
+  id: string;
+  account_id: string;
+  name: string;
+  character_class: CharacterClass;
+  level: number;
+  current_xp: number;
+  gold: number;
+  merit_points: number;
+  pos_x: number;
+  pos_y: number;
+  hp: number;
+  mp: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export class ApiClient {
+  private static baseUrl = '/api';
+
+  private static async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    const config: RequestInit = {
+      ...options,
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(options.headers || {})
+      }
+    };
+
+    const res = await fetch(`${this.baseUrl}${endpoint}`, config);
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      throw new Error(data.error || `Erro HTTP ${res.status}`);
+    }
+
+    return data as T;
+  }
+
+  public static async getMe(): Promise<{ account: AuthAccount } | null> {
+    try {
+      return await this.request<{ account: AuthAccount }>('/auth/me');
+    } catch {
+      return null;
+    }
+  }
+
+  public static async register(username: string, password: string): Promise<{ account: AuthAccount }> {
+    return this.request<{ account: AuthAccount }>('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ username, password })
+    });
+  }
+
+  public static async login(username: string, password: string): Promise<{ account: AuthAccount }> {
+    return this.request<{ account: AuthAccount }>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ username, password })
+    });
+  }
+
+  public static async logout(): Promise<void> {
+    await this.request('/auth/logout', { method: 'POST' });
+  }
+
+  public static async listCharacters(): Promise<CharacterSummary[]> {
+    const res = await this.request<{ characters: CharacterSummary[] }>('/characters');
+    return res.characters;
+  }
+
+  public static async createCharacter(name: string, characterClass: CharacterClass): Promise<PlayerData> {
+    const res = await this.request<{ player: PlayerData }>('/characters', {
+      method: 'POST',
+      body: JSON.stringify({ name, characterClass })
+    });
+    return res.player;
+  }
+
+  public static async getCharacter(id: string): Promise<PlayerData> {
+    const res = await this.request<{ player: PlayerData }>(`/characters/${id}`);
+    return res.player;
+  }
+
+  public static async saveCharacter(
+    id: string,
+    payload: {
+      position?: { x: number; y: number };
+      hp?: number;
+      mp?: number;
+      xpGained?: number;
+      goldChange?: { amount: number; source: string };
+      inventory?: (InventorySlot | null)[];
+      equipped?: { weapon: string | null; armor: string | null; accessory: string | null };
+    }
+  ): Promise<PlayerData> {
+    const res = await this.request<{ player: PlayerData }>(`/characters/${id}/save`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    return res.player;
+  }
+}

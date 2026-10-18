@@ -48,46 +48,59 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private lastSkill1Time: number = 0;
   private respawnPoint = { x: 180, y: 160 };
 
-  constructor(scene: Phaser.Scene, x: number, y: number, characterClass: CharacterClass = CharacterClass.WARRIOR) {
-    const textureKey = Player.getTextureKeyForClass(characterClass);
-    super(scene, x, y, textureKey, 0);
+  constructor(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    characterClass: CharacterClass = CharacterClass.WARRIOR,
+    initialData?: PlayerData
+  ) {
+    const finalClass = initialData?.characterClass || characterClass;
+    const textureKey = Player.getTextureKeyForClass(finalClass);
+    const startX = initialData?.position?.x || x;
+    const startY = initialData?.position?.y || y;
+
+    super(scene, startX, startY, textureKey, 0);
 
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
-    // Inicializa o inventário de 24 slots e equipamentos vazios
-    const inventory = createEmptyInventory();
-    const equipped = {
-      weapon: null,
-      armor: null,
-      accessory: null
-    };
+    if (initialData) {
+      this.playerData = { ...initialData };
+    } else {
+      // Inicializa o inventário de 24 slots e equipamentos vazios (fallback local)
+      const inventory = createEmptyInventory();
+      const equipped = {
+        weapon: null,
+        armor: null,
+        accessory: null
+      };
 
-    // Itens iniciais de teste para demonstrar a Fase 3
-    addItemToInventory(inventory, 'pickaxe_copper', 1);
-    addItemToInventory(inventory, 'potion_hp_minor', 3);
-    addItemToInventory(inventory, 'herb_green', 4);
-    addItemToInventory(inventory, 'slime_gel', 2);
-    addItemToInventory(inventory, 'iron_ore', 6);
-    addItemToInventory(inventory, 'wood_log', 4);
+      addItemToInventory(inventory, 'pickaxe_copper', 1);
+      addItemToInventory(inventory, 'potion_hp_minor', 3);
+      addItemToInventory(inventory, 'herb_green', 4);
+      addItemToInventory(inventory, 'slime_gel', 2);
+      addItemToInventory(inventory, 'iron_ore', 6);
+      addItemToInventory(inventory, 'wood_log', 4);
 
-    const initialAttrs = calculateTotalPlayerAttributes(characterClass, 1, equipped);
-    this.playerData = {
-      id: 'local_player_1',
-      name: 'HeroiIniciante',
-      characterClass,
-      level: 1,
-      currentXp: 0,
-      gold: 100,
-      meritPoints: 0,
-      attributes: { ...initialAttrs },
-      position: { x, y },
-      direction: Direction.DOWN,
-      inventory,
-      equipped
-    };
+      const initialAttrs = calculateTotalPlayerAttributes(finalClass, 1, equipped);
+      this.playerData = {
+        id: 'local_player_1',
+        name: 'HeroiIniciante',
+        characterClass: finalClass,
+        level: 1,
+        currentXp: 0,
+        gold: 100,
+        meritPoints: 0,
+        attributes: { ...initialAttrs },
+        position: { x: startX, y: startY },
+        direction: Direction.DOWN,
+        inventory,
+        equipped
+      };
+    }
 
-    this.respawnPoint = { x, y };
+    this.respawnPoint = { x: startX, y: startY };
     this.initPhysics();
     this.initInput();
   }

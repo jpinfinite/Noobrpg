@@ -1,11 +1,12 @@
 import Phaser from 'phaser';
-import { MonsterType, GatheringNodeType, MonsterDropEntry } from '@noobrpg/shared';
+import { MonsterType, GatheringNodeType, MonsterDropEntry, PlayerData, CharacterClass } from '@noobrpg/shared';
 import { Player } from '../entities/Player.js';
 import { Monster } from '../entities/Monster.js';
 import { EnvironmentProp } from '../entities/EnvironmentProp.js';
 import { GatheringNode } from '../entities/GatheringNode.js';
 import { CraftingStation } from '../entities/CraftingStation.js';
 import { GroundItem } from '../entities/GroundItem.js';
+import { ApiClient } from '../net/ApiClient.js';
 
 export class WorldScene extends Phaser.Scene {
   private player!: Player;
@@ -17,9 +18,17 @@ export class WorldScene extends Phaser.Scene {
   private craftingStation!: CraftingStation;
   private map!: Phaser.Tilemaps.Tilemap;
   private collisionLayer!: Phaser.Tilemaps.TilemapLayer;
+  private initialPlayerData?: PlayerData;
+  private autoSaveTimer?: Phaser.Time.TimerEvent;
 
   constructor() {
     super({ key: 'WorldScene' });
+  }
+
+  public init(data: { playerData?: PlayerData }): void {
+    if (data?.playerData) {
+      this.initialPlayerData = data.playerData;
+    }
   }
 
   public create(): void {
@@ -50,8 +59,11 @@ export class WorldScene extends Phaser.Scene {
     // 4. Nós de Coleta
     this.spawnGatheringNodes();
 
-    // 5. Jogador
-    this.player = new Player(this, 180, 160);
+    // 5. Jogador carregado com dados autoritativos do servidor
+    const spawnX = this.initialPlayerData?.position?.x || 180;
+    const spawnY = this.initialPlayerData?.position?.y || 160;
+    const charClass = this.initialPlayerData?.characterClass || CharacterClass.WARRIOR;
+    this.player = new Player(this, spawnX, spawnY, charClass, this.initialPlayerData);
 
     // 6. Monstros
     this.monstersGroup = this.physics.add.group();
@@ -218,5 +230,46 @@ export class WorldScene extends Phaser.Scene {
         }
       }
     });
+
+    // Autosave periódico a cada 20 segundos
+    this.autoSaveTimer = this.time.addEvent({
+      delay: 20000,
+      loop: true,
+      callback: () => this.saveProgress()
+    });
+
+    // Evento de pedido de salvamento e saída
+    this.events.on('request-save-and-exit', async () => {
+      await this.saveProgress();
+      this.scene.stop('UIScene');
+      this.scene.start('CharacterSelectScene');
+    });
+  }
+
+  public async saveProgress(): Promise<void> {
+    if (!this.player || !this.player.playerData) return;
+    const charId = this.player.playerData.id;
+    if (charId === 'local_player_1') return; // Ignora em sessões puramente locais
+
+    try {
+      const payload = {
+        position: { x: Math.round(this.player.x), y: Math.round(this.player.y) },
+        hp: this.player.playerData.attributes.currentHp,
+        mp: this.player.playerData.attributes.currentMp,
+        inventory: this.player.playerData.inventory,
+        equipped: this.player.playerData.equipped
+      };
+
+      await ApiClient.saveCharacter(charId, payload);
+      this.events.emit('floating-text', {
+        x: this.player.x,
+        y: this.player.y - 14,
+        text: '💾 PROGRESSO SALVO',
+        color: '#34d399'
+      });
+    } catch (err) {
+      console.warn('[AutoSave] Falha ao persistir no servidor:', err);
+    }
   }
 }
+

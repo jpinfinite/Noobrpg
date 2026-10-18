@@ -1,0 +1,71 @@
+import express, { Express } from 'express';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import { IDatabase } from './db/index.js';
+import { AccountRepository, SessionRepository } from './repositories/accountRepository.js';
+import { CharacterRepository } from './repositories/characterRepository.js';
+import { InventoryRepository } from './repositories/inventoryRepository.js';
+import { EquipmentRepository } from './repositories/equipmentRepository.js';
+import { GoldLedgerRepository } from './repositories/goldLedgerRepository.js';
+import { AuthService } from './services/authService.js';
+import { CharacterService } from './services/characterService.js';
+import { createAuthMiddleware } from './middleware/authMiddleware.js';
+import { createAuthRoutes } from './routes/authRoutes.js';
+import { createCharacterRoutes } from './routes/characterRoutes.js';
+
+export function createApp(db: IDatabase): Express {
+  const app = express();
+
+  // Repositórios
+  const accountRepo = new AccountRepository(db);
+  const sessionRepo = new SessionRepository(db);
+  const characterRepo = new CharacterRepository(db);
+  const inventoryRepo = new InventoryRepository(db);
+  const equipmentRepo = new EquipmentRepository(db);
+  const goldLedgerRepo = new GoldLedgerRepository(db);
+
+  // Serviços
+  const authService = new AuthService(accountRepo, sessionRepo);
+  const characterService = new CharacterService(
+    db,
+    characterRepo,
+    inventoryRepo,
+    equipmentRepo,
+    goldLedgerRepo
+  );
+
+  // Middlewares
+  const clientOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:3000';
+  app.use(
+    cors({
+      origin: [clientOrigin, 'http://127.0.0.1:3000'],
+      credentials: true
+    })
+  );
+  app.use(cookieParser());
+  app.use(express.json());
+
+  // Middleware de Autenticação
+  const authMiddleware = createAuthMiddleware(authService);
+
+  // Rotas
+  app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok', service: 'noobrpg-server', timestamp: new Date().toISOString() });
+  });
+
+  app.use('/api/auth', createAuthRoutes(authService, authMiddleware));
+  app.use('/api/characters', createCharacterRoutes(characterService, authMiddleware));
+
+  // Handler 404
+  app.use((req, res) => {
+    res.status(404).json({ error: 'Endpoint não encontrado.' });
+  });
+
+  // Handler de Erros Global
+  app.use((err: any, req: any, res: any, next: any) => {
+    console.error('[Server Error]', err);
+    res.status(500).json({ error: 'Erro interno no servidor.' });
+  });
+
+  return app;
+}
