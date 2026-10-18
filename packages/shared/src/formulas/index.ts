@@ -1,5 +1,5 @@
-import { Vector2D } from '../types/index.js';
-import { GAME_CONSTANTS } from '../constants/index.js';
+import { Vector2D, CharacterClass, CharacterAttributes } from '../types/index.js';
+import { GAME_CONSTANTS, CLASS_BASE_ATTRIBUTES, CLASS_GROWTH_RATES } from '../constants/index.js';
 
 /**
  * Retorna o XP total acumulado necessário para atingir o nível L.
@@ -18,6 +18,65 @@ export function calculateTotalXpForLevel(level: number): number {
 export function calculateXpToNextLevel(level: number): number {
   if (level < 1) return 500;
   return 200 * (level - 1) + 500;
+}
+
+/**
+ * Calcula os atributos consolidados de uma classe para um nível específico
+ */
+export function calculateAttributesForLevel(characterClass: CharacterClass, level: number): CharacterAttributes {
+  const base = CLASS_BASE_ATTRIBUTES[characterClass];
+  const growth = CLASS_GROWTH_RATES[characterClass];
+  const levelDelta = Math.max(0, level - 1);
+
+  const maxHp = Math.round(base.maxHp + growth.hpPerLevel * levelDelta);
+  const maxMp = Math.round(base.maxMp + growth.mpPerLevel * levelDelta);
+  const attack = Math.round(base.attack + growth.attackPerLevel * levelDelta);
+  const defense = Math.round(base.defense + growth.defensePerLevel * levelDelta);
+
+  return {
+    maxHp,
+    currentHp: maxHp,
+    maxMp,
+    currentMp: maxMp,
+    attack,
+    defense,
+    speed: base.speed
+  };
+}
+
+/**
+ * Avalia o progresso de nível com base no XP total acumulado
+ */
+export function evaluateLevelProgression(currentLevel: number, totalXp: number): {
+  newLevel: number;
+  didLevelUp: boolean;
+  xpInCurrentLevel: number;
+  xpRequiredForNext: number;
+} {
+  let level = 1;
+  while (totalXp >= calculateTotalXpForLevel(level + 1)) {
+    level++;
+  }
+
+  const currentLevelStartXp = calculateTotalXpForLevel(level);
+  const xpInCurrentLevel = totalXp - currentLevelStartXp;
+  const xpRequiredForNext = calculateXpToNextLevel(level);
+
+  return {
+    newLevel: level,
+    didLevelUp: level > currentLevel,
+    xpInCurrentLevel,
+    xpRequiredForNext
+  };
+}
+
+/**
+ * Calcula a distância euclidiana entre duas coordenadas
+ */
+export function calculateDistance(x1: number, y1: number, x2: number, y2: number): number {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  return Math.sqrt(dx * dx + dy * dy);
 }
 
 /**
@@ -43,7 +102,7 @@ export function calculateMarketplacePayout(priceInGold: number): { sellerReceive
 }
 
 /**
- * Normaliza um vetor 2D garantindo que a movimentação diagonal não exceda a velocidade unitária (evitando speedhack diagonal).
+ * Normaliza um vetor 2D garantindo que a movimentação diagonal não exceda a velocidade unitária.
  */
 export function normalizeVector(x: number, y: number): Vector2D {
   if (x === 0 && y === 0) {

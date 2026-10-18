@@ -4,7 +4,7 @@ import path from 'path';
 export default defineConfig({
   resolve: {
     alias: {
-      '@noobrpg/shared': path.resolve(__dirname, '../shared/src')
+      '@noobrpg/shared': path.resolve(__dirname, '../shared/src/index.ts')
     }
   },
   server: {

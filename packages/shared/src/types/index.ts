@@ -31,6 +31,21 @@ export interface CharacterAttributes {
   speed: number; // Pixels por segundo
 }
 
+export interface ClassCombatConfig {
+  attackRange: number;       // Alcance do ataque em pixels
+  attackCooldownMs: number;  // Intervalo entre ataques em milissegundos
+  skill1Name: string;
+  skill1CooldownMs: number;
+  skill1CostMp: number;
+}
+
+export interface ClassGrowthRate {
+  hpPerLevel: number;
+  mpPerLevel: number;
+  attackPerLevel: number;
+  defensePerLevel: number;
+}
+
 export interface PlayerData {
   id: string;
   name: string;
@@ -42,4 +57,36 @@ export interface PlayerData {
   attributes: CharacterAttributes;
   position: Vector2D;
   direction: Direction;
+}
+
+// --- TIPOS DE MONSTROS E IA ---
+
+export enum MonsterType {
+  SLIME = 'SLIME',
+  GOBLIN = 'GOBLIN'
+}
+
+export enum MonsterAIState {
+  IDLE_PATROL = 'IDLE_PATROL',
+  CHASE = 'CHASE',
+  ATTACK = 'ATTACK',
+  RETURN = 'RETURN',
+  DEAD = 'DEAD'
+}
+
+export interface MonsterConfig {
+  type: MonsterType;
+  name: string;
+  level: number;
+  maxHp: number;
+  attack: number;
+  defense: number;
+  speed: number;
+  detectionRadius: number;
+  attackRange: number;
+  attackCooldownMs: number;
+  xpReward: number;
+  goldRewardMin: number;
+  goldRewardMax: number;
+  respawnTimeMs: number;
 }

@@ -6,80 +6,74 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   public preload(): void {
-    // Carrega o mapa JSON do Tiled
     this.load.tilemapTiledJSON('map_prototype', './assets/maps/map_prototype.json');
   }
 
   public create(): void {
     this.createHeroAnimations();
-    // Transiciona para o mundo jogável
     this.scene.start('WorldScene');
   }
 
-  /**
-   * Registra as animações direcionais do personagem no AnimationManager do Phaser
-   */
   private createHeroAnimations(): void {
-    // Configuração dos frames do spritesheet de 64x72 (4 colunas x 3 linhas)
-    // Linha 0 = Down (frames 0, 1, 2, 3)
-    // Linha 1 = Up (frames 4, 5, 6, 7)
-    // Linha 2 = Right (frames 8, 9, 10, 11)
+    const classKeys = ['hero_warrior', 'hero_ranger', 'hero_mage', 'hero_druid'];
 
-    // --- DIREÇÃO: BAIXO (DOWN) ---
-    this.anims.create({
-      key: 'hero_idle_down',
-      frames: [{ key: 'hero_prototype', frame: 0 }],
-      frameRate: 1
-    });
+    classKeys.forEach(key => {
+      // Também cria alias genérico 'hero' se for warrior
+      const prefix = key === 'hero_warrior' ? 'hero' : key;
 
-    this.anims.create({
-      key: 'hero_walk_down',
-      frames: [
-        { key: 'hero_prototype', frame: 1 },
-        { key: 'hero_prototype', frame: 0 },
-        { key: 'hero_prototype', frame: 3 },
-        { key: 'hero_prototype', frame: 0 }
-      ],
-      frameRate: 8,
-      repeat: -1
-    });
+      // Down
+      this.anims.create({
+        key: `${prefix}_idle_down`,
+        frames: [{ key, frame: 0 }],
+        frameRate: 1
+      });
+      this.anims.create({
+        key: `${prefix}_walk_down`,
+        frames: [
+          { key, frame: 1 },
+          { key, frame: 0 },
+          { key, frame: 3 },
+          { key, frame: 0 }
+        ],
+        frameRate: 8,
+        repeat: -1
+      });
 
-    // --- DIREÇÃO: CIMA (UP) ---
-    this.anims.create({
-      key: 'hero_idle_up',
-      frames: [{ key: 'hero_prototype', frame: 4 }],
-      frameRate: 1
-    });
+      // Up
+      this.anims.create({
+        key: `${prefix}_idle_up`,
+        frames: [{ key, frame: 4 }],
+        frameRate: 1
+      });
+      this.anims.create({
+        key: `${prefix}_walk_up`,
+        frames: [
+          { key, frame: 5 },
+          { key, frame: 4 },
+          { key, frame: 7 },
+          { key, frame: 4 }
+        ],
+        frameRate: 8,
+        repeat: -1
+      });
 
-    this.anims.create({
-      key: 'hero_walk_up',
-      frames: [
-        { key: 'hero_prototype', frame: 5 },
-        { key: 'hero_prototype', frame: 4 },
-        { key: 'hero_prototype', frame: 7 },
-        { key: 'hero_prototype', frame: 4 }
-      ],
-      frameRate: 8,
-      repeat: -1
-    });
-
-    // --- DIREÇÃO: DIREITA (RIGHT) ---
-    this.anims.create({
-      key: 'hero_idle_right',
-      frames: [{ key: 'hero_prototype', frame: 8 }],
-      frameRate: 1
-    });
-
-    this.anims.create({
-      key: 'hero_walk_right',
-      frames: [
-        { key: 'hero_prototype', frame: 9 },
-        { key: 'hero_prototype', frame: 8 },
-        { key: 'hero_prototype', frame: 11 },
-        { key: 'hero_prototype', frame: 8 }
-      ],
-      frameRate: 8,
-      repeat: -1
+      // Right
+      this.anims.create({
+        key: `${prefix}_idle_right`,
+        frames: [{ key, frame: 8 }],
+        frameRate: 1
+      });
+      this.anims.create({
+        key: `${prefix}_walk_right`,
+        frames: [
+          { key, frame: 9 },
+          { key, frame: 8 },
+          { key, frame: 11 },
+          { key, frame: 8 }
+        ],
+        frameRate: 8,
+        repeat: -1
+      });
     });
   }
 }
