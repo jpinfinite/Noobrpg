@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="description" content="NoobRPG — RPG 2D top-down online com pixel art clássica, combate determinístico e economia balanceada." />
+    <title>NoobRPG — 2D Pixel Art Web RPG</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Outfit:wght@400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./src/index.css" />
+  </head>
+  <body>
+    <div id="app-container">
+      <header id="game-header">
+        <div class="header-content">
+          <span class="game-badge">PHASE 1 PROTOTYPE</span>
+          <h1 class="game-title">NoobRPG</h1>
+          <span class="version-tag">v0.1.0-alpha</span>
+        </div>
+      </header>
+
+      <main id="game-wrapper">
+        <div id="game-viewport"></div>
+        <div id="mobile-controls-info">
+          <span>Controles: <strong>WASD</strong> ou <strong>Setas direcionais</strong> para movimentação em 8 direções.</span>
+        </div>
+      </main>
+
+      <footer id="game-footer">
+        <span>Servidor Autoritativo • Escala 16:9 Pixel-Perfect • NoobRPG Engine</span>
+      </footer>
+    </div>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

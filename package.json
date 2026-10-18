@@ -1,0 +1,18 @@
+{
+  "name": "noobrpg",
+  "version": "0.1.0",
+  "private": true,
+  "description": "NoobRPG - 2D Pixel Art Web RPG",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm --workspace=@noobrpg/client run dev",
+    "build": "npm --workspace=@noobrpg/shared run build && npm --workspace=@noobrpg/client run build",
+    "test": "node --import tsx --test packages/shared/tests/*.test.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15",
+    "typescript": "^5.5.4"
+  }
+}
