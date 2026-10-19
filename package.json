@@ -10,7 +10,8 @@
     "dev": "npm --workspace=@noobrpg/client run dev",
     "build": "npm --workspace=@noobrpg/shared run build && npm --workspace=@noobrpg/client run build",
     "test": "node --import tsx --test packages/shared/tests/*.test.ts",
-    "sync:assets": "tsx packages/server/scripts/sync_r2_assets.ts"
+    "sync:assets": "tsx packages/server/scripts/sync_r2_assets.ts",
+    "tunnel": "bin\\cloudflared.exe tunnel --url http://localhost:4000"
   },
   "devDependencies": {
     "tsx": "^4.23.15",
