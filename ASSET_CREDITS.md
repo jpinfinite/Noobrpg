@@ -30,6 +30,7 @@ O NoobRPG utiliza uma combinação de **spritesheets em pixel art profissional**
 | :--- | :--- | :--- | :--- | :--- | :---: |
 | `mob_slime` | `TextureGenerator.generateSlimeSpritesheet` | Procedural Canvas 16×16 px<br>Idle e Salto pulsante | NoobRPG Engine Team | CC0 (Domínio Público) | **INTEGRADO** |
 | `mob_goblin` | `TextureGenerator.generateGoblinSpritesheet` | Procedural Canvas 16×24 px<br>Idle e Patrulha armada | NoobRPG Engine Team | CC0 (Domínio Público) | **INTEGRADO** |
+| `mob_skeleton` | `TextureGenerator.generateSkeletonSpritesheet` | Procedural Canvas 32×24 px<br>Idle e Corte com espada | NoobRPG Engine Team | CC0 (Domínio Público) | **INTEGRADO** |
 
 ### 2.3 Terreno, Mapa e Elementos do Cenário
 | Identificador no Jogo | Arquivo / Geração | Formato & Dimensões | Autor / Origem | Licença | Status |
@@ -45,8 +46,14 @@ O NoobRPG utiliza uma combinação de **spritesheets em pixel art profissional**
 | `node_ore` | `TextureGenerator.generateOreNode` | Canvas PNG 16×16 px (Veio de minério) | NoobRPG Engine Team | CC0 (Domínio Público) | **INTEGRADO** |
 | `node_herb` | `TextureGenerator.generateHerbNode` | Canvas PNG 16×16 px (Arbusto de ervas) | NoobRPG Engine Team | CC0 (Domínio Público) | **INTEGRADO** |
 | `prop_anvil` | `TextureGenerator.generateAnvilProp` | Canvas PNG 16×16 px (Bancada da forja) | NoobRPG Engine Team | CC0 (Domínio Público) | **INTEGRADO** |
-| `item_icons` | `TextureGenerator.generateItemIcons` | Canvas PNG 16×16 px (Espadas, armaduras, poções, minérios) | NoobRPG Engine Team | CC0 (Domínio Público) | **INTEGRADO** |
 | `fx_*` | `TextureGenerator.generate*Fx` | Efeitos de corte, flecha, orbe mágico, explosão de natureza e cura | NoobRPG Engine Team | CC0 (Domínio Público) | **INTEGRADO** |
+
+### 2.5 Efeitos Sonoros Retrô e Áudio
+| Identificador no Jogo | Arquivo / Módulo | Formato & Método | Autor / Origem | Licença | Status |
+| :--- | :--- | :--- | :--- | :--- | :---: |
+| `sfx_combat_*` | `SoundEffects.ts` | Síntese Procedural Web Audio API (Ondas quadradas/triangulares) | NoobRPG Audio Engine | CC0 (Domínio Público) | **INTEGRADO** |
+| `sfx_gather_*` | `SoundEffects.ts` | Síntese Procedural Web Audio API (Ruído branco filtrado e cliques) | NoobRPG Audio Engine | CC0 (Domínio Público) | **INTEGRADO** |
+| `sfx_fanfare` | `SoundEffects.ts` | Síntese Procedural Web Audio API (Arpeggio maior C5-E5-G5-C6) | NoobRPG Audio Engine | CC0 (Domínio Público) | **INTEGRADO** |
 
 ---
 
