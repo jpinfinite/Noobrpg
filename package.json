@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "npm --workspace=@noobrpg/client run dev",
     "build": "npm --workspace=@noobrpg/shared run build && npm --workspace=@noobrpg/client run build",
-    "test": "node --import tsx --test packages/shared/tests/*.test.ts"
+    "test": "node --import tsx --test packages/shared/tests/*.test.ts",
+    "sync:assets": "tsx packages/server/scripts/sync_r2_assets.ts"
   },
   "devDependencies": {
     "tsx": "^4.23.15",

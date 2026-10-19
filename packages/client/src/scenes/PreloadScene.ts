@@ -6,7 +6,9 @@ export class PreloadScene extends Phaser.Scene {
   }
 
   public preload(): void {
-    this.load.tilemapTiledJSON('map_prototype', './assets/maps/map_prototype.json');
+    const assetsBaseUrl = ((import.meta as any).env?.VITE_ASSETS_BASE_URL as string) || './assets';
+    const cleanBase = assetsBaseUrl.endsWith('/') ? assetsBaseUrl.slice(0, -1) : assetsBaseUrl;
+    this.load.tilemapTiledJSON('map_prototype', `${cleanBase}/maps/map_prototype.json`);
   }
 
   public create(): void {
