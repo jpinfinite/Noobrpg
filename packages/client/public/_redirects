@@ -1,0 +1,2 @@
+# Cloudflare Pages Redirects / API Proxy
+/api/* https://len-bit-election-notebooks.trycloudflare.com/api/:splat 200

@@ -49,6 +49,8 @@ export class MultiplayerClient {
       const customWsUrl = (import.meta as any).env?.VITE_WS_URL as string;
       if (customWsUrl) {
         this.serverUrl = customWsUrl;
+      } else if (typeof window !== 'undefined' && window.location.hostname.includes('pages.dev')) {
+        this.serverUrl = 'wss://len-bit-election-notebooks.trycloudflare.com/ws';
       } else {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const host = window.location.hostname || 'localhost';

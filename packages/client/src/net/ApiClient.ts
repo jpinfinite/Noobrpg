@@ -24,7 +24,11 @@ export interface CharacterSummary {
 }
 
 export class ApiClient {
-  private static baseUrl = ((import.meta as any).env?.VITE_API_URL as string) || '/api';
+  private static baseUrl =
+    ((import.meta as any).env?.VITE_API_URL as string) ||
+    (typeof window !== 'undefined' && window.location.hostname.includes('pages.dev')
+      ? 'https://len-bit-election-notebooks.trycloudflare.com/api'
+      : '/api');
 
   private static tokenKey = 'noobrpg_session_token';
 
