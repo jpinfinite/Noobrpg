@@ -17,6 +17,7 @@ interface UISceneData {
 
 export class UIScene extends Phaser.Scene {
   private player!: Player;
+  private statusContainer!: Phaser.GameObjects.Container;
   private classLevelText!: Phaser.GameObjects.Text;
   private hpText!: Phaser.GameObjects.Text;
   private mpText!: Phaser.GameObjects.Text;
@@ -26,7 +27,8 @@ export class UIScene extends Phaser.Scene {
   private mpBarGraphics!: Phaser.GameObjects.Graphics;
   private xpBarGraphics!: Phaser.GameObjects.Graphics;
 
-  // Painel de Debug (Alternável via F3)
+  // Painel Superior Direito e Debug (Alternável via F3)
+  private headerRightContainer!: Phaser.GameObjects.Container;
   private isDebugOpen: boolean = true;
   private debugContainer!: Phaser.GameObjects.Container;
   private coordsText!: Phaser.GameObjects.Text;
@@ -36,6 +38,7 @@ export class UIScene extends Phaser.Scene {
 
   // Barra de Ações Inferior (HUD)
   private actionBarContainer!: Phaser.GameObjects.Container;
+  private hintsText!: Phaser.GameObjects.Text;
   private atkCdGraphics!: Phaser.GameObjects.Graphics;
   private skillIcon!: Phaser.GameObjects.Sprite;
   private skillCdGraphics!: Phaser.GameObjects.Graphics;
@@ -79,6 +82,20 @@ export class UIScene extends Phaser.Scene {
     this.createCraftingModal();
     this.createTooltip();
 
+    // Posicionamento inicial responsivo
+    this.repositionUI(this.scale.width, this.scale.height);
+
+    // Listener de redimensionamento de janela
+    const onResize = (gameSize: Phaser.Structs.Size) => {
+      this.repositionUI(gameSize.width, gameSize.height);
+    };
+    this.scale.on('resize', onResize);
+
+    // Limpeza de evento ao destruir a cena
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.scale.off('resize', onResize);
+    });
+
     // Listeners de alternância de interface
     const worldScene = this.scene.get('WorldScene');
     worldScene.events.on('toggle-inventory', () => this.toggleInventory());
@@ -112,13 +129,17 @@ export class UIScene extends Phaser.Scene {
   }
 
   private createPlayerStatusPanel(): void {
+    this.statusContainer = this.add.container(10, 10);
+    this.statusContainer.setDepth(500);
+
     const panelBg = this.add.graphics();
     panelBg.fillStyle(0x0c0a14, 0.94);
     panelBg.lineStyle(1, 0x4338ca, 0.9);
-    panelBg.fillRoundedRect(8, 8, 156, 66, 4);
-    panelBg.strokeRoundedRect(8, 8, 156, 66, 4);
+    panelBg.fillRoundedRect(0, 0, 156, 66, 4);
+    panelBg.strokeRoundedRect(0, 0, 156, 66, 4);
+    this.statusContainer.add(panelBg);
 
-    this.classLevelText = this.add.text(14, 12, 'GUERREIRO  Lv.1', {
+    this.classLevelText = this.add.text(6, 4, 'GUERREIRO  Lv.1', {
       fontFamily: 'monospace',
       fontSize: '8px',
       color: '#f59e0b',
@@ -128,8 +149,9 @@ export class UIScene extends Phaser.Scene {
     this.hpBarGraphics = this.add.graphics();
     this.mpBarGraphics = this.add.graphics();
     this.xpBarGraphics = this.add.graphics();
+    this.statusContainer.add([this.hpBarGraphics, this.mpBarGraphics, this.xpBarGraphics]);
 
-    this.hpText = this.add.text(14, 25, 'HP: 120/120', {
+    this.hpText = this.add.text(6, 17, 'HP: 120/120', {
       fontFamily: 'monospace',
       fontSize: '6.5px',
       color: '#ffffff',
@@ -138,7 +160,7 @@ export class UIScene extends Phaser.Scene {
       strokeThickness: 1.5
     });
 
-    this.mpText = this.add.text(14, 39, 'MP: 30/30', {
+    this.mpText = this.add.text(6, 31, 'MP: 30/30', {
       fontFamily: 'monospace',
       fontSize: '6.5px',
       color: '#ffffff',
@@ -147,22 +169,27 @@ export class UIScene extends Phaser.Scene {
       strokeThickness: 1.5
     });
 
-    this.xpText = this.add.text(14, 53, 'XP: 0/500 (0%)', {
+    this.xpText = this.add.text(6, 45, 'XP: 0/500 (0%)', {
       fontFamily: 'monospace',
       fontSize: '6px',
       color: '#facc15',
       stroke: '#000000',
       strokeThickness: 1.5
     });
+
+    this.statusContainer.add([this.classLevelText, this.hpText, this.mpText, this.xpText]);
   }
 
   private createHeaderAndDebugPanel(): void {
+    this.headerRightContainer = this.add.container(310, 10);
+    this.headerRightContainer.setDepth(500);
+
     // 1. Barra Superior Direita (Botão F3 e Botão Sair)
-    const btnF3 = this.add.rectangle(402, 14, 40, 13, 0x1e1b4b)
+    const btnF3 = this.add.rectangle(90, 8, 42, 14, 0x1e1b4b)
       .setStrokeStyle(1, 0x6366f1)
       .setInteractive({ useHandCursor: true });
 
-    this.add.text(402, 14, '[F3] INFO', {
+    const txtF3 = this.add.text(90, 8, '[F3] INFO', {
       fontFamily: 'monospace',
       fontSize: '6px',
       color: '#a5b4fc',
@@ -171,11 +198,11 @@ export class UIScene extends Phaser.Scene {
 
     btnF3.on('pointerdown', () => this.toggleDebugPanel());
 
-    const btnExit = this.add.rectangle(450, 14, 30, 13, 0x450a0a)
+    const btnExit = this.add.rectangle(142, 8, 34, 14, 0x450a0a)
       .setStrokeStyle(1, 0xef4444)
       .setInteractive({ useHandCursor: true });
 
-    this.add.text(450, 14, 'SAIR', {
+    const txtExit = this.add.text(142, 8, 'SAIR', {
       fontFamily: 'monospace',
       fontSize: '6.5px',
       color: '#fca5a5',
@@ -188,14 +215,14 @@ export class UIScene extends Phaser.Scene {
     });
 
     // 2. Container de Debug Alternável (F3)
-    this.debugContainer = this.add.container(310, 24);
+    this.debugContainer = this.add.container(0, 20);
     this.debugContainer.setVisible(this.isDebugOpen);
 
     const infoBg = this.add.graphics();
     infoBg.fillStyle(0x0c0a14, 0.92);
     infoBg.lineStyle(1, 0x334155, 0.9);
-    infoBg.fillRoundedRect(0, 0, 162, 56, 4);
-    infoBg.strokeRoundedRect(0, 0, 162, 56, 4);
+    infoBg.fillRoundedRect(0, 0, 164, 56, 4);
+    infoBg.strokeRoundedRect(0, 0, 164, 56, 4);
     this.debugContainer.add(infoBg);
 
     this.coordsText = this.add.text(6, 6, 'X: 000 | Y: 000 [T: 0, 0]', {
@@ -204,7 +231,7 @@ export class UIScene extends Phaser.Scene {
       color: '#38bdf8'
     });
 
-    this.fpsText = this.add.text(6, 18, 'FPS: 60 | 480x270 nativo', {
+    this.fpsText = this.add.text(6, 18, 'FPS: 60 | Fullscreen', {
       fontFamily: 'monospace',
       fontSize: '7px',
       color: '#94a3b8'
@@ -223,6 +250,7 @@ export class UIScene extends Phaser.Scene {
     });
 
     this.debugContainer.add([this.coordsText, this.fpsText, this.skillText, this.entitiesText]);
+    this.headerRightContainer.add([btnF3, txtF3, btnExit, txtExit, this.debugContainer]);
   }
 
   private createBottomActionBar(): void {
@@ -345,11 +373,38 @@ export class UIScene extends Phaser.Scene {
     btnCraft.hitZone.on('pointerout', () => this.hideTooltip());
 
     // Dica discreta no rodapé inferior
-    this.add.text(240, 264, '[1-4]: Classes  •  [F3]: Debug', {
+    this.hintsText = this.add.text(240, 264, '[1-4]: Classes  •  [F3]: Debug  •  [ENTER]: Chat', {
       fontFamily: 'monospace',
-      fontSize: '5.5px',
+      fontSize: '6px',
       color: '#64748b'
     }).setOrigin(0.5);
+  }
+
+  private repositionUI(width: number, height: number): void {
+    if (this.statusContainer) {
+      this.statusContainer.setPosition(10, 10);
+    }
+    if (this.headerRightContainer) {
+      this.headerRightContainer.setPosition(width - 180, 10);
+    }
+    if (this.actionBarContainer) {
+      this.actionBarContainer.setPosition(Math.round(width / 2), Math.round(height - 28));
+    }
+    if (this.hintsText) {
+      this.hintsText.setPosition(Math.round(width / 2), Math.round(height - 8));
+    }
+    if (this.inventoryContainer) {
+      this.inventoryContainer.setPosition(
+        Math.max(10, Math.floor((width - 340) / 2)),
+        Math.max(10, Math.floor((height - 210) / 2))
+      );
+    }
+    if (this.craftingContainer) {
+      this.craftingContainer.setPosition(
+        Math.max(10, Math.floor((width - 360) / 2)),
+        Math.max(10, Math.floor((height - 210) / 2))
+      );
+    }
   }
 
   private createActionSlot(
@@ -854,26 +909,26 @@ export class UIScene extends Phaser.Scene {
     // HP
     this.hpBarGraphics.clear();
     this.hpBarGraphics.fillStyle(0x2a080c, 0.95);
-    this.hpBarGraphics.fillRoundedRect(72, 23, 80, 8, 2);
+    this.hpBarGraphics.fillRoundedRect(64, 15, 84, 8, 2);
     const hpRatio = Math.max(0, Math.min(1, attrs.currentHp / attrs.maxHp));
     if (hpRatio > 0) {
       this.hpBarGraphics.fillStyle(0xe11d48, 1);
-      this.hpBarGraphics.fillRoundedRect(72, 23, Math.max(4, 80 * hpRatio), 8, 2);
+      this.hpBarGraphics.fillRoundedRect(64, 15, Math.max(4, 84 * hpRatio), 8, 2);
       this.hpBarGraphics.fillStyle(0xfb7185, 0.7);
-      this.hpBarGraphics.fillRect(73, 24, Math.max(2, 78 * hpRatio), 2);
+      this.hpBarGraphics.fillRect(65, 16, Math.max(2, 82 * hpRatio), 2);
     }
     this.hpText.setText(`HP: ${attrs.currentHp}/${attrs.maxHp}`);
 
     // MP
     this.mpBarGraphics.clear();
     this.mpBarGraphics.fillStyle(0x04192d, 0.95);
-    this.mpBarGraphics.fillRoundedRect(72, 37, 80, 7, 2);
+    this.mpBarGraphics.fillRoundedRect(64, 29, 84, 7, 2);
     const mpRatio = Math.max(0, Math.min(1, attrs.currentMp / attrs.maxMp));
     if (mpRatio > 0) {
       this.mpBarGraphics.fillStyle(0x0284c7, 1);
-      this.mpBarGraphics.fillRoundedRect(72, 37, Math.max(4, 80 * mpRatio), 7, 2);
+      this.mpBarGraphics.fillRoundedRect(64, 29, Math.max(4, 84 * mpRatio), 7, 2);
       this.mpBarGraphics.fillStyle(0x38bdf8, 0.7);
-      this.mpBarGraphics.fillRect(73, 38, Math.max(2, 78 * mpRatio), 2);
+      this.mpBarGraphics.fillRect(65, 30, Math.max(2, 82 * mpRatio), 2);
     }
     this.mpText.setText(`MP: ${attrs.currentMp}/${attrs.maxMp}`);
 
@@ -884,12 +939,12 @@ export class UIScene extends Phaser.Scene {
 
     this.xpBarGraphics.clear();
     this.xpBarGraphics.fillStyle(0x211802, 0.95);
-    this.xpBarGraphics.fillRoundedRect(72, 51, 80, 6, 2);
+    this.xpBarGraphics.fillRoundedRect(64, 43, 84, 6, 2);
     if (xpRatio > 0) {
       this.xpBarGraphics.fillStyle(0xf59e0b, 1);
-      this.xpBarGraphics.fillRoundedRect(72, 51, Math.max(3, 80 * xpRatio), 6, 2);
+      this.xpBarGraphics.fillRoundedRect(64, 43, Math.max(3, 84 * xpRatio), 6, 2);
       this.xpBarGraphics.fillStyle(0xfde047, 0.7);
-      this.xpBarGraphics.fillRect(73, 52, Math.max(2, 78 * xpRatio), 1);
+      this.xpBarGraphics.fillRect(65, 44, Math.max(2, 82 * xpRatio), 1);
     }
     this.xpText.setText(`XP: ${progression.xpInCurrentLevel}/${progression.xpRequiredForNext} (${xpPercent}%)`);
   }

@@ -39,6 +39,10 @@ export class WorldScene extends Phaser.Scene {
   private chatContainerEl?: HTMLElement;
   private chatInputEl?: HTMLInputElement;
   private chatMessagesEl?: HTMLElement;
+  private isChatMinimized: boolean = false;
+  private unreadChatCount: number = 0;
+  private chatBadgeEl?: HTMLElement;
+  private chatToggleBtnEl?: HTMLElement;
 
   constructor() {
     super({ key: 'WorldScene' });
@@ -117,6 +121,19 @@ export class WorldScene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, mapWidthPx, mapHeightPx);
     this.cameras.main.setBounds(0, 0, mapWidthPx, mapHeightPx);
     this.cameras.main.startFollow(this.player, true, 0.08, 0.08);
+
+    const updateCameraZoom = () => {
+      const h = this.scale.height;
+      // Proporção ideal para visualização confortável de pixel art (exibe ~240-300px verticais)
+      const optimalZoom = Math.max(1.75, Math.min(3.5, h / 280));
+      this.cameras.main.setZoom(optimalZoom);
+    };
+    updateCameraZoom();
+
+    this.scale.on('resize', (gameSize: Phaser.Structs.Size) => {
+      this.cameras.main.setSize(gameSize.width, gameSize.height);
+      updateCameraZoom();
+    });
 
     // 9. Handlers de eventos de loot e textos flutuantes
     this.setupEventListeners();
@@ -431,6 +448,37 @@ export class WorldScene extends Phaser.Scene {
     const chatContainer = document.createElement('div');
     chatContainer.id = 'noobrpg-chat-container';
 
+    // 1. Cabeçalho do Chat com botão de alternância e badge
+    const chatHeader = document.createElement('div');
+    chatHeader.id = 'noobrpg-chat-header';
+
+    const headerLeft = document.createElement('div');
+    headerLeft.className = 'chat-header-left';
+
+    const chatTitle = document.createElement('span');
+    chatTitle.className = 'chat-header-title';
+    chatTitle.textContent = '💬 Chat';
+
+    const chatBadge = document.createElement('span');
+    chatBadge.id = 'noobrpg-chat-badge';
+    chatBadge.className = 'chat-badge';
+    chatBadge.style.display = 'none';
+    chatBadge.textContent = '0';
+
+    headerLeft.appendChild(chatTitle);
+    headerLeft.appendChild(chatBadge);
+
+    const toggleBtn = document.createElement('button');
+    toggleBtn.id = 'noobrpg-chat-toggle';
+    toggleBtn.className = 'chat-toggle-btn';
+    toggleBtn.textContent = '−';
+    toggleBtn.title = 'Minimizar / Expandir Chat (ou clique no cabeçalho)';
+
+    chatHeader.appendChild(headerLeft);
+    chatHeader.appendChild(toggleBtn);
+    chatContainer.appendChild(chatHeader);
+
+    // 2. Mensagens e Input
     const chatMessages = document.createElement('div');
     chatMessages.id = 'noobrpg-chat-messages';
 
@@ -447,9 +495,40 @@ export class WorldScene extends Phaser.Scene {
     this.chatContainerEl = chatContainer;
     this.chatInputEl = chatInput;
     this.chatMessagesEl = chatMessages;
+    this.chatBadgeEl = chatBadge;
+    this.chatToggleBtnEl = toggleBtn;
 
-    // Foco no chat ao apertar ENTER
+    const setChatMinimized = (minimized: boolean) => {
+      this.isChatMinimized = minimized;
+      if (this.isChatMinimized) {
+        chatContainer.classList.add('minimized');
+        toggleBtn.textContent = '+';
+      } else {
+        chatContainer.classList.remove('minimized');
+        toggleBtn.textContent = '−';
+        this.unreadChatCount = 0;
+        chatBadge.style.display = 'none';
+        chatBadge.textContent = '0';
+      }
+    };
+
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setChatMinimized(!this.isChatMinimized);
+    });
+
+    chatHeader.addEventListener('click', () => {
+      if (this.isChatMinimized) {
+        setChatMinimized(false);
+        chatInput.focus();
+      }
+    });
+
+    // Foco no chat ao apertar ENTER (expande se estiver minimizado)
     this.input.keyboard?.on('keydown-ENTER', () => {
+      if (this.isChatMinimized) {
+        setChatMinimized(false);
+      }
       if (document.activeElement !== chatInput) {
         chatInput.focus();
       }
@@ -472,7 +551,7 @@ export class WorldScene extends Phaser.Scene {
       }
     });
 
-    this.addChatMessage('Guia', 'Bem-vindo ao NoobRPG Multiplayer! Digite Enter para conversar.', 'system');
+    this.addChatMessage('Guia', 'Bem-vindo ao NoobRPG! Pressione Enter para conversar ou [−] para recolher.', 'system');
   }
 
   private addChatMessage(sender: string, message: string, type: 'player' | 'self' | 'system'): void {
@@ -495,6 +574,15 @@ export class WorldScene extends Phaser.Scene {
 
     // Auto-scroll para a mensagem mais recente
     this.chatMessagesEl.scrollTop = this.chatMessagesEl.scrollHeight;
+
+    // Se estiver minimizado e for mensagem de outro jogador ou sistema, incrementa badge de não lidas
+    if (this.isChatMinimized && type !== 'self') {
+      this.unreadChatCount++;
+      if (this.chatBadgeEl) {
+        this.chatBadgeEl.style.display = 'inline-block';
+        this.chatBadgeEl.textContent = `${this.unreadChatCount}`;
+      }
+    }
   }
 
   private spawnGatheringNodes(): void {

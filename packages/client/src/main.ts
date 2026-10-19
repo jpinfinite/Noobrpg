@@ -9,18 +9,18 @@ import { UIScene } from './scenes/UIScene.js';
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
-  width: GAME_CONSTANTS.CANVAS_WIDTH,
-  height: GAME_CONSTANTS.CANVAS_HEIGHT,
+  width: window.innerWidth,
+  height: window.innerHeight,
   parent: 'game-viewport',
   pixelArt: true,
   roundPixels: true,
   antialias: false,
   backgroundColor: '#0c0a14',
   scale: {
-    mode: Phaser.Scale.FIT,
+    mode: Phaser.Scale.RESIZE,
     autoCenter: Phaser.Scale.CENTER_BOTH,
-    width: GAME_CONSTANTS.CANVAS_WIDTH,
-    height: GAME_CONSTANTS.CANVAS_HEIGHT
+    width: '100%',
+    height: '100%'
   },
   physics: {
     default: 'arcade',
