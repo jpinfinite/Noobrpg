@@ -76,3 +76,27 @@
 - Total de testes: **73/73 aprovados (100%)**.
 - `npx tsc --noEmit`: **0 erros**.
 - `npm --workspace=@noobrpg/client run build`: **Sucesso em 6.90s com 0 avisos**.
+
+---
+
+## [2026-10-19] Ciclo: Resolução de Rubberbanding de Movimento & Anti-Speedhack Elástico
+
+### Problema Diagnosticado
+- Ao caminhar pelo mapa com o personagem (ex: Guerreiro), segundos depois o jogador era puxado abruptamente de volta para o ponto de spawn inicial (180, 160).
+- **Causa Raiz 1 (Servidor):** A validação de anti-speedhack em [ServerPlayer.ts](file:///d:/NoobRPG/packages/server/src/simulation/ServerPlayer.ts) utilizava `maxAllowedDist = speed * dt * 1.25 + 8px`. Devido à oscilação de latência de rede/túnel Cloudflare (*jitter*), pacotes de movimento que chegavam em rajada tinham intervalo minúsculo medido pelo servidor, resultando em rejeição com `SPEEDHACK_EXCEEDED`. Como o servidor não atualizava nem `this.x` nem `lastMoveTimestamp`, todos os pacotes subsequentes entravam em efeito bola de neve de rejeição. A cada 1 segundo (Full Snapshot), o servidor enviava a posição congelada (180, 160).
+- **Causa Raiz 2 (Cliente):** O threshold de reconciliação em [WorldScene.ts](file:///d:/NoobRPG/packages/client/src/scenes/WorldScene.ts) era de apenas 28px (~300ms de ping a 90px/s) com snap instantâneo via `setPosition()`. Qualquer atraso normal da rede provocava puxões secos para trás.
+
+### Ações Executadas
+1. **Anti-Speedhack Elástico com Clamping ([ServerPlayer.ts](file:///d:/NoobRPG/packages/server/src/simulation/ServerPlayer.ts)):**
+   - Tolerância elástica expandida para 24px fixos contra jitter de rede.
+   - Movimentos que excedem ligeiramente o limite por latência são suavemente clampados para a distância máxima permitida na direção do vetor, impedindo congelamento do jogador e garantindo que o servidor acompanhe a caminhada.
+   - Atualização garantida de `lastMoveTimestamp` em colisões e rejeições moderadas.
+2. **Reconciliação Suave com LERP ([WorldScene.ts](file:///d:/NoobRPG/packages/client/src/scenes/WorldScene.ts)):**
+   - Threshold de snap severo ampliado para 48px (3 tiles completos).
+   - Para desvios moderados (8 a 48px), aplicada interpolação suave (LERP 20%), eliminando solavancos e travamentos visuais.
+   - Envio de `clientDt` acumulado real em vez do delta de 1 único frame do Phaser.
+3. **Validação:**
+   - Testes do servidor aprovados (46/46).
+   - Build do cliente compilado com sucesso (`index-BSwK1yH8.js`).
+   - Deploy publicado e ativo no Cloudflare Pages.
+
