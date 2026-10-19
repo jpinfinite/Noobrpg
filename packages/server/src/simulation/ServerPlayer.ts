@@ -92,14 +92,19 @@ export class ServerPlayer {
   /**
    * Validação de Movimento com Anti-Speedhack e Detecção de Colisão
    */
-  public validateAndApplyMovement(newX: number, newY: number, clientTimestamp: number): { success: boolean; x: number; y: number; reason?: string } {
+  public validateAndApplyMovement(
+    newX: number,
+    newY: number,
+    clientDt: number = 50
+  ): { success: boolean; x: number; y: number; reason?: string } {
     if (!this.isAlive()) {
       return { success: false, x: this.x, y: this.y, reason: 'PLAYER_DEAD' };
     }
 
     const now = Date.now();
-    const dtMs = Math.max(10, Math.min(1000, now - this.lastMoveTimestamp));
-    const dtSeconds = dtMs / 1000;
+    const serverElapsedMs = now - this.lastMoveTimestamp;
+    const effectiveDtMs = Math.max(10, Math.min(1000, serverElapsedMs));
+    const dtSeconds = effectiveDtMs / 1000;
 
     const dx = newX - this.x;
     const dy = newY - this.y;
@@ -113,6 +118,7 @@ export class ServerPlayer {
 
     // 1. Colisão no Mapa (Paredes e Obstáculos)
     if (!MapCollisionGrid.isWalkable(newX, newY)) {
+      this.lastMoveTimestamp = now;
       return {
         success: false,
         x: this.x,
@@ -121,17 +127,36 @@ export class ServerPlayer {
       };
     }
 
-    // 2. Anti-Speedhack
+    // 2. Anti-Speedhack com Tolerância Elástica para Rede/Jitter
     const maxSpeed = this.getSpeed();
-    const maxAllowedDist = maxSpeed * dtSeconds * SIMULATION_CONSTANTS.SPEED_TOLERANCE_FACTOR;
+    const maxAllowedDist = maxSpeed * dtSeconds * SIMULATION_CONSTANTS.SPEED_TOLERANCE_FACTOR + 24;
 
-    if (distance > maxAllowedDist + 8) { // 8px de tolerância extra para atrasos pontuais
-      return {
-        success: false,
-        x: this.x,
-        y: this.y,
-        reason: 'SPEEDHACK_EXCEEDED'
-      };
+    if (distance > maxAllowedDist) {
+      // Rejeita categoricamente se for salto grotesco / teleporte
+      if (distance > maxAllowedDist + 60) {
+        this.lastMoveTimestamp = now;
+        return {
+          success: false,
+          x: this.x,
+          y: this.y,
+          reason: 'SPEEDHACK_EXCEEDED'
+        };
+      }
+
+      // Clampa o movimento para a distância máxima autorizada nessa direção (previne rubberband catastrófico)
+      const ratio = maxAllowedDist / distance;
+      const clampedX = Math.round(this.x + dx * ratio);
+      const clampedY = Math.round(this.y + dy * ratio);
+
+      if (MapCollisionGrid.isWalkable(clampedX, clampedY)) {
+        this.x = clampedX;
+        this.y = clampedY;
+        this.lastMoveTimestamp = now;
+        return { success: true, x: this.x, y: this.y };
+      } else {
+        this.lastMoveTimestamp = now;
+        return { success: false, x: this.x, y: this.y, reason: 'COLLISION_OBSTACLE' };
+      }
     }
 
     this.x = newX;

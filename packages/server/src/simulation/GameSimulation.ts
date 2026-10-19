@@ -187,11 +187,11 @@ export class GameSimulation {
     playerId: string,
     newX: number,
     newY: number,
-    clientTimestamp: number = Date.now()
+    clientDt: number = 50
   ): { success: boolean; x: number; y: number; reason?: string } {
     const player = this.players.get(playerId);
     if (!player) return { success: false, x: 0, y: 0, reason: 'PLAYER_NOT_FOUND' };
-    return player.validateAndApplyMovement(newX, newY, clientTimestamp);
+    return player.validateAndApplyMovement(newX, newY, clientDt);
   }
 
   public processAttack(

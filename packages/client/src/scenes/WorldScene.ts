@@ -106,6 +106,8 @@ export class WorldScene extends Phaser.Scene {
     const spawnY = this.initialPlayerData?.position?.y || 160;
     const charClass = this.initialPlayerData?.characterClass || CharacterClass.WARRIOR;
     this.player = new Player(this, spawnX, spawnY, charClass, this.initialPlayerData);
+    this.lastSentX = spawnX;
+    this.lastSentY = spawnY;
 
     // 6. Monstros locais/estáticos
     this.monstersGroup = this.physics.add.group();
@@ -166,10 +168,11 @@ export class WorldScene extends Phaser.Scene {
         (curX !== this.lastSentX || curY !== this.lastSentY) &&
         time - this.lastMoveSentTime >= 50
       ) {
+        const clientDt = this.lastMoveSentTime > 0 ? Math.round(time - this.lastMoveSentTime) : 50;
         this.lastMoveSentTime = time;
         this.lastSentX = curX;
         this.lastSentY = curY;
-        this.multiplayerClient?.sendMove(curX, curY, delta);
+        this.multiplayerClient?.sendMove(curX, curY, clientDt);
       }
     }
 
@@ -338,9 +341,13 @@ export class WorldScene extends Phaser.Scene {
       // 1. Identificação inequívoca do jogador local
       if (p.id === this.localPlayerId || (this.player && p.id === this.player.playerData.id)) {
         const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, p.x, p.y);
-        if (dist > 28) {
-          // Desvio significativo: reconcilia suavemente para a posição oficial do servidor
+        if (dist > 48) {
+          // Desvio severo (ex: teleporte, respawn ou colisão intransponível): snap direto
           this.player.setPosition(p.x, p.y);
+        } else if (dist > 8) {
+          // Desvio moderado por latência de rede em trânsito: reconciliação suave (LERP 20%) sem travamentos
+          this.player.x += (p.x - this.player.x) * 0.2;
+          this.player.y += (p.y - this.player.y) * 0.2;
         }
 
         // Sincroniza atributos vitais
@@ -429,8 +436,11 @@ export class WorldScene extends Phaser.Scene {
         if (pDelta.id === this.localPlayerId || (this.player && pDelta.id === this.player.playerData.id)) {
           if (pDelta.x !== undefined && pDelta.y !== undefined) {
             const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, pDelta.x, pDelta.y);
-            if (dist > 28) {
+            if (dist > 48) {
               this.player.setPosition(pDelta.x, pDelta.y);
+            } else if (dist > 8) {
+              this.player.x += (pDelta.x - this.player.x) * 0.2;
+              this.player.y += (pDelta.y - this.player.y) * 0.2;
             }
           }
           if (pDelta.hp !== undefined) this.player.playerData.attributes.currentHp = pDelta.hp;
