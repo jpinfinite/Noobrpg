@@ -260,7 +260,7 @@ describe('NoobRPG Fase 5A — Simulação Autoritativa e Zero Client Trust', () 
     assert.ok(snapshot.timestamp > 0);
     assert.equal(snapshot.players.length, 1);
     assert.equal(snapshot.players[0].name, 'TestHero');
-    assert.equal(snapshot.monsters.length, 4);
-    assert.equal(snapshot.gatheringNodes.length, 6);
+    assert.equal(snapshot.monsters.length, 6);
+    assert.equal(snapshot.gatheringNodes.length, 9);
   });
 });

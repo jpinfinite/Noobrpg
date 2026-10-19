@@ -128,7 +128,8 @@ export interface PlayerData {
 
 export enum MonsterType {
   SLIME = 'SLIME',
-  GOBLIN = 'GOBLIN'
+  GOBLIN = 'GOBLIN',
+  SKELETON = 'SKELETON'
 }
 
 export enum MonsterAIState {

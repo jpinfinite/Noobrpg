@@ -37,6 +37,9 @@ export class TextureGenerator {
     if (!scene.textures.exists('mob_goblin')) {
       this.generateGoblinSpritesheet(scene);
     }
+    if (!scene.textures.exists('mob_skeleton')) {
+      this.generateSkeletonSpritesheet(scene);
+    }
 
     // Efeitos visuais de combate (FX) — Fase 2.2
     if (!scene.textures.exists('fx_slash')) {
@@ -1216,6 +1219,123 @@ export class TextureGenerator {
     canvas.refresh();
   }
 
+  private static generateSkeletonSpritesheet(scene: Phaser.Scene): void {
+    const canvas = scene.textures.createCanvas('mob_skeleton', 32, 24);
+    if (!canvas) return;
+    const ctx = canvas.getContext();
+
+    ctx.clearRect(0, 0, 32, 24);
+
+    // FRAME 0: Idle (x = 0..15)
+    // Sombra suave no chão
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+    ctx.beginPath();
+    ctx.ellipse(8, 22, 5, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Pernas (ossos tibiais)
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fillRect(6, 17, 2, 5);
+    ctx.fillRect(9, 17, 2, 5);
+
+    // Pélvis e Coluna vertebral
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillRect(6, 15, 5, 2);
+    ctx.fillRect(7, 10, 3, 5);
+
+    // Caixa torácica / Costelas
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(5, 9, 7, 2);
+    ctx.fillRect(5, 12, 7, 2);
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(6, 11, 2, 1);
+    ctx.fillRect(9, 11, 2, 1);
+
+    // Crânio do esqueleto
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(5, 3, 7, 6);
+    ctx.fillRect(6, 2, 5, 1);
+    // Mandíbula / dentes
+    ctx.fillStyle = '#e2e8f0';
+    ctx.fillRect(6, 7, 5, 2);
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(7, 8, 1, 1);
+    ctx.fillRect(9, 8, 1, 1);
+
+    // Órbitas oculares com brilho violeta arcano
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(6, 4, 2, 2);
+    ctx.fillRect(9, 4, 2, 2);
+    ctx.fillStyle = '#c084fc';
+    ctx.fillRect(7, 4, 1, 1);
+    ctx.fillRect(10, 4, 1, 1);
+
+    // Braço esquerdo e Espada Curva Enferrujada
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fillRect(3, 10, 2, 5);
+    ctx.fillStyle = '#b45309';
+    ctx.fillRect(2, 14, 3, 1);
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillRect(3, 15, 1, 6);
+    ctx.fillRect(4, 17, 1, 3);
+
+    // FRAME 1: Walk / Attack (x = 16..31)
+    const x2 = 16;
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+    ctx.beginPath();
+    ctx.ellipse(x2 + 8, 22, 6, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Pernas em passo de combate
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fillRect(x2 + 5, 17, 2, 5);
+    ctx.fillRect(x2 + 10, 16, 2, 6);
+
+    // Coluna e pélvis
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillRect(x2 + 6, 15, 5, 2);
+    ctx.fillRect(x2 + 7, 10, 3, 5);
+
+    // Costelas
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(x2 + 5, 9, 7, 2);
+    ctx.fillRect(x2 + 5, 12, 7, 2);
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(x2 + 6, 11, 2, 1);
+    ctx.fillRect(x2 + 9, 11, 2, 1);
+
+    // Crânio inclinado
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(x2 + 6, 3, 7, 6);
+    ctx.fillRect(x2 + 7, 2, 5, 1);
+    ctx.fillStyle = '#e2e8f0';
+    ctx.fillRect(x2 + 7, 7, 5, 2);
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(x2 + 8, 8, 1, 1);
+    ctx.fillRect(x2 + 10, 8, 1, 1);
+
+    // Olhos com fogo espectral púrpura
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(x2 + 7, 4, 2, 2);
+    ctx.fillRect(x2 + 10, 4, 2, 2);
+    ctx.fillStyle = '#e879f9';
+    ctx.fillRect(x2 + 8, 4, 1, 1);
+    ctx.fillRect(x2 + 11, 4, 1, 1);
+
+    // Espada erguida em golpe
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fillRect(x2 + 12, 8, 2, 4);
+    ctx.fillStyle = '#b45309';
+    ctx.fillRect(x2 + 11, 7, 4, 1);
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fillRect(x2 + 12, 1, 2, 6);
+    ctx.fillRect(x2 + 14, 2, 1, 3);
+
+    canvas.add(0, 0, 0, 0, 16, 24);
+    canvas.add(1, 0, 16, 0, 16, 24);
+    canvas.refresh();
+  }
+
   private static generateTreeProp(scene: Phaser.Scene): void {
     const canvas = scene.textures.createCanvas('prop_tree', 32, 48);
     if (!canvas) return;
@@ -1799,6 +1919,54 @@ export class TextureGenerator {
           ctx.fillStyle = '#fef08a';
           ctx.fillRect(5, 5, 1, 3);
           ctx.fillRect(8, 4, 1, 4);
+        }
+      },
+      {
+        key: 'icon_bone',
+        draw: ctx => {
+          ctx.fillStyle = '#f8fafc';
+          ctx.fillRect(3, 3, 3, 3);
+          ctx.fillRect(3, 10, 3, 3);
+          ctx.fillRect(10, 3, 3, 3);
+          ctx.fillRect(10, 10, 3, 3);
+          ctx.fillRect(5, 5, 6, 6);
+          ctx.fillStyle = '#cbd5e1';
+          ctx.fillRect(5, 7, 6, 2);
+          ctx.fillStyle = '#94a3b8';
+          ctx.fillRect(4, 11, 2, 2);
+          ctx.fillRect(10, 11, 2, 2);
+        }
+      },
+      {
+        key: 'icon_potion_hp_medium',
+        draw: ctx => {
+          ctx.fillStyle = '#78350f';
+          ctx.fillRect(6, 1, 4, 2);
+          ctx.fillStyle = '#f59e0b';
+          ctx.fillRect(5, 3, 6, 1);
+          ctx.fillStyle = '#be123c';
+          ctx.beginPath();
+          ctx.arc(8, 10, 6, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#fda4af';
+          ctx.fillRect(5, 7, 3, 3);
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(6, 8, 1, 1);
+        }
+      },
+      {
+        key: 'icon_bow',
+        draw: ctx => {
+          ctx.fillStyle = '#78350f';
+          ctx.fillRect(4, 2, 3, 2);
+          ctx.fillRect(3, 4, 2, 3);
+          ctx.fillRect(2, 7, 2, 3);
+          ctx.fillRect(3, 10, 2, 3);
+          ctx.fillRect(4, 13, 3, 2);
+          ctx.fillStyle = '#f8fafc';
+          ctx.fillRect(2, 7, 2, 2);
+          ctx.fillStyle = '#e2e8f0';
+          ctx.fillRect(7, 3, 1, 11);
         }
       }
     ];

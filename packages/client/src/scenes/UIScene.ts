@@ -10,6 +10,7 @@ import {
   CharacterClass
 } from '@noobrpg/shared';
 import { Player } from '../entities/Player.js';
+import { SoundEffects } from '../audio/SoundEffects.js';
 
 interface UISceneData {
   player: Player;
@@ -53,6 +54,8 @@ export class UIScene extends Phaser.Scene {
   private inventoryContainer!: Phaser.GameObjects.Container;
   private craftingContainer!: Phaser.GameObjects.Container;
   private tooltipContainer!: Phaser.GameObjects.Container;
+  private btnSound!: Phaser.GameObjects.Rectangle;
+  private txtSound!: Phaser.GameObjects.Text;
 
   // Cache de elementos de slot para atualização reativa
   private slotSprites: Array<{
@@ -139,6 +142,11 @@ export class UIScene extends Phaser.Scene {
       event?.preventDefault();
       this.toggleDebugPanel();
     });
+
+    // Tecla M para alternar áudio
+    this.input.keyboard?.on('keydown-M', () => {
+      this.toggleSound();
+    });
   }
 
   public update(time: number, delta: number): void {
@@ -206,12 +214,29 @@ export class UIScene extends Phaser.Scene {
     this.headerRightContainer = this.add.container(310, 10);
     this.headerRightContainer.setDepth(500);
 
-    // 1. Barra Superior Direita (Botão F3 e Botão Sair)
-    const btnF3 = this.add.rectangle(90, 8, 42, 14, 0x1e1b4b)
+    // 1. Barra Superior Direita (Botão de Som, Botão F3 e Botão Sair)
+    const isMuted = SoundEffects.getInstance().getMuted();
+
+    this.btnSound = this.add.rectangle(40, 8, 38, 14, isMuted ? 0x27272a : 0x064e3b)
+      .setStrokeStyle(1, isMuted ? 0x71717a : 0x10b981)
+      .setInteractive({ useHandCursor: true });
+
+    this.txtSound = this.add.text(40, 8, isMuted ? 'SOM: OFF' : 'SOM: ON', {
+      fontFamily: 'monospace',
+      fontSize: '6px',
+      color: isMuted ? '#a1a1aa' : '#a7f3d0',
+      fontStyle: 'bold'
+    }).setOrigin(0.5);
+
+    this.btnSound.on('pointerdown', () => {
+      this.toggleSound();
+    });
+
+    const btnF3 = this.add.rectangle(86, 8, 38, 14, 0x1e1b4b)
       .setStrokeStyle(1, 0x6366f1)
       .setInteractive({ useHandCursor: true });
 
-    const txtF3 = this.add.text(90, 8, '[F3] INFO', {
+    const txtF3 = this.add.text(86, 8, '[F3] INFO', {
       fontFamily: 'monospace',
       fontSize: '6px',
       color: '#a5b4fc',
@@ -220,11 +245,11 @@ export class UIScene extends Phaser.Scene {
 
     btnF3.on('pointerdown', () => this.toggleDebugPanel());
 
-    const btnExit = this.add.rectangle(142, 8, 34, 14, 0x450a0a)
+    const btnExit = this.add.rectangle(138, 8, 34, 14, 0x450a0a)
       .setStrokeStyle(1, 0xef4444)
       .setInteractive({ useHandCursor: true });
 
-    const txtExit = this.add.text(142, 8, 'SAIR', {
+    const txtExit = this.add.text(138, 8, 'SAIR', {
       fontFamily: 'monospace',
       fontSize: '6.5px',
       color: '#fca5a5',
@@ -272,7 +297,7 @@ export class UIScene extends Phaser.Scene {
     });
 
     this.debugContainer.add([this.coordsText, this.fpsText, this.skillText, this.entitiesText]);
-    this.headerRightContainer.add([btnF3, txtF3, btnExit, txtExit, this.debugContainer]);
+    this.headerRightContainer.add([this.btnSound, this.txtSound, btnF3, txtF3, btnExit, txtExit, this.debugContainer]);
   }
 
   private createBottomActionBar(): void {
@@ -395,7 +420,7 @@ export class UIScene extends Phaser.Scene {
     btnCraft.hitZone.on('pointerout', () => this.hideTooltip());
 
     // Dica discreta no rodapé inferior
-    this.hintsText = this.add.text(240, 264, '[1-4]: Classes  •  [F3]: Debug  •  [ENTER]: Chat', {
+    this.hintsText = this.add.text(240, 264, '[1-4]: Classes  •  [M]: Som  •  [F3]: Info  •  [ENTER]: Chat', {
       fontFamily: 'monospace',
       fontSize: '6px',
       color: '#64748b'
@@ -875,6 +900,17 @@ export class UIScene extends Phaser.Scene {
     this.inventoryContainer.setVisible(this.isInventoryOpen);
     this.hideTooltip();
     if (this.isCraftingOpen) this.refreshCraftingUI();
+  }
+
+  public toggleSound(): boolean {
+    const isMuted = SoundEffects.getInstance().toggleMute();
+    if (this.btnSound && this.txtSound) {
+      this.btnSound.setFillStyle(isMuted ? 0x27272a : 0x064e3b);
+      this.btnSound.setStrokeStyle(1, isMuted ? 0x71717a : 0x10b981);
+      this.txtSound.setText(isMuted ? 'SOM: OFF' : 'SOM: ON');
+      this.txtSound.setColor(isMuted ? '#a1a1aa' : '#a7f3d0');
+    }
+    return !isMuted;
   }
 
   private refreshInventoryUI(): void {

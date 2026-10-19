@@ -17,6 +17,7 @@ import {
   executeCrafting
 } from '@noobrpg/shared';
 import { Monster } from './Monster.js';
+import { SoundEffects } from '../audio/SoundEffects.js';
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
   public playerData: PlayerData;
@@ -371,6 +372,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const attackOffset = this.getDirectionOffset(16);
 
     if (charClass === CharacterClass.WARRIOR) {
+      SoundEffects.getInstance().playAttackSlash();
       // Efeito de corte em arco (Slash)
       const fx = this.scene.add.sprite(startX + attackOffset.x, startY + attackOffset.y, 'fx_slash');
       fx.setDepth(this.depth + 5);
@@ -397,6 +399,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         onComplete: () => fx.destroy()
       });
     } else if (charClass === CharacterClass.RANGER) {
+      SoundEffects.getInstance().playArrowShoot();
       // Projétil Cosmético: Flecha voando até o alvo
       const destX = targetX !== undefined ? targetX : startX + attackOffset.x * 3;
       const destY = targetY !== undefined ? targetY : startY + attackOffset.y * 3;
@@ -421,6 +424,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         }
       });
     } else if (charClass === CharacterClass.MAGE) {
+      SoundEffects.getInstance().playMagicCast();
       // Projétil Cosmético: Orbe arcano
       const destX = targetX !== undefined ? targetX : startX + attackOffset.x * 3;
       const destY = targetY !== undefined ? targetY : startY + attackOffset.y * 3;
@@ -454,6 +458,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         }
       });
     } else if (charClass === CharacterClass.DRUID) {
+      SoundEffects.getInstance().playDruidHeal();
       if (isSkill) {
         // Habilidade de Cura: Bênção da Natureza
         const aura = this.scene.add.sprite(this.x, this.y - 6, 'fx_heal_aura');
@@ -545,6 +550,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         });
 
         if (result.isDead && result.xpReward > 0) {
+          SoundEffects.getInstance().playMonsterDeath();
           this.gainXp(result.xpReward);
           this.playerData.gold += result.goldReward;
           this.scene.events.emit('floating-text', {
@@ -626,6 +632,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         });
 
         if (result.isDead && result.xpReward > 0) {
+          SoundEffects.getInstance().playMonsterDeath();
           this.gainXp(result.xpReward);
           this.playerData.gold += result.goldReward;
           this.scene.events.emit('spawn-monster-loot', {
@@ -656,6 +663,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   public takeDamage(amount: number, attacker: Monster): void {
     if (this.isDead || this.isInvulnerable) return;
 
+    SoundEffects.getInstance().playHit();
     this.playerData.attributes.currentHp = Math.max(0, this.playerData.attributes.currentHp - amount);
 
     this.scene.events.emit('floating-text', {
@@ -728,6 +736,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const progression = evaluateLevelProgression(this.playerData.level, this.playerData.currentXp);
 
     if (progression.didLevelUp) {
+      SoundEffects.getInstance().playLevelUp();
       this.playerData.level = progression.newLevel;
       this.recalculateAttributes();
 
@@ -875,6 +884,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const itemDef = ITEM_DEFINITIONS[slot.itemId];
     if (!itemDef?.consumableEffect) return false;
 
+    if (itemDef.consumableEffect.hpRestore || itemDef.consumableEffect.mpRestore) {
+      SoundEffects.getInstance().playDruidHeal();
+    }
+
     if (itemDef.consumableEffect.hpRestore) {
       const heal = itemDef.consumableEffect.hpRestore;
       this.playerData.attributes.currentHp = Math.min(
@@ -932,6 +945,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     const result = executeCrafting(this.playerData.inventory, recipeId, this.playerData.level);
 
     if (result.success && result.resultItemId) {
+      SoundEffects.getInstance().playCraftSuccess();
       const def = ITEM_DEFINITIONS[result.resultItemId];
       this.scene.events.emit('floating-text', {
         x: this.x,

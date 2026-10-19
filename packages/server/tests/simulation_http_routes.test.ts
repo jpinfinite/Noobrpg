@@ -175,4 +175,62 @@ describe('NoobRPG Fase 5A — Rotas HTTP de Simulação Autoritativa', () => {
     const hijackData = await actionHijack.json();
     assert.ok(hijackData.error.includes('Acesso negado'));
   });
+
+  it('3. Zero Client Trust: Bloqueio estrito de injeção arbitrária de Gold e XP em /api/characters/:id/save', async () => {
+    // 1. Registra conta e cria personagem
+    const reg = await fetch(`${baseUrl}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: 'security_tester', password: 'SenhaSegura123!' })
+    });
+    const cookie = reg.headers.get('set-cookie')!.split(';')[0];
+
+    const c = await fetch(`${baseUrl}/characters`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Cookie: cookie },
+      body: JSON.stringify({ name: 'SecHero', characterClass: CharacterClass.WARRIOR })
+    });
+    const cData = await c.json();
+    const charId = cData.player.id;
+    assert.equal(cData.player.gold, 100);
+
+    // 2. Tentativa maliciosa de injetar Gold via HTTP
+    const goldExploitRes = await fetch(`${baseUrl}/characters/${charId}/save`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Cookie: cookie },
+      body: JSON.stringify({
+        goldChange: { amount: 999999, source: 'free_money_exploit' }
+      })
+    });
+    assert.equal(goldExploitRes.status, 403);
+    const goldExploitData = await goldExploitRes.json();
+    assert.ok(goldExploitData.error.includes('Alterações de Gold não são permitidas'));
+
+    // 3. Tentativa maliciosa de injetar XP via HTTP
+    const xpExploitRes = await fetch(`${baseUrl}/characters/${charId}/save`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Cookie: cookie },
+      body: JSON.stringify({
+        xpGained: 50000
+      })
+    });
+    assert.equal(xpExploitRes.status, 403);
+    const xpExploitData = await xpExploitRes.json();
+    assert.ok(xpExploitData.error.includes('Concessão de XP não é permitida'));
+
+    // 4. Salvamento seguro de posição e HP permitido
+    const safeSaveRes = await fetch(`${baseUrl}/characters/${charId}/save`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Cookie: cookie },
+      body: JSON.stringify({
+        position: { x: 250, y: 350 },
+        hp: 95
+      })
+    });
+    assert.equal(safeSaveRes.status, 200);
+    const safeSaveData = await safeSaveRes.json();
+    assert.equal(safeSaveData.player.position.x, 250);
+    assert.equal(safeSaveData.player.position.y, 350);
+    assert.equal(safeSaveData.player.gold, 100); // Gold inalterado!
+  });
 });

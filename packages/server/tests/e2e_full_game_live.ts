@@ -233,27 +233,36 @@ async function runFullGameLiveTest() {
   assert.equal(leftNotification.playerId, mageB.id);
   console.log('✔ [13/15] Jogador 2 desconectou; Jogador 1 recebeu S2C_PLAYER_LEFT');
 
-  // 14. Salvamento de Progresso e Inventário
+  // 14. Salvamento de Progresso e Inventário (com validação Zero Client Trust)
+  // Tentativa maliciosa de injetar Gold deve ser rejeitada com 403
+  const exploitRes = await fetch(`${httpUrl}/characters/${warriorA.id}/save`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Cookie: cookieA },
+    body: JSON.stringify({
+      goldChange: { amount: 99999 }
+    })
+  });
+  assert.equal(exploitRes.status, 403);
+
+  // Salvamento legítimo de posição e integridade física de logout
   const saveRes = await fetch(`${httpUrl}/characters/${warriorA.id}/save`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Cookie: cookieA },
     body: JSON.stringify({
       position: { x: 750, y: 350 },
       hp: 120,
-      xpGained: 150,
-      goldChange: { amount: 50, source: 'exploration_reward' },
       inventory: [
-        { slotIndex: 0, itemId: 'potion_hp_minor', quantity: 5 },
-        { slotIndex: 1, itemId: 'iron_ore', quantity: 10 }
+        { slotIndex: 0, itemId: 'potion_hp_minor', quantity: 2 },
+        { slotIndex: 1, itemId: 'wood_log', quantity: 5 }
       ],
-      equipped: { weapon: null, armor: null, accessory: null }
+      equipped: { weapon: 'sword_iron', armor: 'armor_leather', accessory: null }
     })
   });
   assert.equal(saveRes.status, 200);
   const saveData = await saveRes.json();
-  assert.equal(saveData.player.gold, 150);
+  assert.equal(saveData.player.gold, 100); // Gold protegido contra adulteração!
   assert.equal(saveData.player.position.x, 750);
-  console.log('✔ [14/15] Estado do mundo expandido salvo no SQLite (150 Gold, posição x=750)');
+  console.log('✔ [14/15] Estado do mundo expandido salvo no SQLite com Zero Client Trust (posição x=750)');
 
   // 15. Encerramento Limpo da Conexão
   wsA.close();

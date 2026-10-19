@@ -57,6 +57,10 @@ export class MultiplayerClient {
     }
   }
 
+  public getServerUrl(): string {
+    return this.serverUrl;
+  }
+
   public isConnected(): boolean {
     return this.socket !== null && this.socket.readyState === WebSocket.OPEN;
   }

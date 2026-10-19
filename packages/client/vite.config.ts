@@ -19,6 +19,14 @@ export default defineConfig({
   },
   build: {
     assetsInlineLimit: 0,
-    target: 'esnext'
+    target: 'esnext',
+    chunkSizeWarningLimit: 1600,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          phaser: ['phaser']
+        }
+      }
+    }
   }
 });

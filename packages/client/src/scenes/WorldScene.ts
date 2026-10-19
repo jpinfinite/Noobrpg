@@ -9,6 +9,7 @@ import { CraftingStation } from '../entities/CraftingStation.js';
 import { GroundItem } from '../entities/GroundItem.js';
 import { ApiClient } from '../net/ApiClient.js';
 import { MultiplayerClient } from '../net/MultiplayerClient.js';
+import { SoundEffects } from '../audio/SoundEffects.js';
 
 export class WorldScene extends Phaser.Scene {
   private player!: Player;
@@ -56,6 +57,9 @@ export class WorldScene extends Phaser.Scene {
   }
 
   public create(): void {
+    // 0. Inicializa sistema de áudio retrô
+    SoundEffects.getInstance().init();
+
     // 1. Tilemap
     this.map = this.make.tilemap({ key: 'map_prototype' });
     const tileset = this.map.addTilesetImage('tileset_prototype', 'tileset_prototype');
@@ -276,11 +280,14 @@ export class WorldScene extends Phaser.Scene {
           remoteAttacker.playAttackVisual(targetMob.x, targetMob.y, isSkill);
         }
 
-        // 2. Se houver dano contra um monstro, dispara o feedback visual no monstro
+        // 2. Se houver dano contra um monstro, dispara o feedback visual e sonoro
         if (ev.damage && targetMob) {
           const attackerX = remoteAttacker ? remoteAttacker.x : this.player.x;
           const attackerY = remoteAttacker ? remoteAttacker.y : this.player.y;
           targetMob.playHitFeedback(attackerX, attackerY);
+          if (remoteAttacker) {
+            SoundEffects.getInstance().playHit();
+          }
 
           this.events.emit('floating-text', {
             x: targetMob.x,
@@ -292,13 +299,30 @@ export class WorldScene extends Phaser.Scene {
       },
       onError: (err) => {
         this.addChatMessage('Erro', err.message, 'system');
+      },
+      onDisconnect: () => {
+        this.addChatMessage('Aviso', 'Conexão com o servidor perdida. Tentando reconectar...', 'system');
+        if (this.player) {
+          this.events.emit('floating-text', {
+            x: this.player.x,
+            y: this.player.y - 20,
+            text: '⚠️ CONEXÃO PERDIDA',
+            color: '#ef4444'
+          });
+        }
       }
     });
 
     this.multiplayerClient
       .connect('plains_01', this.initialPlayerData.id)
       .catch((err) => {
-        console.warn('[Multiplayer] Conexão WebSocket não disponível, operando em modo offline:', err);
+        const targetUrl = this.multiplayerClient?.getServerUrl() || 'desconhecido';
+        console.warn(`[Multiplayer] Conexão WebSocket não disponível em ${targetUrl}:`, err);
+        this.addChatMessage(
+          'Sistema',
+          `Servidor multiplayer não acessível (${targetUrl}). Operando em modo de simulação local.`,
+          'system'
+        );
       });
   }
 
@@ -355,10 +379,13 @@ export class WorldScene extends Phaser.Scene {
     // 4. Sincroniza monstros a partir do snapshot oficial
     if (snapshot.monsters) {
       for (const mState of snapshot.monsters) {
-        const mob = this.monsters.find(m => m.id === mState.id);
-        if (mob) {
-          mob.updateFromSnapshot(mState);
+        let mob = this.monsters.find(m => m.id === mState.id);
+        if (!mob) {
+          mob = new Monster(this, mState.x, mState.y, mState.type || MonsterType.SLIME, mState.id);
+          this.monsters.push(mob);
+          this.monstersGroup.add(mob);
         }
+        mob.updateFromSnapshot(mState);
       }
     }
   }
@@ -428,7 +455,12 @@ export class WorldScene extends Phaser.Scene {
     // 4. Atualizações de estado/movimento dos monstros
     if (delta.monsters) {
       for (const mDelta of delta.monsters) {
-        const mob = this.monsters.find(m => m.id === mDelta.id);
+        let mob = this.monsters.find(m => m.id === mDelta.id);
+        if (!mob && mDelta.x !== undefined && mDelta.y !== undefined) {
+          mob = new Monster(this, mDelta.x, mDelta.y, MonsterType.SLIME, mDelta.id);
+          this.monsters.push(mob);
+          this.monstersGroup.add(mob);
+        }
         if (mob) {
           mob.updateFromSnapshot(mDelta);
         }
@@ -619,6 +651,12 @@ export class WorldScene extends Phaser.Scene {
     const goblin = new Monster(this, 280, 70, MonsterType.GOBLIN, 'mob_goblin_1');
     this.monsters.push(goblin);
     this.monstersGroup.add(goblin);
+
+    const skeleton1 = new Monster(this, 100, 70, MonsterType.SKELETON, 'mob_skeleton_1');
+    const skeleton2 = new Monster(this, 230, 55, MonsterType.SKELETON, 'mob_skeleton_2');
+    this.monsters.push(skeleton1, skeleton2);
+    this.monstersGroup.add(skeleton1);
+    this.monstersGroup.add(skeleton2);
   }
 
   private spawnEnvironmentProps(): void {

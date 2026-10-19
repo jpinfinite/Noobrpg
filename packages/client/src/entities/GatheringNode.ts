@@ -7,6 +7,7 @@ import {
   calculateDistance
 } from '@noobrpg/shared';
 import { Player } from './Player.js';
+import { SoundEffects } from '../audio/SoundEffects.js';
 
 export class GatheringNode extends Phaser.Physics.Arcade.Sprite {
   public nodeConfig: GatheringNodeConfig;
@@ -146,6 +147,7 @@ export class GatheringNode extends Phaser.Physics.Arcade.Sprite {
     const result = player.tryCollectItem(this.nodeConfig.droppedItemId, amount);
 
     if (result.success) {
+      SoundEffects.getInstance().playGather();
       this.isAvailable = false;
       this.respawnTimer = this.nodeConfig.respawnTimeMs;
       this.setAlpha(0.35);

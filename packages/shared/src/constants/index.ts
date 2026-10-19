@@ -268,6 +268,44 @@ export const ITEM_DEFINITIONS: Record<string, ItemDefinition> = {
       defense: 2
     },
     iconKey: 'icon_ring'
+  },
+  bone_fragment: {
+    id: 'bone_fragment',
+    name: 'Fragmento de Osso',
+    description: 'Fragmento ósseo resistente recolhido de esqueletos e criptas antigas. Material para ferramentas e arcos.',
+    category: ItemCategory.CRAFTING_MATERIAL,
+    rarity: ItemRarity.COMMON,
+    maxStack: 99,
+    goldValue: 6,
+    iconKey: 'icon_bone'
+  },
+  potion_hp_medium: {
+    id: 'potion_hp_medium',
+    name: 'Poção de Vida Reforçada',
+    description: 'Frasco denso de elixir curativo concentrado. Restaura 80 pontos de vida instantaneamente.',
+    category: ItemCategory.CONSUMABLE,
+    rarity: ItemRarity.RARE,
+    maxStack: 20,
+    goldValue: 35,
+    consumableEffect: {
+      hpRestore: 80
+    },
+    iconKey: 'icon_potion_hp_medium'
+  },
+  bow_composite: {
+    id: 'bow_composite',
+    name: 'Arco Composto Reforçado',
+    description: 'Arco curvado feito com camadas de madeira e ossos polidos. Concede alto poder de ataque.',
+    category: ItemCategory.WEAPON,
+    rarity: ItemRarity.RARE,
+    maxStack: 1,
+    goldValue: 80,
+    equipSlot: EquipmentSlot.WEAPON,
+    requiredLevel: 3,
+    attributesBonus: {
+      attack: 11
+    },
+    iconKey: 'icon_bow'
   }
 };
 
@@ -314,6 +352,28 @@ export const MONSTER_DEFINITIONS: Record<MonsterType, MonsterConfig> = {
       { itemId: 'iron_ore', chance: 0.7, minAmount: 1, maxAmount: 2 },
       { itemId: 'leather_strip', chance: 0.6, minAmount: 1, maxAmount: 1 },
       { itemId: 'sword_iron', chance: 0.1, minAmount: 1, maxAmount: 1 }
+    ]
+  },
+  [MonsterType.SKELETON]: {
+    type: MonsterType.SKELETON,
+    name: 'Esqueleto Guerreiro',
+    level: 7,
+    maxHp: 220,
+    attack: 24,
+    defense: 10,
+    speed: 50,
+    detectionRadius: 120,
+    attackRange: 28,
+    attackCooldownMs: 1100,
+    xpReward: 95,
+    goldRewardMin: 12,
+    goldRewardMax: 22,
+    respawnTimeMs: 10000,
+    lootTable: [
+      { itemId: 'bone_fragment', chance: 1.0, minAmount: 1, maxAmount: 3 },
+      { itemId: 'iron_ore', chance: 0.5, minAmount: 1, maxAmount: 2 },
+      { itemId: 'potion_hp_minor', chance: 0.3, minAmount: 1, maxAmount: 1 },
+      { itemId: 'ring_vitality', chance: 0.08, minAmount: 1, maxAmount: 1 }
     ]
   }
 };
@@ -367,6 +427,19 @@ export const CRAFTING_RECIPES: CraftingRecipe[] = [
     ]
   },
   {
+    id: 'recipe_medium_hp_potion',
+    name: 'Poção de Vida Reforçada',
+    description: 'Concentra ervas e múltiplos frascos de poções menores para criar um elixir potente.',
+    category: ItemCategory.CONSUMABLE,
+    resultItemId: 'potion_hp_medium',
+    resultAmount: 1,
+    requiredLevel: 3,
+    ingredients: [
+      { itemId: 'potion_hp_minor', quantity: 2 },
+      { itemId: 'herb_green', quantity: 3 }
+    ]
+  },
+  {
     id: 'recipe_pickaxe',
     name: 'Picareta de Cobre',
     description: 'Monta uma picareta combinando minérios de ferro e cabos de madeira.',
@@ -390,6 +463,20 @@ export const CRAFTING_RECIPES: CraftingRecipe[] = [
     ingredients: [
       { itemId: 'iron_ore', quantity: 4 },
       { itemId: 'wood_log', quantity: 2 }
+    ]
+  },
+  {
+    id: 'recipe_composite_bow',
+    name: 'Arco Composto Reforçado',
+    description: 'Entalha madeira nobre e ossos para montar um arco de longo alcance.',
+    category: ItemCategory.WEAPON,
+    resultItemId: 'bow_composite',
+    resultAmount: 1,
+    requiredLevel: 3,
+    ingredients: [
+      { itemId: 'wood_log', quantity: 5 },
+      { itemId: 'bone_fragment', quantity: 3 },
+      { itemId: 'leather_strip', quantity: 2 }
     ]
   },
   {

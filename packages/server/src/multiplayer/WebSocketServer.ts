@@ -56,6 +56,27 @@ export class GameWebSocketServer {
     return list;
   }
 
+  /**
+   * Validação Anti-CSWSH: garante que apenas origens autorizadas realizem o upgrade do WebSocket
+   */
+  public isAllowedOrigin(originHeader?: string): boolean {
+    if (!originHeader) {
+      // Conexões diretas sem cabeçalho Origin (scripts backend, testes locais) são toleradas
+      return true;
+    }
+    const clientOrigin = process.env.CLIENT_ORIGIN || process.env.CORS_ORIGIN || 'http://localhost:3000';
+    const allowedList = clientOrigin.split(',').map(s => s.trim().toLowerCase());
+
+    const lowerOrigin = originHeader.trim().toLowerCase();
+    return (
+      allowedList.includes(lowerOrigin) ||
+      lowerOrigin.includes('localhost') ||
+      lowerOrigin.includes('127.0.0.1') ||
+      lowerOrigin.endsWith('.pages.dev') ||
+      lowerOrigin.includes('trycloudflare.com')
+    );
+  }
+
   private setupUpgradeHandler(): void {
     this.httpServer.on('upgrade', async (req: IncomingMessage, socket, head) => {
       // Aceita conexões na rota /ws
@@ -64,8 +85,16 @@ export class GameWebSocketServer {
         return; // Deixa outros possíveis handlers tratarem ou descarta
       }
 
+      // 1. Validação estrita de Origin (Anti-CSWSH)
+      const originHeader = req.headers.origin;
+      if (originHeader && !this.isAllowedOrigin(originHeader)) {
+        socket.write('HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n');
+        socket.destroy();
+        return;
+      }
+
       try {
-        // 1. Extração segura de cookie sem expor segredos
+        // 2. Extração segura de cookie sem expor segredos
         let sessionToken: string | undefined;
 
         if (req.headers.cookie) {

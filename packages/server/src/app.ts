@@ -68,7 +68,7 @@ export function createApp(db: IDatabase, simulationInstance?: GameSimulation): E
         ) {
           callback(null, true);
         } else {
-          callback(null, true);
+          callback(new Error('Origem não autorizada pela política de CORS.'));
         }
       },
       credentials: true

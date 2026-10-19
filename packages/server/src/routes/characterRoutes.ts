@@ -48,14 +48,36 @@ export function createCharacterRoutes(characterService: CharacterService, authMi
     }
   });
 
-  // POST /api/characters/:id/save - Salva o progresso e estado do personagem
+  // POST /api/characters/:id/save - Salva o progresso e estado do personagem (com Zero Client Trust)
   router.post('/:id/save', async (req: AuthenticatedRequest, res) => {
     try {
       const accountId = req.account!.id;
       const characterId = req.params.id;
-      const payload = req.body;
+      const payload = req.body || {};
 
-      const updatedPlayer = await characterService.saveCharacter(accountId, characterId, payload);
+      // Validação Zero Client Trust: o cliente HTTP nunca pode injetar Gold ou XP diretamente
+      if (payload.goldChange && payload.goldChange.amount !== 0) {
+        return res.status(403).json({
+          error: 'Alterações de Gold não são permitidas via API REST de cliente. Recompensas e transações financeiras são geridas exclusivamente pela simulação autoritativa do servidor.'
+        });
+      }
+
+      if (typeof payload.xpGained === 'number' && payload.xpGained > 0) {
+        return res.status(403).json({
+          error: 'Concessão de XP não é permitida via API REST de cliente. Progressão de nível é processada exclusivamente pela simulação autoritativa do servidor.'
+        });
+      }
+
+      // Permite apenas dados seguros de persistência física (posição, HP, MP, inventário e equipamentos existentes)
+      const safePayload = {
+        position: payload.position,
+        hp: payload.hp,
+        mp: payload.mp,
+        inventory: payload.inventory,
+        equipped: payload.equipped
+      };
+
+      const updatedPlayer = await characterService.saveCharacter(accountId, characterId, safePayload);
       res.json({
         message: 'Progresso salvo com sucesso.',
         player: updatedPlayer

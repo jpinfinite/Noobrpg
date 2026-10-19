@@ -27,7 +27,11 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
 
   constructor(scene: Phaser.Scene, x: number, y: number, type: MonsterType = MonsterType.SLIME, id?: string) {
     const config = MONSTER_DEFINITIONS[type];
-    const textureKey = type === MonsterType.SLIME ? 'mob_slime' : 'mob_goblin';
+    const textureKey = type === MonsterType.SLIME
+      ? 'mob_slime'
+      : type === MonsterType.SKELETON
+        ? 'mob_skeleton'
+        : 'mob_goblin';
 
     super(scene, x, y, textureKey, 0);
 
@@ -47,6 +51,10 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
     if (type === MonsterType.SLIME) {
       if (scene.anims?.exists('mob_slime_idle')) {
         this.anims.play('mob_slime_idle');
+      }
+    } else if (type === MonsterType.SKELETON) {
+      if (scene.anims?.exists('mob_skeleton_idle')) {
+        this.anims.play('mob_skeleton_idle');
       }
     } else {
       if (scene.anims?.exists('mob_goblin_idle')) {
@@ -323,14 +331,22 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
   }
 
   public playWalkAnimation(): void {
-    const key = this.monsterConfig.type === MonsterType.SLIME ? 'mob_slime_walk' : 'mob_goblin_walk';
+    const key = this.monsterConfig.type === MonsterType.SLIME
+      ? 'mob_slime_walk'
+      : this.monsterConfig.type === MonsterType.SKELETON
+        ? 'mob_skeleton_walk'
+        : 'mob_goblin_walk';
     if (this.anims && this.scene?.anims?.exists(key)) {
       this.anims.play(key, true);
     }
   }
 
   public playIdleAnimation(): void {
-    const key = this.monsterConfig.type === MonsterType.SLIME ? 'mob_slime_idle' : 'mob_goblin_idle';
+    const key = this.monsterConfig.type === MonsterType.SLIME
+      ? 'mob_slime_idle'
+      : this.monsterConfig.type === MonsterType.SKELETON
+        ? 'mob_skeleton_idle'
+        : 'mob_goblin_idle';
     if (this.anims && this.scene?.anims?.exists(key)) {
       this.anims.play(key, true);
     }
@@ -340,6 +356,10 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
     if (this.monsterConfig.type === MonsterType.GOBLIN) {
       if (this.anims && this.scene?.anims?.exists('mob_goblin_attack')) {
         this.anims.play('mob_goblin_attack', true);
+      }
+    } else if (this.monsterConfig.type === MonsterType.SKELETON) {
+      if (this.anims && this.scene?.anims?.exists('mob_skeleton_attack')) {
+        this.anims.play('mob_skeleton_attack', true);
       }
     } else {
       this.setFrame(1);

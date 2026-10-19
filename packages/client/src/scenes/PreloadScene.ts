@@ -303,5 +303,26 @@ export class PreloadScene extends Phaser.Scene {
       frames: [{ key: 'mob_goblin', frame: 1 }],
       frameRate: 1
     });
+
+    // 3. Esqueleto Guerreiro (Frames 0: idle ereto, 1: passo e corte com espada)
+    this.anims.create({
+      key: 'mob_skeleton_idle',
+      frames: [{ key: 'mob_skeleton', frame: 0 }],
+      frameRate: 1
+    });
+    this.anims.create({
+      key: 'mob_skeleton_walk',
+      frames: [
+        { key: 'mob_skeleton', frame: 0 },
+        { key: 'mob_skeleton', frame: 1 }
+      ],
+      frameRate: 4,
+      repeat: -1
+    });
+    this.anims.create({
+      key: 'mob_skeleton_attack',
+      frames: [{ key: 'mob_skeleton', frame: 1 }],
+      frameRate: 2
+    });
   }
 }

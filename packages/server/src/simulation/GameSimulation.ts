@@ -54,14 +54,23 @@ export class GameSimulation {
     const goblin = new ServerMonster('mob_goblin_1', MonsterType.GOBLIN, 280, 70);
     this.monsters.set(goblin.id, goblin);
 
-    // 2. Nós de Coleta canônicos
+    // Esqueletos Guerreiros nas zonas expandidas
+    const skeleton1 = new ServerMonster('mob_skeleton_1', MonsterType.SKELETON, 720, 280);
+    const skeleton2 = new ServerMonster('mob_skeleton_2', MonsterType.SKELETON, 840, 340);
+    this.monsters.set(skeleton1.id, skeleton1);
+    this.monsters.set(skeleton2.id, skeleton2);
+
+    // 2. Nós de Coleta canônicos e expandidos
     const nodes = [
       { id: 'node_tree_1', type: GatheringNodeType.TREE, x: 90, y: 80 },
       { id: 'node_tree_2', type: GatheringNodeType.TREE, x: 300, y: 210 },
+      { id: 'node_tree_3', type: GatheringNodeType.TREE, x: 680, y: 220 },
       { id: 'node_ore_1', type: GatheringNodeType.ORE_VEIN, x: 140, y: 60 },
       { id: 'node_ore_2', type: GatheringNodeType.ORE_VEIN, x: 260, y: 60 },
+      { id: 'node_ore_3', type: GatheringNodeType.ORE_VEIN, x: 780, y: 320 },
       { id: 'node_herb_1', type: GatheringNodeType.HERB_BUSH, x: 100, y: 150 },
-      { id: 'node_herb_2', type: GatheringNodeType.HERB_BUSH, x: 270, y: 160 }
+      { id: 'node_herb_2', type: GatheringNodeType.HERB_BUSH, x: 270, y: 160 },
+      { id: 'node_herb_3', type: GatheringNodeType.HERB_BUSH, x: 820, y: 400 }
     ];
     nodes.forEach(n => {
       this.gatheringNodes.set(n.id, new ServerGatheringNode(n.id, n.type, n.x, n.y));

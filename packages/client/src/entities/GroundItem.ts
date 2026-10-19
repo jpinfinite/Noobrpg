@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { ITEM_DEFINITIONS, calculateDistance } from '@noobrpg/shared';
 import { Player } from './Player.js';
+import { SoundEffects } from '../audio/SoundEffects.js';
 
 export class GroundItem extends Phaser.Physics.Arcade.Sprite {
   public itemId: string;
@@ -44,6 +45,7 @@ export class GroundItem extends Phaser.Physics.Arcade.Sprite {
     if (dist <= 24) {
       const result = player.tryCollectItem(this.itemId, this.quantity);
       if (result.success) {
+        SoundEffects.getInstance().playItemPickup();
         this.isCollected = true;
         const itemDef = ITEM_DEFINITIONS[this.itemId];
         const name = itemDef ? itemDef.name : this.itemId;
