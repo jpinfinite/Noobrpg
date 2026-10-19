@@ -11,12 +11,19 @@ export class MapCollisionGrid {
   private static obstacles: BoundingBox[] = [
     // Borda superior (parede)
     { x: 0, y: 0, width: 480, height: 24 },
-    // Borda inferior
-    { x: 0, y: 254, width: 480, height: 16 },
+    // Borda inferior (linha de tiles 19 em y = 304..320)
+    { x: 0, y: 304, width: 480, height: 16 },
     // Borda esquerda
-    { x: 0, y: 0, width: 16, height: 270 },
+    { x: 0, y: 0, width: 16, height: 320 },
     // Borda direita
-    { x: 464, y: 0, width: 16, height: 270 },
+    { x: 464, y: 0, width: 16, height: 320 },
+
+    // Lago de água (geometria real dos tiles colidíveis da camada de água)
+    { x: 336, y: 16, width: 80, height: 16 },
+    { x: 320, y: 32, width: 112, height: 16 },
+    { x: 304, y: 48, width: 144, height: 32 },
+    { x: 320, y: 80, width: 96, height: 16 },
+    { x: 352, y: 96, width: 48, height: 16 },
 
     // Props estáticos
     { x: 112, y: 102, width: 16, height: 16 }, // Árvore decorativa 1

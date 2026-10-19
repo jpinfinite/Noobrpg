@@ -220,6 +220,7 @@ export enum NetMessageType {
   S2C_JOINED = 's2c_joined',
   S2C_ERROR = 's2c_error',
   S2C_SNAPSHOT = 's2c_snapshot',
+  S2C_SNAPSHOT_DELTA = 's2c_snapshot_delta',
   S2C_PLAYER_JOINED = 's2c_player_joined',
   S2C_PLAYER_LEFT = 's2c_player_left',
   S2C_CHAT = 's2c_chat',
@@ -269,11 +270,48 @@ export interface GroundItemSnapshotState {
 }
 
 export interface WorldSnapshot {
+  seq?: number;
   timestamp: number;
   players: PlayerSnapshotState[];
   monsters: MonsterSnapshotState[];
   gatheringNodes: GatheringNodeSnapshotState[];
   groundItems: GroundItemSnapshotState[];
+}
+
+export interface PlayerDeltaState {
+  id: string;
+  x?: number;
+  y?: number;
+  hp?: number;
+  maxHp?: number;
+  mp?: number;
+  maxMp?: number;
+  level?: number;
+  isDead?: boolean;
+  direction?: Direction;
+}
+
+export interface MonsterDeltaState {
+  id: string;
+  x?: number;
+  y?: number;
+  hp?: number;
+  maxHp?: number;
+  state?: MonsterAIState;
+}
+
+export interface WorldSnapshotDelta {
+  seq: number;
+  timestamp: number;
+  isDelta: true;
+  players?: PlayerDeltaState[];
+  monsters?: MonsterDeltaState[];
+  enteredPlayers?: PlayerSnapshotState[];
+  enteredMonsters?: MonsterSnapshotState[];
+  enteredGroundItems?: GroundItemSnapshotState[];
+  removedPlayerIds?: string[];
+  removedMonsterIds?: string[];
+  removedGroundItemIds?: string[];
 }
 
 export interface C2S_JoinPayload {

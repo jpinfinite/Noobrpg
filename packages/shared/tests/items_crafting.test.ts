@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   CharacterClass,
+  InventorySlot,
   createEmptyInventory,
   addItemToInventory,
   removeItemFromSlot,
@@ -11,9 +12,9 @@ import {
 } from '../src/index.js';
 
 test('Inventário de 24 slots: criação, empilhamento e limite de capacidade', () => {
-  const inv = createEmptyInventory();
+  const inv: (InventorySlot | null)[] = createEmptyInventory();
   assert.equal(inv.length, 24);
-  assert.ok(inv.every(slot => slot === null));
+  assert.ok(inv.every(slot => slot === null as unknown));
 
   // Adiciona 60 Madeiras (maxStack: 99)
   const res1 = addItemToInventory(inv, 'wood_log', 60);

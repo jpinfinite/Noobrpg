@@ -1,5 +1,5 @@
 import { MonsterType, MonsterAIState, MonsterConfig, MONSTER_DEFINITIONS, calculateDistance, normalizeVector } from '@noobrpg/shared';
-import { ServerPlayer } from './ServerPlayer.js';
+import type { ServerPlayer } from './ServerPlayer';
 
 export interface MonsterDeathReward {
   died: boolean;

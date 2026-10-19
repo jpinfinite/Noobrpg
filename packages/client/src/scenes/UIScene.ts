@@ -6,7 +6,8 @@ import {
   CRAFTING_RECIPES,
   ItemRarity,
   EquipmentSlot,
-  getItemCount
+  getItemCount,
+  CharacterClass
 } from '@noobrpg/shared';
 import { Player } from '../entities/Player.js';
 
@@ -20,13 +21,28 @@ export class UIScene extends Phaser.Scene {
   private hpText!: Phaser.GameObjects.Text;
   private mpText!: Phaser.GameObjects.Text;
   private xpText!: Phaser.GameObjects.Text;
-  private coordsText!: Phaser.GameObjects.Text;
-  private fpsText!: Phaser.GameObjects.Text;
-  private skillText!: Phaser.GameObjects.Text;
 
   private hpBarGraphics!: Phaser.GameObjects.Graphics;
   private mpBarGraphics!: Phaser.GameObjects.Graphics;
   private xpBarGraphics!: Phaser.GameObjects.Graphics;
+
+  // Painel de Debug (Alternável via F3)
+  private isDebugOpen: boolean = true;
+  private debugContainer!: Phaser.GameObjects.Container;
+  private coordsText!: Phaser.GameObjects.Text;
+  private fpsText!: Phaser.GameObjects.Text;
+  private skillText!: Phaser.GameObjects.Text;
+  private entitiesText!: Phaser.GameObjects.Text;
+
+  // Barra de Ações Inferior (HUD)
+  private actionBarContainer!: Phaser.GameObjects.Container;
+  private atkCdGraphics!: Phaser.GameObjects.Graphics;
+  private skillIcon!: Phaser.GameObjects.Sprite;
+  private skillCdGraphics!: Phaser.GameObjects.Graphics;
+  private skillCdText!: Phaser.GameObjects.Text;
+  private skillMpText!: Phaser.GameObjects.Text;
+  private potionIcon!: Phaser.GameObjects.Sprite;
+  private potionQtyText!: Phaser.GameObjects.Text;
 
   // Painéis de Interface (Modais)
   private isInventoryOpen: boolean = false;
@@ -57,8 +73,8 @@ export class UIScene extends Phaser.Scene {
 
   public create(): void {
     this.createPlayerStatusPanel();
-    this.createInfoPanel();
-    this.createControlsHintPanel();
+    this.createHeaderAndDebugPanel();
+    this.createBottomActionBar();
     this.createInventoryModal();
     this.createCraftingModal();
     this.createTooltip();
@@ -70,6 +86,7 @@ export class UIScene extends Phaser.Scene {
     worldScene.events.on('player-updated', () => {
       this.refreshInventoryUI();
       this.refreshCraftingUI();
+      this.updateActionBarPotionCount();
     });
 
     // Tecla ESC para fechar janelas
@@ -77,22 +94,29 @@ export class UIScene extends Phaser.Scene {
       if (this.isInventoryOpen) this.toggleInventory(false);
       if (this.isCraftingOpen) this.toggleCrafting(false);
     });
+
+    // Tecla F3 para alternar o painel de debug
+    this.input.keyboard?.on('keydown-F3', (event: KeyboardEvent) => {
+      event?.preventDefault();
+      this.toggleDebugPanel();
+    });
   }
 
-  public update(): void {
+  public update(time: number, delta: number): void {
     if (!this.player) return;
 
     this.updateStatusBars();
     this.updateCoordinates();
     this.updateFps();
+    this.updateActionBar(time);
   }
 
   private createPlayerStatusPanel(): void {
     const panelBg = this.add.graphics();
-    panelBg.fillStyle(0x0c0a14, 0.9);
+    panelBg.fillStyle(0x0c0a14, 0.94);
     panelBg.lineStyle(1, 0x4338ca, 0.9);
-    panelBg.fillRoundedRect(8, 8, 150, 64, 4);
-    panelBg.strokeRoundedRect(8, 8, 150, 64, 4);
+    panelBg.fillRoundedRect(8, 8, 156, 66, 4);
+    panelBg.strokeRoundedRect(8, 8, 156, 66, 4);
 
     this.classLevelText = this.add.text(14, 12, 'GUERREIRO  Lv.1', {
       fontFamily: 'monospace',
@@ -105,59 +129,56 @@ export class UIScene extends Phaser.Scene {
     this.mpBarGraphics = this.add.graphics();
     this.xpBarGraphics = this.add.graphics();
 
-    this.hpText = this.add.text(14, 24, 'HP: 120/120', {
+    this.hpText = this.add.text(14, 25, 'HP: 120/120', {
       fontFamily: 'monospace',
-      fontSize: '7px',
-      color: '#ffffff'
+      fontSize: '6.5px',
+      color: '#ffffff',
+      fontStyle: 'bold',
+      stroke: '#000000',
+      strokeThickness: 1.5
     });
 
-    this.mpText = this.add.text(14, 38, 'MP: 30/30', {
+    this.mpText = this.add.text(14, 39, 'MP: 30/30', {
       fontFamily: 'monospace',
-      fontSize: '7px',
-      color: '#ffffff'
+      fontSize: '6.5px',
+      color: '#ffffff',
+      fontStyle: 'bold',
+      stroke: '#000000',
+      strokeThickness: 1.5
     });
 
-    this.xpText = this.add.text(14, 52, 'XP: 0/500 (0%)', {
+    this.xpText = this.add.text(14, 53, 'XP: 0/500 (0%)', {
       fontFamily: 'monospace',
-      fontSize: '7px',
-      color: '#facc15'
+      fontSize: '6px',
+      color: '#facc15',
+      stroke: '#000000',
+      strokeThickness: 1.5
     });
   }
 
-  private createInfoPanel(): void {
-    const infoBg = this.add.graphics();
-    infoBg.fillStyle(0x0c0a14, 0.9);
-    infoBg.lineStyle(1, 0x334155, 0.8);
-    infoBg.fillRoundedRect(310, 8, 162, 54, 4);
-    infoBg.strokeRoundedRect(310, 8, 162, 54, 4);
-
-    this.coordsText = this.add.text(316, 13, 'X: 000 | Y: 000', {
-      fontFamily: 'monospace',
-      fontSize: '8px',
-      color: '#38bdf8'
-    });
-
-    this.fpsText = this.add.text(316, 26, 'FPS: 60 | 480x270', {
-      fontFamily: 'monospace',
-      fontSize: '7px',
-      color: '#94a3b8'
-    });
-
-    this.skillText = this.add.text(316, 40, '[E] Golpe Pesado', {
-      fontFamily: 'monospace',
-      fontSize: '7px',
-      color: '#a78bfa'
-    });
-
-    // Botão Salvar e Sair
-    const btnExit = this.add.rectangle(440, 19, 28, 14, 0x1e1b4b)
+  private createHeaderAndDebugPanel(): void {
+    // 1. Barra Superior Direita (Botão F3 e Botão Sair)
+    const btnF3 = this.add.rectangle(402, 14, 40, 13, 0x1e1b4b)
       .setStrokeStyle(1, 0x6366f1)
       .setInteractive({ useHandCursor: true });
 
-    const txtExit = this.add.text(440, 19, 'SAIR', {
+    this.add.text(402, 14, '[F3] INFO', {
+      fontFamily: 'monospace',
+      fontSize: '6px',
+      color: '#a5b4fc',
+      fontStyle: 'bold'
+    }).setOrigin(0.5);
+
+    btnF3.on('pointerdown', () => this.toggleDebugPanel());
+
+    const btnExit = this.add.rectangle(450, 14, 30, 13, 0x450a0a)
+      .setStrokeStyle(1, 0xef4444)
+      .setInteractive({ useHandCursor: true });
+
+    this.add.text(450, 14, 'SAIR', {
       fontFamily: 'monospace',
       fontSize: '6.5px',
-      color: '#f87171',
+      color: '#fca5a5',
       fontStyle: 'bold'
     }).setOrigin(0.5);
 
@@ -165,23 +186,261 @@ export class UIScene extends Phaser.Scene {
       const worldScene = this.scene.get('WorldScene');
       worldScene.events.emit('request-save-and-exit');
     });
+
+    // 2. Container de Debug Alternável (F3)
+    this.debugContainer = this.add.container(310, 24);
+    this.debugContainer.setVisible(this.isDebugOpen);
+
+    const infoBg = this.add.graphics();
+    infoBg.fillStyle(0x0c0a14, 0.92);
+    infoBg.lineStyle(1, 0x334155, 0.9);
+    infoBg.fillRoundedRect(0, 0, 162, 56, 4);
+    infoBg.strokeRoundedRect(0, 0, 162, 56, 4);
+    this.debugContainer.add(infoBg);
+
+    this.coordsText = this.add.text(6, 6, 'X: 000 | Y: 000 [T: 0, 0]', {
+      fontFamily: 'monospace',
+      fontSize: '7.5px',
+      color: '#38bdf8'
+    });
+
+    this.fpsText = this.add.text(6, 18, 'FPS: 60 | 480x270 nativo', {
+      fontFamily: 'monospace',
+      fontSize: '7px',
+      color: '#94a3b8'
+    });
+
+    this.skillText = this.add.text(6, 30, 'Atq CD: 0.0s | Hab: [E] 0.0s', {
+      fontFamily: 'monospace',
+      fontSize: '7px',
+      color: '#a78bfa'
+    });
+
+    this.entitiesText = this.add.text(6, 42, 'Monstros: 0 | Remotos: 0', {
+      fontFamily: 'monospace',
+      fontSize: '6.5px',
+      color: '#34d399'
+    });
+
+    this.debugContainer.add([this.coordsText, this.fpsText, this.skillText, this.entitiesText]);
   }
 
-  private createControlsHintPanel(): void {
-    const hintBg = this.add.graphics();
-    hintBg.fillStyle(0x0c0a14, 0.85);
-    hintBg.fillRect(0, 256, 480, 14);
+  private createBottomActionBar(): void {
+    this.actionBarContainer = this.add.container(240, 246);
+    this.actionBarContainer.setDepth(500);
 
-    this.add.text(
-      6,
-      259,
-      '[ESPAÇO]: Atacar  |  [F]: Coletar/Interagir  |  [I]: Inventário  |  [C]: Crafting  |  [1-4]: Classes',
-      {
-        fontFamily: 'monospace',
-        fontSize: '6px',
-        color: '#e2e8f0'
-      }
-    );
+    // Fundo da barra de ações
+    const barBg = this.add.graphics();
+    barBg.fillStyle(0x0a0f1d, 0.94);
+    barBg.lineStyle(1, 0x334155, 1);
+    barBg.fillRoundedRect(-102, -15, 204, 30, 4);
+    barBg.strokeRoundedRect(-102, -15, 204, 30, 4);
+    this.actionBarContainer.add(barBg);
+
+    // 1. Slot Ataque Básico [ESPAÇO]
+    const slotAtk = this.createActionSlot(-78, 0, 'icon_sword', '[ESP]', () => {
+      this.player.triggerBasicAttackFromUI();
+    });
+    this.atkCdGraphics = this.add.graphics();
+    this.atkCdGraphics.setPosition(-78, 0);
+    this.actionBarContainer.add(this.atkCdGraphics);
+
+    slotAtk.hitZone.on('pointerover', () => {
+      this.showActionTooltip('Ataque Básico', 'Golpe primário da classe.\nAtalho: [ESPAÇO] ou Clique', 150, 195);
+    });
+    slotAtk.hitZone.on('pointerout', () => this.hideTooltip());
+
+    // 2. Slot Habilidade de Classe [E]
+    const charClass = this.player?.playerData?.characterClass || CharacterClass.WARRIOR;
+    let initSkillIcon = 'fx_slash';
+    if (charClass === CharacterClass.RANGER) initSkillIcon = 'fx_arrow';
+    else if (charClass === CharacterClass.MAGE) initSkillIcon = 'fx_magic_orb';
+    else if (charClass === CharacterClass.DRUID) initSkillIcon = 'fx_nature_burst';
+
+    const slotSkill = this.createActionSlot(-46, 0, initSkillIcon, '[E]', () => {
+      this.player.triggerSkill1FromUI();
+    });
+    this.skillIcon = slotSkill.icon;
+
+    this.skillCdGraphics = this.add.graphics();
+    this.skillCdGraphics.setPosition(-46, 0);
+
+    this.skillCdText = this.add.text(-46, 0, '', {
+      fontFamily: 'monospace',
+      fontSize: '6.5px',
+      color: '#ffffff',
+      fontStyle: 'bold',
+      stroke: '#000000',
+      strokeThickness: 2
+    }).setOrigin(0.5).setVisible(false);
+
+    const combatCfg = CLASS_COMBAT_CONFIG[this.player?.playerData?.characterClass || 'warrior'];
+    this.skillMpText = this.add.text(-36, 6, `${combatCfg.skill1CostMp}m`, {
+      fontFamily: 'monospace',
+      fontSize: '5.5px',
+      color: '#38bdf8',
+      stroke: '#000000',
+      strokeThickness: 1.5
+    }).setOrigin(1, 1);
+
+    this.actionBarContainer.add([this.skillCdGraphics, this.skillCdText, this.skillMpText]);
+
+    slotSkill.hitZone.on('pointerover', () => {
+      const currentClass = this.player.playerData.characterClass;
+      const cfg = CLASS_COMBAT_CONFIG[currentClass];
+      this.showActionTooltip(
+        cfg.skill1Name,
+        `Custo: ${cfg.skill1CostMp} MP | Recarga: ${(cfg.skill1CooldownMs / 1000).toFixed(1)}s\nAtalho: [E] ou Clique`,
+        185,
+        195
+      );
+    });
+    slotSkill.hitZone.on('pointerout', () => this.hideTooltip());
+
+    // 3. Slot Poção Rápida [Q]
+    const slotPotion = this.createActionSlot(-14, 0, 'icon_potion_hp', '[Q]', () => {
+      this.player.useQuickPotion();
+    });
+    this.potionIcon = slotPotion.icon;
+
+    this.potionQtyText = this.add.text(-4, 6, 'x0', {
+      fontFamily: 'monospace',
+      fontSize: '6px',
+      color: '#f8fafc',
+      fontStyle: 'bold',
+      stroke: '#000000',
+      strokeThickness: 2
+    }).setOrigin(1, 1);
+    this.actionBarContainer.add(this.potionQtyText);
+
+    slotPotion.hitZone.on('pointerover', () => {
+      const count = getItemCount(this.player.playerData.inventory, 'potion_hp_minor');
+      this.showActionTooltip('Poção de Vida', `Restaura 35 HP imediatamente.\nDisponíveis: ${count}\nAtalho: [Q] ou Clique`, 215, 195);
+    });
+    slotPotion.hitZone.on('pointerout', () => this.hideTooltip());
+
+    // 4. Slot Interagir / Coletar [F]
+    const slotInteract = this.createActionSlot(18, 0, 'ui_action_interact', '[F]', undefined, true);
+    slotInteract.hitZone.on('pointerover', () => {
+      this.showActionTooltip('Interagir / Coletar', 'Colhe recursos ou ativa a forja.\nAtalho: [F] ou Segurar Clique', 245, 195);
+    });
+    slotInteract.hitZone.on('pointerout', () => this.hideTooltip());
+
+    // 5. Botão Inventário [I]
+    const btnInv = this.createMiniButton(52, 0, 'item_drop_bag', '[I]', () => {
+      this.toggleInventory();
+    });
+    btnInv.hitZone.on('pointerover', () => {
+      this.showActionTooltip('Inventário', 'Bolsa de 24 slots e equipamentos.\nAtalho: [I]', 275, 195);
+    });
+    btnInv.hitZone.on('pointerout', () => this.hideTooltip());
+
+    // 6. Botão Crafting [C]
+    const btnCraft = this.createMiniButton(78, 0, 'icon_pickaxe', '[C]', () => {
+      this.toggleCrafting();
+    });
+    btnCraft.hitZone.on('pointerover', () => {
+      this.showActionTooltip('Bancada & Forja', 'Receitas de forja e fabricação.\nAtalho: [C]', 305, 195);
+    });
+    btnCraft.hitZone.on('pointerout', () => this.hideTooltip());
+
+    // Dica discreta no rodapé inferior
+    this.add.text(240, 264, '[1-4]: Classes  •  [F3]: Debug', {
+      fontFamily: 'monospace',
+      fontSize: '5.5px',
+      color: '#64748b'
+    }).setOrigin(0.5);
+  }
+
+  private createActionSlot(
+    x: number,
+    y: number,
+    iconKey: string,
+    shortcutLabel: string,
+    onClick?: () => void,
+    isHoldable?: boolean
+  ): { bg: Phaser.GameObjects.Graphics; icon: Phaser.GameObjects.Sprite; hitZone: Phaser.GameObjects.Zone } {
+    const size = 24;
+    const bg = this.add.graphics();
+    bg.fillStyle(0x1e293b, 1);
+    bg.lineStyle(1, 0x475569, 1);
+    bg.fillRoundedRect(x - size / 2, y - size / 2, size, size, 3);
+    bg.strokeRoundedRect(x - size / 2, y - size / 2, size, size, 3);
+
+    const icon = this.add.sprite(x, y, iconKey).setDisplaySize(16, 16);
+
+    const label = this.add.text(x, y - size / 2 + 1, shortcutLabel, {
+      fontFamily: 'monospace',
+      fontSize: '5.5px',
+      color: '#cbd5e1',
+      fontStyle: 'bold',
+      stroke: '#000000',
+      strokeThickness: 1.5
+    }).setOrigin(0.5, 0);
+
+    const hitZone = this.add.zone(x, y, size, size).setInteractive({ useHandCursor: true });
+
+    if (onClick) {
+      hitZone.on('pointerdown', () => onClick());
+    } else if (isHoldable) {
+      hitZone.on('pointerdown', () => this.player.setVirtualInteract(true));
+      hitZone.on('pointerup', () => this.player.setVirtualInteract(false));
+      hitZone.on('pointerout', () => this.player.setVirtualInteract(false));
+    }
+
+    hitZone.on('pointerover', () => {
+      bg.lineStyle(1, 0xfacc15, 1);
+      bg.strokeRoundedRect(x - size / 2, y - size / 2, size, size, 3);
+    });
+
+    hitZone.on('pointerout', () => {
+      bg.lineStyle(1, 0x475569, 1);
+      bg.strokeRoundedRect(x - size / 2, y - size / 2, size, size, 3);
+    });
+
+    this.actionBarContainer.add([bg, icon, label, hitZone]);
+    return { bg, icon, hitZone };
+  }
+
+  private createMiniButton(
+    x: number,
+    y: number,
+    iconKey: string,
+    shortcutLabel: string,
+    onClick: () => void
+  ): { bg: Phaser.GameObjects.Graphics; icon: Phaser.GameObjects.Sprite; hitZone: Phaser.GameObjects.Zone } {
+    const size = 20;
+    const bg = this.add.graphics();
+    bg.fillStyle(0x0f172a, 1);
+    bg.lineStyle(1, 0x334155, 1);
+    bg.fillRoundedRect(x - size / 2, y - size / 2, size, size, 2);
+    bg.strokeRoundedRect(x - size / 2, y - size / 2, size, size, 2);
+
+    const icon = this.add.sprite(x, y, iconKey).setDisplaySize(13, 13);
+
+    const label = this.add.text(x, y - size / 2 + 1, shortcutLabel, {
+      fontFamily: 'monospace',
+      fontSize: '5px',
+      color: '#94a3b8',
+      stroke: '#000000',
+      strokeThickness: 1
+    }).setOrigin(0.5, 0);
+
+    const hitZone = this.add.zone(x, y, size, size).setInteractive({ useHandCursor: true });
+    hitZone.on('pointerdown', onClick);
+
+    hitZone.on('pointerover', () => {
+      bg.lineStyle(1, 0x6366f1, 1);
+      bg.strokeRoundedRect(x - size / 2, y - size / 2, size, size, 2);
+    });
+
+    hitZone.on('pointerout', () => {
+      bg.lineStyle(1, 0x334155, 1);
+      bg.strokeRoundedRect(x - size / 2, y - size / 2, size, size, 2);
+    });
+
+    this.actionBarContainer.add([bg, icon, label, hitZone]);
+    return { bg, icon, hitZone };
   }
 
   // --- MODAL DE INVENTÁRIO (24 SLOTS + EQUIPAMENTOS) ---
@@ -590,24 +849,32 @@ export class UIScene extends Phaser.Scene {
     const data = this.player.playerData;
     const attrs = data.attributes;
 
-    this.classLevelText.setText(`${data.characterClass}  Lv.${data.level}`);
+    this.classLevelText.setText(`${data.characterClass.toUpperCase()}  Lv.${data.level}  •  🪙 ${data.gold}`);
 
     // HP
     this.hpBarGraphics.clear();
-    this.hpBarGraphics.fillStyle(0x331018, 0.9);
-    this.hpBarGraphics.fillRect(72, 25, 80, 6);
+    this.hpBarGraphics.fillStyle(0x2a080c, 0.95);
+    this.hpBarGraphics.fillRoundedRect(72, 23, 80, 8, 2);
     const hpRatio = Math.max(0, Math.min(1, attrs.currentHp / attrs.maxHp));
-    this.hpBarGraphics.fillStyle(0xe11d48, 1);
-    this.hpBarGraphics.fillRect(72, 25, 80 * hpRatio, 6);
+    if (hpRatio > 0) {
+      this.hpBarGraphics.fillStyle(0xe11d48, 1);
+      this.hpBarGraphics.fillRoundedRect(72, 23, Math.max(4, 80 * hpRatio), 8, 2);
+      this.hpBarGraphics.fillStyle(0xfb7185, 0.7);
+      this.hpBarGraphics.fillRect(73, 24, Math.max(2, 78 * hpRatio), 2);
+    }
     this.hpText.setText(`HP: ${attrs.currentHp}/${attrs.maxHp}`);
 
     // MP
     this.mpBarGraphics.clear();
-    this.mpBarGraphics.fillStyle(0x0c2540, 0.9);
-    this.mpBarGraphics.fillRect(72, 39, 80, 5);
+    this.mpBarGraphics.fillStyle(0x04192d, 0.95);
+    this.mpBarGraphics.fillRoundedRect(72, 37, 80, 7, 2);
     const mpRatio = Math.max(0, Math.min(1, attrs.currentMp / attrs.maxMp));
-    this.mpBarGraphics.fillStyle(0x0284c7, 1);
-    this.mpBarGraphics.fillRect(72, 39, 80 * mpRatio, 5);
+    if (mpRatio > 0) {
+      this.mpBarGraphics.fillStyle(0x0284c7, 1);
+      this.mpBarGraphics.fillRoundedRect(72, 37, Math.max(4, 80 * mpRatio), 7, 2);
+      this.mpBarGraphics.fillStyle(0x38bdf8, 0.7);
+      this.mpBarGraphics.fillRect(73, 38, Math.max(2, 78 * mpRatio), 2);
+    }
     this.mpText.setText(`MP: ${attrs.currentMp}/${attrs.maxMp}`);
 
     // XP
@@ -616,17 +883,19 @@ export class UIScene extends Phaser.Scene {
     const xpPercent = Math.round(xpRatio * 100);
 
     this.xpBarGraphics.clear();
-    this.xpBarGraphics.fillStyle(0x281e05, 0.9);
-    this.xpBarGraphics.fillRect(72, 53, 80, 4);
-    this.xpBarGraphics.fillStyle(0xf59e0b, 1);
-    this.xpBarGraphics.fillRect(72, 53, 80 * xpRatio, 4);
+    this.xpBarGraphics.fillStyle(0x211802, 0.95);
+    this.xpBarGraphics.fillRoundedRect(72, 51, 80, 6, 2);
+    if (xpRatio > 0) {
+      this.xpBarGraphics.fillStyle(0xf59e0b, 1);
+      this.xpBarGraphics.fillRoundedRect(72, 51, Math.max(3, 80 * xpRatio), 6, 2);
+      this.xpBarGraphics.fillStyle(0xfde047, 0.7);
+      this.xpBarGraphics.fillRect(73, 52, Math.max(2, 78 * xpRatio), 1);
+    }
     this.xpText.setText(`XP: ${progression.xpInCurrentLevel}/${progression.xpRequiredForNext} (${xpPercent}%)`);
-
-    const combatCfg = CLASS_COMBAT_CONFIG[data.characterClass];
-    this.skillText.setText(`[E] ${combatCfg.skill1Name} (${combatCfg.skill1CostMp} MP)`);
   }
 
   private updateCoordinates(): void {
+    if (!this.isDebugOpen) return;
     const posX = this.player.playerData.position.x;
     const posY = this.player.playerData.position.y;
     const tileX = Math.floor(posX / 16);
@@ -636,7 +905,110 @@ export class UIScene extends Phaser.Scene {
   }
 
   private updateFps(): void {
+    if (!this.isDebugOpen) return;
     const actualFps = Math.round(this.game.loop.actualFps);
-    this.fpsText.setText(`FPS: ${actualFps} | Gold: ${this.player.playerData.gold}`);
+    this.fpsText.setText(`FPS: ${actualFps} | 480x270 nativo`);
+
+    const worldScene = this.scene.get('WorldScene') as any;
+    const monstersCount = worldScene?.monsters?.filter((m: any) => m.active)?.length ?? 0;
+    const remoteCount = worldScene?.remotePlayers?.size ?? 0;
+    this.entitiesText.setText(`Monstros: ${monstersCount} | Remotos: ${remoteCount}`);
+  }
+
+  private updateActionBar(time: number): void {
+    if (!this.player) return;
+
+    // 1. Cooldown de Ataque Básico
+    const atkCd = this.player.getAttackCooldownProgress(time);
+    this.atkCdGraphics.clear();
+    if (!atkCd.isReady && atkCd.ratio > 0) {
+      this.atkCdGraphics.fillStyle(0x000000, 0.65);
+      const h = 24 * atkCd.ratio;
+      this.atkCdGraphics.fillRect(-12, 12 - h, 24, h);
+    }
+
+    // 2. Cooldown e MP da Habilidade de Classe
+    const skillCd = this.player.getSkill1CooldownProgress(time);
+    const charClass = this.player.playerData.characterClass;
+    const combatCfg = CLASS_COMBAT_CONFIG[charClass];
+    const hasMp = this.player.playerData.attributes.currentMp >= combatCfg.skill1CostMp;
+
+    // Atualiza ícone da habilidade de acordo com a classe
+    let skillIconKey = 'fx_slash';
+    if (charClass === CharacterClass.RANGER) skillIconKey = 'fx_arrow';
+    else if (charClass === CharacterClass.MAGE) skillIconKey = 'fx_magic_orb';
+    else if (charClass === CharacterClass.DRUID) skillIconKey = 'fx_nature_burst';
+
+    if (this.skillIcon.texture.key !== skillIconKey) {
+      this.skillIcon.setTexture(skillIconKey);
+    }
+
+    this.skillCdGraphics.clear();
+    if (!skillCd.isReady && skillCd.ratio > 0) {
+      this.skillCdGraphics.fillStyle(0x000000, 0.72);
+      const h = 24 * skillCd.ratio;
+      this.skillCdGraphics.fillRect(-12, 12 - h, 24, h);
+      const secs = (skillCd.remainingMs / 1000).toFixed(1);
+      this.skillCdText.setText(`${secs}s`).setVisible(true);
+    } else {
+      this.skillCdText.setVisible(false);
+    }
+
+    // Se não tiver MP suficiente, escurece o ícone
+    if (!hasMp) {
+      this.skillIcon.setTint(0x64748b);
+      this.skillMpText.setColor('#ef4444');
+    } else {
+      this.skillIcon.clearTint();
+      this.skillMpText.setColor('#38bdf8');
+    }
+
+    // 3. Contador de Poções baseado no inventário real
+    this.updateActionBarPotionCount();
+
+    // 4. Debug Panel CD Text
+    if (this.isDebugOpen) {
+      const atkRem = (atkCd.remainingMs / 1000).toFixed(1);
+      const sklRem = (skillCd.remainingMs / 1000).toFixed(1);
+      this.skillText.setText(`Atq CD: ${atkRem}s | Hab: [E] ${sklRem}s`);
+    }
+  }
+
+  private updateActionBarPotionCount(): void {
+    if (!this.player || !this.potionQtyText) return;
+    const potionCount = getItemCount(this.player.playerData.inventory, 'potion_hp_minor');
+    this.potionQtyText.setText(`x${potionCount}`);
+    if (potionCount <= 0) {
+      this.potionQtyText.setColor('#ef4444');
+      this.potionIcon.setTint(0x64748b);
+    } else {
+      this.potionQtyText.setColor('#f8fafc');
+      this.potionIcon.clearTint();
+    }
+  }
+
+  public toggleDebugPanel(force?: boolean): void {
+    this.isDebugOpen = force !== undefined ? force : !this.isDebugOpen;
+    this.debugContainer.setVisible(this.isDebugOpen);
+  }
+
+  private showActionTooltip(titleStr: string, descStr: string, screenX: number, screenY: number): void {
+    const titleText = this.tooltipContainer.getByName('tooltip_title') as Phaser.GameObjects.Text;
+    const descText = this.tooltipContainer.getByName('tooltip_desc') as Phaser.GameObjects.Text;
+    const statsText = this.tooltipContainer.getByName('tooltip_stats') as Phaser.GameObjects.Text;
+    const bg = this.tooltipContainer.getByName('tooltip_bg') as Phaser.GameObjects.Graphics;
+
+    titleText.setText(titleStr).setColor('#facc15');
+    descText.setText(descStr);
+    statsText.setText('');
+
+    bg.clear();
+    bg.fillStyle(0x0c0a14, 0.95);
+    bg.lineStyle(1, 0x6366f1, 1);
+    bg.fillRoundedRect(0, 0, 142, 38, 4);
+    bg.strokeRoundedRect(0, 0, 142, 38, 4);
+
+    this.tooltipContainer.setPosition(Math.min(screenX, 325), screenY);
+    this.tooltipContainer.setVisible(true);
   }
 }

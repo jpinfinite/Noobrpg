@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "paths": {
+      "@noobrpg/shared": ["packages/shared/dist/index.d.ts"]
+    }
+  },
+  "include": [
+    "packages/*/src/**/*",
+    "packages/*/tests/**/*"
+  ]
+}

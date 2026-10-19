@@ -33,3 +33,6 @@ pnpm-debug.log*
 *.sqlite-journal
 *.db
 
+# Archives
+*.zip
+

@@ -74,6 +74,9 @@ export class GameSimulation {
     this.intervalTimer = setInterval(() => {
       this.tick(SIMULATION_CONSTANTS.TICK_INTERVAL_MS);
     }, SIMULATION_CONSTANTS.TICK_INTERVAL_MS);
+    if (this.intervalTimer && typeof (this.intervalTimer as any).unref === 'function') {
+      (this.intervalTimer as any).unref();
+    }
   }
 
   public stop(): void {

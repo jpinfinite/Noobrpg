@@ -11,6 +11,7 @@ import { Player } from './Player.js';
 export class GatheringNode extends Phaser.Physics.Arcade.Sprite {
   public nodeConfig: GatheringNodeConfig;
   public isAvailable: boolean = true;
+  public canopySprite?: Phaser.GameObjects.Sprite;
   private respawnTimer: number = 0;
   private isGathering: boolean = false;
   private currentGatherProgress: number = 0;
@@ -21,7 +22,7 @@ export class GatheringNode extends Phaser.Physics.Arcade.Sprite {
     const config = GATHERING_NODE_DEFINITIONS[type];
     const textureKey =
       type === GatheringNodeType.TREE
-        ? 'prop_tree'
+        ? 'prop_tree_trunk'
         : type === GatheringNodeType.ORE_VEIN
         ? 'node_ore'
         : 'node_herb';
@@ -32,6 +33,13 @@ export class GatheringNode extends Phaser.Physics.Arcade.Sprite {
     scene.physics.add.existing(this, true); // Estático
 
     this.nodeConfig = config;
+
+    if (type === GatheringNodeType.TREE) {
+      this.canopySprite = scene.add.sprite(x, y, 'prop_tree_canopy');
+      this.canopySprite.setOrigin(0.5, 0.95);
+      this.canopySprite.setDepth(y);
+    }
+
     this.progressBarGraphics = scene.add.graphics();
     this.hintText = scene.add.text(x, y - 24, '[F] Coletar', {
       fontFamily: 'monospace',
@@ -48,7 +56,7 @@ export class GatheringNode extends Phaser.Physics.Arcade.Sprite {
 
   private initPhysics(type: GatheringNodeType): void {
     const body = this.body as Phaser.Physics.Arcade.StaticBody;
-    this.setOrigin(0.5, 0.9);
+    this.setOrigin(0.5, 0.95);
     this.setDepth(this.y);
 
     if (type === GatheringNodeType.TREE) {
@@ -68,11 +76,29 @@ export class GatheringNode extends Phaser.Physics.Arcade.Sprite {
       this.respawnTimer -= delta;
       this.progressBarGraphics.clear();
       this.hintText.setVisible(false);
+      if (this.canopySprite) {
+        this.canopySprite.setVisible(false);
+      }
       if (this.respawnTimer <= 0) {
         this.isAvailable = true;
         this.setAlpha(1.0);
+        if (this.canopySprite) {
+          this.canopySprite.setVisible(true);
+        }
       }
       return;
+    }
+
+    // Se o jogador estiver passando atrás da copa da árvore, suaviza o alpha
+    if (this.canopySprite) {
+      const isBehind =
+        Math.abs(player.x - this.x) <= 18 &&
+        player.y < this.y - 4 &&
+        player.y >= this.y - 42;
+      const targetAlpha = isBehind ? 0.65 : 1.0;
+      if (this.canopySprite.alpha !== targetAlpha) {
+        this.canopySprite.setAlpha(targetAlpha);
+      }
     }
 
     const dist = calculateDistance(this.x, this.y, player.x, player.y);
@@ -123,6 +149,9 @@ export class GatheringNode extends Phaser.Physics.Arcade.Sprite {
       this.isAvailable = false;
       this.respawnTimer = this.nodeConfig.respawnTimeMs;
       this.setAlpha(0.35);
+      if (this.canopySprite) {
+        this.canopySprite.setVisible(false);
+      }
 
       const itemDef = ITEM_DEFINITIONS[this.nodeConfig.droppedItemId];
       const itemName = itemDef ? itemDef.name : this.nodeConfig.droppedItemId;
@@ -161,7 +190,10 @@ export class GatheringNode extends Phaser.Physics.Arcade.Sprite {
     this.progressBarGraphics.setDepth(9998);
   }
 
-  public destroy(fromScene?: boolean): void {
+  public override destroy(fromScene?: boolean): void {
+    if (this.canopySprite) {
+      this.canopySprite.destroy(fromScene);
+    }
     this.progressBarGraphics.destroy();
     this.hintText.destroy();
     super.destroy(fromScene);

@@ -70,6 +70,25 @@ describe('NoobRPG Fase 5A — Simulação Autoritativa e Zero Client Trust', () 
     const pilarResult = sim.processMove('player_collision', 140, 160, Date.now() + 100);
     assert.equal(pilarResult.success, false);
     assert.equal(pilarResult.reason, 'COLLISION_OBSTACLE');
+
+    // Tenta penetrar na colisão física autoritativa do Lago (x = 350, y = 60)
+    const lakeResult = sim.processMove('player_collision', 350, 60, Date.now() + 150);
+    assert.equal(lakeResult.success, false);
+    assert.equal(lakeResult.reason, 'COLLISION_OBSTACLE');
+
+    // Tenta ultrapassar a borda física sul (y = 315, parede em y >= 304)
+    const southWallResult = sim.processMove('player_collision', 180, 315, Date.now() + 200);
+    assert.equal(southWallResult.success, false);
+    assert.equal(southWallResult.reason, 'COLLISION_OBSTACLE');
+
+    // Caminhar na nova região sul expandida até y = 285 (válida e andável)
+    const player = sim.players.get('player_collision')!;
+    player.x = 180;
+    player.y = 280;
+    player.lastMoveTimestamp = Date.now();
+    const southValidResult = sim.processMove('player_collision', 180, 285, Date.now() + 100);
+    assert.equal(southValidResult.success, true);
+    assert.equal(player.y, 285);
   });
 
   it('3. Validação de Alcance de Ataque (Anti-Rangehack)', () => {

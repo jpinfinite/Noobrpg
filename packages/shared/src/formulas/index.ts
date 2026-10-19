@@ -64,7 +64,7 @@ export function calculateAttributesForLevel(characterClass: CharacterClass, leve
 export function calculateTotalPlayerAttributes(
   characterClass: CharacterClass,
   level: number,
-  equipped: EquippedSlots
+  equipped?: EquippedSlots | null
 ): CharacterAttributes {
   const base = calculateAttributesForLevel(characterClass, level);
 
@@ -74,7 +74,9 @@ export function calculateTotalPlayerAttributes(
   let bonusMaxMp = 0;
   let bonusSpeed = 0;
 
-  const equippedIds = [equipped.weapon, equipped.armor, equipped.accessory].filter(Boolean) as string[];
+  const equippedIds = equipped
+    ? ([equipped.weapon, equipped.armor, equipped.accessory].filter(Boolean) as string[])
+    : [];
 
   for (const itemId of equippedIds) {
     const itemDef = ITEM_DEFINITIONS[itemId];

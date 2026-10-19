@@ -57,5 +57,33 @@
   - *Colyseus:* Oferece abstração de salas e serialização binária com `@colyseus/schema`. Contudo, impõe forte acoplamento a decoradores proprietários incompatíveis com as interfaces puras de `@noobrpg/shared`, além de introduzir sobreposição com o loop autoritativo de 20 Hz já consolidado no `GameSimulation`.
   - *WebSocket Puro (`ws`):* Protocolo padrão da web, sem dependências opacas ou decorators. Permite integrar o handshake de upgrade HTTP diretamente com o sistema de autenticação via cookies `session_token` HttpOnly (prevenindo vazamento de tokens em query strings e logs). Possibilita arquitetura limpa de salas (`PlainsRoom`), rate limiting granular por conexão e uso direto dos contratos de `@noobrpg/shared`.
 - **Decisão:** Adotar **WebSocket Puro via biblioteca `ws`** estruturado no padrão de Salas (`RoomManager` / `PlainsRoom`), acoplado diretamente à `GameSimulation` autoritativa a 20 Hz.
-- **Consequências:** Controle total sobre o ciclo de vida das mensagens e rate limiting; preservação integral da simulação da Fase 5A; simplicidade de depuração e testes automatizados sem dependência de schemas proprietários.
+
+---
+
+## ADR-009: Desduplicação de Entidades e Fatiamento de Texturas Procedurais
+- **Status:** Aprovado
+- **Contexto:** Na Fase 5B, foi observada uma grade com múltiplos bonecos desenhados na coordenada do jogador e suspeita de duplicação de entidades multiplayer no mapa.
+- **Diagnóstico:**
+  1. *Fatiamento de Canvas Procedural:* O gerador `TextureGenerator` criava um canvas de 64x72 px contendo 12 poses do personagem, porém não registrava os frames individuais no Phaser com `canvas.add()`. O Phaser tratava a textura como imagem inteiriça de 64x72 px, renderizando a folha completa de 12 bonecos em grade para um único sprite.
+  2. *Idempotência e Identidade Local:* O cliente requeria identificador local imutável (`localPlayerId`) para garantir que o próprio personagem nunca seja instanciado como entidade remota, além de limpeza idempotente na desconexão do servidor (`PlainsRoom.onLeave`).
+- **Decisão:**
+  1. Registrar explicitamente cada frame ($16 \times 24$ px para heróis/goblins e $16 \times 16$ px para slimes) no `CanvasTexture` do Phaser.
+  2. Indexar rigorosamente entidades remotas por UUID estável (`characterId`) com atualização in-place de estado e descarte estrito de IDs ausentes do snapshot.
+  3. Implementar hook `shutdown()` para teardown limpo de cena no cliente e `.unref()` nos timers do servidor.
+- **Consequências:** Eliminação total da matriz de bonecos; renderização de exatamente 1 sprite por jogador; suíte de regressão automatizada cobrindo 8 cenários críticos.
+
+---
+
+## ADR-010: Área de Interesse (AOI), Sincronização por Deltas e Controle de Sequência
+- **Status:** Aprovado
+- **Contexto:** Com o crescimento de jogadores simultâneos por sala, o broadcast de snapshots completos globais gerava um gargalo quadrático $O(N^2)$ (7,8 MB/s para 50 jogadores), sobrecarregando a banda do servidor e clientes.
+- **Decisão:**
+  1. **Área de Interesse (AOI) com Histerese:** Implementar gerenciador espacial com raio interno de entrada ($180 \times 120$ px) e raio externo de saída ($220 \times 150$ px), eliminando oscilações de fronteira (*flickering*). Clientes recebem apenas entidades dentro de sua vizinhança.
+  2. **Filtragem de Eventos de Combate:** Broadcasts de combate são restritos aos participantes e aos clientes que têm atacante ou defensor em seu campo de visão.
+  3. **Sincronização por Deltas Incrementais (`s2c_snapshot_delta`):** Transmissão apenas de deltas e supressão de atributos não modificados, com controle monótono de sequência (`seq`) para descarte estrito de pacotes fora de ordem.
+  4. **Full Snapshot Âncora Periódico:** Transmissão de snapshot completo a cada 20 ticks (1s) e na entrada de novos clientes, servindo como âncora de integridade contra divergências de estado.
+  5. **Autoridade Absoluta:** O AOI afeta unicamente a visibilidade e entrega de pacotes de rede; o motor de simulação (`GameSimulation`) continua avaliando 100% das regras de combate, movimento e recursos no servidor.
+- **Consequências:** Redução de **80,5%** na largura de banda e **80,9%** no tamanho médio dos pacotes com 50 jogadores simultâneos, mantendo o consumo por tick do servidor em 4,69 ms (menos de 10% do orçamento de 50 ms a 20 Hz).
+
+
 

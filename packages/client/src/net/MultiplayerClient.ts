@@ -1,6 +1,7 @@
 import {
   NetMessageType,
   WorldSnapshot,
+  WorldSnapshotDelta,
   S2C_JoinedPayload,
   S2C_PlayerJoinedPayload,
   S2C_PlayerLeftPayload,
@@ -21,6 +22,7 @@ import {
 
 export interface MultiplayerCallbacks {
   onSnapshot?: (snapshot: WorldSnapshot) => void;
+  onSnapshotDelta?: (delta: WorldSnapshotDelta) => void;
   onJoined?: (payload: S2C_JoinedPayload) => void;
   onPlayerJoined?: (payload: S2C_PlayerJoinedPayload) => void;
   onPlayerLeft?: (payload: S2C_PlayerLeftPayload) => void;
@@ -102,6 +104,13 @@ export class MultiplayerClient {
             case NetMessageType.S2C_SNAPSHOT: {
               if (this.callbacks.onSnapshot) {
                 this.callbacks.onSnapshot(payload as WorldSnapshot);
+              }
+              break;
+            }
+
+            case NetMessageType.S2C_SNAPSHOT_DELTA: {
+              if (this.callbacks.onSnapshotDelta) {
+                this.callbacks.onSnapshotDelta(payload as WorldSnapshotDelta);
               }
               break;
             }

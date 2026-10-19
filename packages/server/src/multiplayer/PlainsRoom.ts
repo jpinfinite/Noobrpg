@@ -2,6 +2,7 @@ import { WebSocket } from 'ws';
 import {
   NetMessageType,
   WorldSnapshot,
+  WorldSnapshotDelta,
   PlayerSnapshotState,
   S2C_JoinedPayload,
   S2C_PlayerJoinedPayload,
@@ -14,12 +15,14 @@ import { Room, RoomClient } from './Room.js';
 import { GameSimulation, CombatEvent } from '../simulation/GameSimulation.js';
 import { CharacterService } from '../services/characterService.js';
 import { SIMULATION_CONSTANTS } from '../simulation/SimulationConstants.js';
+import { AreaOfInterestManager } from './AreaOfInterestManager.js';
 
 export class PlainsRoom extends Room {
   public readonly id: string = 'plains_01';
   public readonly name: string = 'Planícies Iniciais';
   public readonly maxPlayers: number = 50;
   public readonly simulation: GameSimulation;
+  public readonly aoiManager: AreaOfInterestManager = new AreaOfInterestManager();
 
   private tickTimer: NodeJS.Timeout | null = null;
   private isRunning: boolean = false;
@@ -37,6 +40,9 @@ export class PlainsRoom extends Room {
     this.tickTimer = setInterval(() => {
       this.tick();
     }, SIMULATION_CONSTANTS.TICK_INTERVAL_MS);
+    if (this.tickTimer && typeof (this.tickTimer as any).unref === 'function') {
+      (this.tickTimer as any).unref();
+    }
   }
 
   public stop(): void {
@@ -48,7 +54,7 @@ export class PlainsRoom extends Room {
   }
 
   /**
-   * Ciclo principal da sala executado a 20 Hz
+   * Ciclo principal da sala executado a 20 Hz com AOI e sincronização por deltas
    */
   private tick(): void {
     const prevEventsLength = this.simulation.combatEvents.length;
@@ -56,7 +62,7 @@ export class PlainsRoom extends Room {
     // 1. Atualiza a física e a simulação de combate autoritativa
     this.simulation.tick(SIMULATION_CONSTANTS.TICK_INTERVAL_MS);
 
-    // 2. Transmite eventos de combate ocorridos neste tick
+    // 2. Transmite eventos de combate ocorridos neste tick filtrados por relevância espacial (AOI)
     if (this.simulation.combatEvents.length > this.lastProcessedCombatEventIndex) {
       const newEvents = this.simulation.combatEvents.slice(this.lastProcessedCombatEventIndex);
       this.lastProcessedCombatEventIndex = this.simulation.combatEvents.length;
@@ -72,7 +78,16 @@ export class PlainsRoom extends Room {
           newLevel: ev.newLevel,
           timestamp: ev.timestamp
         };
-        this.broadcast(NetMessageType.S2C_COMBAT_EVENT, payload);
+
+        for (const [charId, client] of this.clients.entries()) {
+          const isParticipant = charId === ev.attackerId || charId === ev.targetId;
+          const isAttackerVisible = this.aoiManager.isEntityVisibleToClient(charId, ev.attackerId);
+          const isTargetVisible = this.aoiManager.isEntityVisibleToClient(charId, ev.targetId);
+
+          if (isParticipant || isAttackerVisible || isTargetVisible) {
+            this.send(charId, NetMessageType.S2C_COMBAT_EVENT, payload);
+          }
+        }
       }
     }
 
@@ -81,10 +96,25 @@ export class PlainsRoom extends Room {
       this.lastProcessedCombatEventIndex = this.simulation.combatEvents.length;
     }
 
-    // 3. Se houver jogadores conectados, faz broadcast do Snapshot autoritativo a 20 Hz
+    // 3. Sincronização eficiente de snapshots e deltas baseados em Área de Interesse (AOI)
     if (this.clients.size > 0) {
-      const snapshot = this.simulation.getSnapshot();
-      this.broadcast(NetMessageType.S2C_SNAPSHOT, snapshot);
+      for (const [charId, client] of this.clients.entries()) {
+        const packet = this.aoiManager.generatePacketForClient(
+          charId,
+          this.simulation.players,
+          this.simulation.monsters,
+          this.simulation.gatheringNodes,
+          this.simulation.groundItems
+        );
+
+        if (packet) {
+          if (packet.type === 'FULL' && packet.snapshot) {
+            this.send(charId, NetMessageType.S2C_SNAPSHOT, packet.snapshot);
+          } else if (packet.type === 'DELTA' && packet.delta) {
+            this.send(charId, NetMessageType.S2C_SNAPSHOT_DELTA, packet.delta);
+          }
+        }
+      }
     }
   }
 
@@ -149,22 +179,44 @@ export class PlainsRoom extends Room {
     };
     client.socket.send(JSON.stringify({ type: NetMessageType.S2C_JOINED, payload: joinedPayload }));
 
-    // 5. Notifica todos os demais jogadores sobre a entrada
+    // 5. Registra o cliente no gerenciador de Área de Interesse (AOI) e envia Full Snapshot inicial
+    this.aoiManager.registerClient(client.characterId);
+    const initialPacket = this.aoiManager.generatePacketForClient(
+      client.characterId,
+      this.simulation.players,
+      this.simulation.monsters,
+      this.simulation.gatheringNodes,
+      this.simulation.groundItems,
+      true
+    );
+    if (initialPacket && initialPacket.snapshot) {
+      this.send(client.characterId, NetMessageType.S2C_SNAPSHOT, initialPacket.snapshot);
+    }
+
+    // 6. Notifica jogadores próximos sobre a entrada
     const notifyOtherPayload: S2C_PlayerJoinedPayload = {
       player: playerState
     };
-    this.broadcast(NetMessageType.S2C_PLAYER_JOINED, notifyOtherPayload, client.characterId);
+    for (const [otherId, otherClient] of this.clients.entries()) {
+      if (otherId === client.characterId) continue;
+      const otherPlayer = this.simulation.getPlayer(otherId);
+      if (otherPlayer && this.aoiManager.isEntityInAOI(player.x, player.y, otherPlayer.x, otherPlayer.y, true)) {
+        this.send(otherId, NetMessageType.S2C_PLAYER_JOINED, notifyOtherPayload);
+      }
+    }
 
     return true;
   }
 
   public async onLeave(characterId: string): Promise<void> {
+    this.aoiManager.unregisterClient(characterId);
+
     const client = this.clients.get(characterId);
-    if (!client) return;
+    if (client) {
+      this.clients.delete(characterId);
+    }
 
-    this.clients.delete(characterId);
-
-    // Salva o personagem autoritativamente no banco de dados
+    // Salva o personagem autoritativamente no banco de dados e remove da simulação
     const player = this.simulation.getPlayer(characterId);
     if (player) {
       try {

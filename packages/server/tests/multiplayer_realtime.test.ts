@@ -27,6 +27,7 @@ describe('NoobRPG Fase 5B — Multiplayer em Tempo Real e Sincronização de Sal
   let wsServer: GameWebSocketServer;
   let baseUrl: string;
   let wsUrl: string;
+  let roomManager: any;
 
   beforeEach(async () => {
     dbFile = path.resolve(process.cwd(), `ws_test_${Date.now()}_${Math.random().toString(36).substring(7)}.sqlite`);
@@ -41,7 +42,9 @@ describe('NoobRPG Fase 5B — Multiplayer em Tempo Real e Sincronização de Sal
     baseUrl = `http://127.0.0.1:${address.port}/api`;
     wsUrl = `ws://127.0.0.1:${address.port}/ws`;
 
-    const { authService, characterRepo, roomManager } = app.locals;
+    const authService = app.locals.authService;
+    const characterRepo = app.locals.characterRepo;
+    roomManager = app.locals.roomManager;
     wsServer = new GameWebSocketServer(server, authService, characterRepo, roomManager);
   });
 
@@ -49,6 +52,7 @@ describe('NoobRPG Fase 5B — Multiplayer em Tempo Real e Sincronização de Sal
     wsServer.close();
     if (server) server.close();
     sim.stop();
+    if (roomManager) roomManager.stopAll();
     await db.close();
     if (fs.existsSync(dbFile)) {
       try {

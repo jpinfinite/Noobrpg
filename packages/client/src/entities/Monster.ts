@@ -42,6 +42,17 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
 
     this.hpBarGraphics = scene.add.graphics();
     this.initPhysics();
+
+    // Inicializa animação de repouso conforme o tipo de monstro
+    if (type === MonsterType.SLIME) {
+      if (scene.anims?.exists('mob_slime_idle')) {
+        this.anims.play('mob_slime_idle');
+      }
+    } else {
+      if (scene.anims?.exists('mob_goblin_idle')) {
+        this.anims.play('mob_goblin_idle');
+      }
+    }
   }
 
   private initPhysics(): void {
@@ -118,8 +129,10 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
       const patrolSpeed = this.monsterConfig.speed * 0.5;
       this.setVelocity(dir.x * patrolSpeed, dir.y * patrolSpeed);
       this.setFlipX(dir.x < 0);
+      this.playWalkAnimation();
     } else {
       this.setVelocity(0, 0);
+      this.playIdleAnimation();
     }
   }
 
@@ -135,6 +148,7 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
     if (distToPlayer <= this.monsterConfig.attackRange) {
       this.setVelocity(0, 0);
       this.aiState = MonsterAIState.ATTACK;
+      this.playAttackAnimation();
       return;
     }
 
@@ -142,6 +156,7 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
     const dir = normalizeVector(player.x - this.x, player.y - this.y);
     this.setVelocity(dir.x * this.monsterConfig.speed, dir.y * this.monsterConfig.speed);
     this.setFlipX(dir.x < 0);
+    this.playWalkAnimation();
   }
 
   private handleAttackState(time: number, player: Player, distToPlayer: number): void {
@@ -157,15 +172,13 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
     if (time - this.lastAttackTime >= this.monsterConfig.attackCooldownMs) {
       this.lastAttackTime = time;
       this.executeAttackOnPlayer(player);
+    } else {
+      this.playAttackAnimation();
     }
   }
 
   private executeAttackOnPlayer(player: Player): void {
-    // Pequena animação/avanço visual de impacto
-    this.setFrame(1);
-    this.scene.time.delayedCall(200, () => {
-      if (this.active) this.setFrame(0);
-    });
+    this.playAttackAnimation();
 
     // Calcula dano determinístico no jogador
     const damage = calculateDamage(this.monsterConfig.attack, player.playerData.attributes.defense);
@@ -180,6 +193,7 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
       // Recupera HP ao retornar com sucesso
       this.currentHp = this.monsterConfig.maxHp;
       this.aiState = MonsterAIState.IDLE_PATROL;
+      this.playIdleAnimation();
       return;
     }
 
@@ -187,12 +201,65 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
     const returnSpeed = this.monsterConfig.speed * 1.2;
     this.setVelocity(dir.x * returnSpeed, dir.y * returnSpeed);
     this.setFlipX(dir.x < 0);
+    this.playWalkAnimation();
   }
 
   private handleDeadState(delta: number): void {
+    this.anims?.stop();
     this.respawnTimer -= delta;
     if (this.respawnTimer <= 0) {
       this.respawn();
+    }
+  }
+
+  public playHitFeedback(attackerX?: number, attackerY?: number): void {
+    if (!this.active || this.aiState === MonsterAIState.DEAD) return;
+
+    // 1. Flash branco puro imediato (white hit flash)
+    this.setTintFill(0xffffff);
+    this.scene.time.delayedCall(60, () => {
+      if (this.active && this.aiState !== MonsterAIState.DEAD) {
+        // 2. Transição para tom avermelhado de dano
+        this.setTint(0xff5555);
+        this.scene.time.delayedCall(80, () => {
+          if (this.active && this.aiState !== MonsterAIState.DEAD) {
+            this.clearTint();
+          }
+        });
+      }
+    });
+
+    // 3. Efeito de faíscas de impacto
+    if (this.scene.textures.exists('fx_impact_spark')) {
+      const spark = this.scene.add.sprite(this.x, this.y - 4, 'fx_impact_spark');
+      spark.setDepth(this.depth + 10);
+      spark.setScale(1.1);
+      this.scene.tweens.add({
+        targets: spark,
+        scale: 1.5,
+        alpha: 0,
+        duration: 130,
+        onComplete: () => spark.destroy()
+      });
+    }
+
+    // 4. Recuo visual curto (knockback estético sem alterar física autoritativa)
+    if (attackerX !== undefined && attackerY !== undefined) {
+      const dx = this.x - attackerX;
+      const dy = this.y - attackerY;
+      const len = Math.hypot(dx, dy) || 1;
+      const recoilDist = 3.5;
+      const offsetX = (dx / len) * recoilDist;
+      const offsetY = (dy / len) * recoilDist;
+
+      this.scene.tweens.add({
+        targets: this,
+        x: this.x + offsetX,
+        y: this.y + offsetY,
+        duration: 50,
+        yoyo: true,
+        ease: 'Quad.easeOut'
+      });
     }
   }
 
@@ -200,18 +267,13 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
    * Processa o dano recebido pelo monstro.
    * Garante que o XP e recompensas sejam concedidos estritamente uma única vez.
    */
-  public takeDamage(amount: number): { isDead: boolean; xpReward: number; goldReward: number } {
+  public takeDamage(amount: number, attackerX?: number, attackerY?: number): { isDead: boolean; xpReward: number; goldReward: number } {
     if (this.aiState === MonsterAIState.DEAD) {
       return { isDead: false, xpReward: 0, goldReward: 0 };
     }
 
     this.currentHp = Math.max(0, this.currentHp - amount);
-
-    // Feedback visual (flash branco/vermelho)
-    this.setTint(0xff5555);
-    this.scene.time.delayedCall(120, () => {
-      if (this.active) this.clearTint();
-    });
+    this.playHitFeedback(attackerX, attackerY);
 
     // Se estiver em patrulha e for atingido, entra em perseguição imediatamente
     if (this.aiState === MonsterAIState.IDLE_PATROL || this.aiState === MonsterAIState.RETURN) {
@@ -227,6 +289,7 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
       this.setVelocity(0, 0);
       (this.body as Phaser.Physics.Arcade.Body).enable = false;
       this.setVisible(false);
+      this.anims?.stop();
 
       const gold = Math.floor(
         Math.random() * (this.monsterConfig.goldRewardMax - this.monsterConfig.goldRewardMin + 1)
@@ -255,8 +318,81 @@ export class Monster extends Phaser.Physics.Arcade.Sprite {
     this.setVisible(true);
     (this.body as Phaser.Physics.Arcade.Body).enable = true;
     this.setVelocity(0, 0);
-    this.setFrame(0);
     this.clearTint();
+    this.playIdleAnimation();
+  }
+
+  public playWalkAnimation(): void {
+    const key = this.monsterConfig.type === MonsterType.SLIME ? 'mob_slime_walk' : 'mob_goblin_walk';
+    if (this.anims && this.scene?.anims?.exists(key)) {
+      this.anims.play(key, true);
+    }
+  }
+
+  public playIdleAnimation(): void {
+    const key = this.monsterConfig.type === MonsterType.SLIME ? 'mob_slime_idle' : 'mob_goblin_idle';
+    if (this.anims && this.scene?.anims?.exists(key)) {
+      this.anims.play(key, true);
+    }
+  }
+
+  public playAttackAnimation(): void {
+    if (this.monsterConfig.type === MonsterType.GOBLIN) {
+      if (this.anims && this.scene?.anims?.exists('mob_goblin_attack')) {
+        this.anims.play('mob_goblin_attack', true);
+      }
+    } else {
+      this.setFrame(1);
+      this.scene.time.delayedCall(200, () => {
+        if (this.active && this.aiState !== MonsterAIState.DEAD) {
+          this.playIdleAnimation();
+        }
+      });
+    }
+  }
+
+  /**
+   * Sincroniza estado a partir de snapshots/deltas do servidor multiplayer
+   */
+  public updateFromSnapshot(state: { x?: number; y?: number; hp?: number; maxHp?: number; isDead?: boolean; aiState?: MonsterAIState; state?: MonsterAIState }): void {
+    const prevX = this.x;
+    const prevY = this.y;
+
+    if (state.x !== undefined) this.x = state.x;
+    if (state.y !== undefined) this.y = state.y;
+    if (state.hp !== undefined) this.currentHp = state.hp;
+    if (state.maxHp !== undefined) this.monsterConfig.maxHp = state.maxHp;
+
+    const resolvedState = state.aiState !== undefined ? state.aiState : state.state;
+    if (resolvedState !== undefined) this.aiState = resolvedState;
+
+    if (state.isDead !== undefined) {
+      if (state.isDead) {
+        this.aiState = MonsterAIState.DEAD;
+        this.anims?.stop();
+        this.setTint(0x555555);
+        this.setVisible(false);
+        this.hpBarGraphics.clear();
+        return;
+      } else if (!this.visible) {
+        this.setVisible(true);
+        this.clearTint();
+        this.playIdleAnimation();
+      }
+    }
+
+    if (this.aiState !== MonsterAIState.DEAD && this.visible) {
+      const dx = this.x - prevX;
+      const dy = this.y - prevY;
+      const isMoving = Math.abs(dx) > 0.1 || Math.abs(dy) > 0.1;
+      if (isMoving) {
+        this.setFlipX(dx < 0);
+        this.playWalkAnimation();
+      } else {
+        this.playIdleAnimation();
+      }
+      this.renderHpBar();
+    }
   }
 
   private renderHpBar(): void {

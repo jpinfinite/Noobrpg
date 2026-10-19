@@ -5,7 +5,7 @@ import {
   calculateDistance
 } from '@noobrpg/shared';
 import { SIMULATION_CONSTANTS } from './SimulationConstants.js';
-import { ServerPlayer } from './ServerPlayer.js';
+import type { ServerPlayer } from './ServerPlayer';
 
 export class ServerGatheringNode {
   public id: string;

@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { MonsterType, GatheringNodeType, MonsterDropEntry, PlayerData, CharacterClass, WorldSnapshot, S2C_ChatPayload, S2C_CombatEventPayload } from '@noobrpg/shared';
+import { MonsterType, GatheringNodeType, MonsterDropEntry, PlayerData, CharacterClass, WorldSnapshot, WorldSnapshotDelta, S2C_ChatPayload, S2C_CombatEventPayload } from '@noobrpg/shared';
 import { Player } from '../entities/Player.js';
 import { Monster } from '../entities/Monster.js';
 import { RemotePlayer } from '../entities/RemotePlayer.js';
@@ -19,11 +19,18 @@ export class WorldScene extends Phaser.Scene {
   private groundItems: GroundItem[] = [];
   private craftingStation!: CraftingStation;
   private map!: Phaser.Tilemaps.Tilemap;
+  private groundBaseLayer?: Phaser.Tilemaps.TilemapLayer;
+  private groundDecoLayer?: Phaser.Tilemaps.TilemapLayer;
   private collisionLayer!: Phaser.Tilemaps.TilemapLayer;
+  private overheadFoliageLayer?: Phaser.Tilemaps.TilemapLayer;
+  private environmentTrees: EnvironmentProp[] = [];
+  private waterAnimationTimer?: Phaser.Time.TimerEvent;
   private initialPlayerData?: PlayerData;
   private autoSaveTimer?: Phaser.Time.TimerEvent;
 
-  // Multiplayer em Tempo Real (Fase 5B)
+  // Multiplayer em Tempo Real (Fase 5B e 6)
+  private localPlayerId: string = '';
+  private lastProcessedSeq: number = 0;
   private remotePlayers: Map<string, RemotePlayer> = new Map();
   private multiplayerClient?: MultiplayerClient;
   private lastMoveSentTime: number = 0;
@@ -40,6 +47,7 @@ export class WorldScene extends Phaser.Scene {
   public init(data: { playerData?: PlayerData }): void {
     if (data?.playerData) {
       this.initialPlayerData = data.playerData;
+      this.localPlayerId = data.playerData.id;
     }
   }
 
@@ -53,12 +61,26 @@ export class WorldScene extends Phaser.Scene {
       return;
     }
 
-    const groundLayer = this.map.createLayer('Ground', tileset, 0, 0);
-    this.collisionLayer = this.map.createLayer('Collision', tileset, 0, 0) as Phaser.Tilemaps.TilemapLayer;
+    // Camada de solo base (com fallback transparente para 'Ground')
+    this.groundBaseLayer = (this.map.createLayer('Ground_Base', tileset, 0, 0) ||
+      this.map.createLayer('Ground', tileset, 0, 0)) as Phaser.Tilemaps.TilemapLayer;
+    this.groundBaseLayer?.setDepth(0);
 
-    groundLayer?.setDepth(0);
-    this.collisionLayer?.setDepth(1);
+    // Camada de decorações do piso (flores, bordas de trilha, seixos)
+    this.groundDecoLayer = this.map.createLayer('Ground_Deco', tileset, 0, 0) as Phaser.Tilemaps.TilemapLayer;
+    this.groundDecoLayer?.setDepth(1);
+
+    // Camada física sólida de colisão
+    this.collisionLayer = this.map.createLayer('Collision', tileset, 0, 0) as Phaser.Tilemaps.TilemapLayer;
+    this.collisionLayer?.setDepth(2);
     this.collisionLayer.setCollisionByProperty({ collides: true });
+
+    // Camada superior de folhagem/copas aéreas (renderizada acima das entidades)
+    this.overheadFoliageLayer = this.map.createLayer('Overhead_Foliage', tileset, 0, 0) as Phaser.Tilemaps.TilemapLayer;
+    this.overheadFoliageLayer?.setDepth(2000);
+
+    // Animação sutil de cintilação do lago em 3 frames
+    this.setupWaterAnimation();
 
     // 2. Props decorativos
     this.propsGroup = this.physics.add.staticGroup();
@@ -107,6 +129,9 @@ export class WorldScene extends Phaser.Scene {
 
     // 12. UIScene
     this.scene.launch('UIScene', { player: this.player });
+
+    // 13. Hook de encerramento da cena (limpeza garantida)
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.shutdown());
   }
 
   public update(time: number, delta: number): void {
@@ -157,6 +182,13 @@ export class WorldScene extends Phaser.Scene {
         this.groundItems.splice(i, 1);
       }
     }
+
+    // Atualiza oclusão da copa das árvores de cenário
+    if (this.player) {
+      for (const tree of this.environmentTrees) {
+        tree.updateCanopyOcclusion(this.player.x, this.player.y);
+      }
+    }
   }
 
   // --- CONFIGURAÇÃO MULTIPLAYER (FASE 5B) ---
@@ -173,9 +205,18 @@ export class WorldScene extends Phaser.Scene {
       onSnapshot: (snapshot: WorldSnapshot) => {
         this.handleWorldSnapshot(snapshot);
       },
+      onSnapshotDelta: (delta: WorldSnapshotDelta) => {
+        this.handleWorldSnapshotDelta(delta);
+      },
       onPlayerJoined: (payload) => {
         const p = payload.player;
-        if (p.id !== this.player.playerData.id && !this.remotePlayers.has(p.id)) {
+        if (!p || p.id === this.localPlayerId || (this.player && p.id === this.player.playerData.id)) {
+          return;
+        }
+        const existing = this.remotePlayers.get(p.id);
+        if (existing) {
+          existing.updateState(p);
+        } else {
           const remote = new RemotePlayer(this, p);
           this.remotePlayers.set(p.id, remote);
           this.addChatMessage('Sistema', `${p.name} entrou no mapa.`, 'system');
@@ -190,7 +231,7 @@ export class WorldScene extends Phaser.Scene {
         }
       },
       onChat: (payload: S2C_ChatPayload) => {
-        const isSelf = payload.senderId === this.player.playerData.id;
+        const isSelf = payload.senderId === this.localPlayerId || (this.player && payload.senderId === this.player.playerData.id);
         this.addChatMessage(payload.senderName, payload.message, isSelf ? 'self' : 'player');
 
         // Exibe balão flutuante acima da cabeça do personagem
@@ -209,17 +250,27 @@ export class WorldScene extends Phaser.Scene {
         }
       },
       onCombatEvent: (ev: S2C_CombatEventPayload) => {
-        // Exibe efeitos de combate de terceiros
-        if (ev.damage && ev.targetId) {
-          const targetMob = this.monsters.find(m => m.id === ev.targetId);
-          if (targetMob) {
-            this.events.emit('floating-text', {
-              x: targetMob.x,
-              y: targetMob.y - 15,
-              text: `-${ev.damage}`,
-              color: '#ffffff'
-            });
-          }
+        // 1. Se o atacante for um jogador remoto, dispara a animação de ataque nele
+        const remoteAttacker = this.remotePlayers.get(ev.attackerId);
+        const targetMob = this.monsters.find(m => m.id === ev.targetId);
+
+        if (remoteAttacker && targetMob) {
+          const isSkill = ev.type === 'PLAYER_SKILL';
+          remoteAttacker.playAttackVisual(targetMob.x, targetMob.y, isSkill);
+        }
+
+        // 2. Se houver dano contra um monstro, dispara o feedback visual no monstro
+        if (ev.damage && targetMob) {
+          const attackerX = remoteAttacker ? remoteAttacker.x : this.player.x;
+          const attackerY = remoteAttacker ? remoteAttacker.y : this.player.y;
+          targetMob.playHitFeedback(attackerX, attackerY);
+
+          this.events.emit('floating-text', {
+            x: targetMob.x,
+            y: targetMob.y - 15,
+            text: `-${ev.damage}`,
+            color: '#ffffff'
+          });
         }
       },
       onError: (err) => {
@@ -235,11 +286,16 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private handleWorldSnapshot(snapshot: WorldSnapshot): void {
+    if (snapshot.seq && snapshot.seq < this.lastProcessedSeq) {
+      return; // Mensagem desordenada descartada
+    }
+    if (snapshot.seq) this.lastProcessedSeq = snapshot.seq;
+
     const presentPlayerIds = new Set<string>();
 
     for (const p of snapshot.players) {
-      if (p.id === this.player.playerData.id) {
-        // 1. Reconciliação do jogador local com o estado do servidor
+      // 1. Identificação inequívoca do jogador local
+      if (p.id === this.localPlayerId || (this.player && p.id === this.player.playerData.id)) {
         const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, p.x, p.y);
         if (dist > 28) {
           // Desvio significativo: reconcilia suavemente para a posição oficial do servidor
@@ -257,12 +313,54 @@ export class WorldScene extends Phaser.Scene {
           this.player.isDead = true;
           this.player.setTint(0x555555);
         }
+        continue;
+      }
+
+      // 2. Atualização e criação de jogadores remotos com índice estável
+      presentPlayerIds.add(p.id);
+      const existingRemote = this.remotePlayers.get(p.id);
+      if (existingRemote) {
+        existingRemote.updateState(p);
       } else {
-        // 2. Atualização e criação de jogadores remotos
-        presentPlayerIds.add(p.id);
-        const existingRemote = this.remotePlayers.get(p.id);
-        if (existingRemote) {
-          existingRemote.updateState(p);
+        const newRemote = new RemotePlayer(this, p);
+        this.remotePlayers.set(p.id, newRemote);
+      }
+    }
+
+    // 3. Remove jogadores que saíram do AOI ou da sala
+    for (const [id, remote] of this.remotePlayers.entries()) {
+      if (!presentPlayerIds.has(id)) {
+        remote.destroy();
+        this.remotePlayers.delete(id);
+      }
+    }
+
+    // 4. Sincroniza monstros a partir do snapshot oficial
+    if (snapshot.monsters) {
+      for (const mState of snapshot.monsters) {
+        const mob = this.monsters.find(m => m.id === mState.id);
+        if (mob) {
+          mob.updateFromSnapshot(mState);
+        }
+      }
+    }
+  }
+
+  private handleWorldSnapshotDelta(delta: WorldSnapshotDelta): void {
+    if (delta.seq && delta.seq < this.lastProcessedSeq) {
+      return; // Mensagem desordenada descartada
+    }
+    if (delta.seq) this.lastProcessedSeq = delta.seq;
+
+    // 1. Novos jogadores entrando no AOI
+    if (delta.enteredPlayers) {
+      for (const p of delta.enteredPlayers) {
+        if (p.id === this.localPlayerId || (this.player && p.id === this.player.playerData.id)) {
+          continue;
+        }
+        const existing = this.remotePlayers.get(p.id);
+        if (existing) {
+          existing.updateState(p);
         } else {
           const newRemote = new RemotePlayer(this, p);
           this.remotePlayers.set(p.id, newRemote);
@@ -270,11 +368,53 @@ export class WorldScene extends Phaser.Scene {
       }
     }
 
-    // 3. Remove jogadores que saíram do mapa/sala
-    for (const [id, remote] of this.remotePlayers.entries()) {
-      if (!presentPlayerIds.has(id)) {
-        remote.destroy();
-        this.remotePlayers.delete(id);
+    // 2. Jogadores saindo do AOI
+    if (delta.removedPlayerIds) {
+      for (const id of delta.removedPlayerIds) {
+        const remote = this.remotePlayers.get(id);
+        if (remote) {
+          remote.destroy();
+          this.remotePlayers.delete(id);
+        }
+      }
+    }
+
+    // 3. Atualizações de estado/movimento dos jogadores conhecidos
+    if (delta.players) {
+      for (const pDelta of delta.players) {
+        if (pDelta.id === this.localPlayerId || (this.player && pDelta.id === this.player.playerData.id)) {
+          if (pDelta.x !== undefined && pDelta.y !== undefined) {
+            const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, pDelta.x, pDelta.y);
+            if (dist > 28) {
+              this.player.setPosition(pDelta.x, pDelta.y);
+            }
+          }
+          if (pDelta.hp !== undefined) this.player.playerData.attributes.currentHp = pDelta.hp;
+          if (pDelta.maxHp !== undefined) this.player.playerData.attributes.maxHp = pDelta.maxHp;
+          if (pDelta.mp !== undefined) this.player.playerData.attributes.currentMp = pDelta.mp;
+          if (pDelta.maxMp !== undefined) this.player.playerData.attributes.maxMp = pDelta.maxMp;
+          if (pDelta.level !== undefined) this.player.playerData.level = pDelta.level;
+          if (pDelta.isDead !== undefined && pDelta.isDead && !this.player.isDead) {
+            this.player.isDead = true;
+            this.player.setTint(0x555555);
+          }
+          continue;
+        }
+
+        const remote = this.remotePlayers.get(pDelta.id);
+        if (remote) {
+          remote.updateState(pDelta);
+        }
+      }
+    }
+
+    // 4. Atualizações de estado/movimento dos monstros
+    if (delta.monsters) {
+      for (const mDelta of delta.monsters) {
+        const mob = this.monsters.find(m => m.id === mDelta.id);
+        if (mob) {
+          mob.updateFromSnapshot(mDelta);
+        }
       }
     }
   }
@@ -377,18 +517,18 @@ export class WorldScene extends Phaser.Scene {
 
   private spawnMonsters(): void {
     const slimeSpawns = [
-      { x: 220, y: 130 },
-      { x: 120, y: 190 },
-      { x: 260, y: 190 }
+      { id: 'mob_slime_1', x: 220, y: 130 },
+      { id: 'mob_slime_2', x: 120, y: 190 },
+      { id: 'mob_slime_3', x: 260, y: 190 }
     ];
 
     slimeSpawns.forEach(pos => {
-      const slime = new Monster(this, pos.x, pos.y, MonsterType.SLIME);
+      const slime = new Monster(this, pos.x, pos.y, MonsterType.SLIME, pos.id);
       this.monsters.push(slime);
       this.monstersGroup.add(slime);
     });
 
-    const goblin = new Monster(this, 280, 70, MonsterType.GOBLIN);
+    const goblin = new Monster(this, 280, 70, MonsterType.GOBLIN, 'mob_goblin_1');
     this.monsters.push(goblin);
     this.monstersGroup.add(goblin);
   }
@@ -403,6 +543,7 @@ export class WorldScene extends Phaser.Scene {
     treePositions.forEach(pos => {
       const tree = new EnvironmentProp(this, pos.x, pos.y, 'tree');
       this.propsGroup.add(tree);
+      this.environmentTrees.push(tree);
     });
 
     const pillarPositions = [
@@ -423,22 +564,30 @@ export class WorldScene extends Phaser.Scene {
         fontSize: '9px',
         color: data.color,
         stroke: '#000000',
-        strokeThickness: 2,
+        strokeThickness: 3,
         fontStyle: 'bold'
       });
       text.setOrigin(0.5);
       text.setDepth(9999);
+      text.setScale(1.2);
 
       this.tweens.add({
         targets: text,
-        y: data.y - 18,
+        y: data.y - 20,
+        scale: 1.0,
         alpha: 0,
-        duration: 900,
-        ease: 'Power1',
+        duration: 850,
+        ease: 'Cubic.easeOut',
         onComplete: () => {
           text.destroy();
         }
       });
+    });
+
+    this.events.on('player-attack-action', (data: { targetMonsterId?: string; isSkill: boolean }) => {
+      if (data.targetMonsterId && this.multiplayerClient) {
+        this.multiplayerClient.sendAttack(data.targetMonsterId);
+      }
     });
 
     this.events.on('spawn-ground-item', (data: { x: number; y: number; itemId: string; quantity: number }) => {
@@ -507,4 +656,59 @@ export class WorldScene extends Phaser.Scene {
       console.warn('[AutoSave] Falha ao persistir no servidor:', err);
     }
   }
+
+  public shutdown(): void {
+    if (this.autoSaveTimer) {
+      this.autoSaveTimer.remove();
+      this.autoSaveTimer = undefined;
+    }
+    if (this.chatContainerEl) {
+      this.chatContainerEl.remove();
+      this.chatContainerEl = undefined;
+    }
+    this.multiplayerClient?.disconnect();
+    this.multiplayerClient = undefined;
+
+    if (this.waterAnimationTimer) {
+      this.waterAnimationTimer.remove();
+      this.waterAnimationTimer = undefined;
+    }
+
+    // Destrói todas as entidades remotas ativas e esvazia o registro
+    for (const [id, remote] of this.remotePlayers.entries()) {
+      remote.destroy();
+    }
+    this.remotePlayers.clear();
+    this.environmentTrees = [];
+  }
+
+  private setupWaterAnimation(): void {
+    if (!this.groundBaseLayer) return;
+    let waterFrame = 0;
+    const shimmerCoords = [
+      [{ x: 23, y: 2 }, { x: 21, y: 3 }, { x: 25, y: 3 }, { x: 24, y: 4 }],
+      [{ x: 22, y: 2 }, { x: 24, y: 3 }, { x: 20, y: 4 }, { x: 22, y: 5 }],
+      [{ x: 24, y: 2 }, { x: 22, y: 3 }, { x: 23, y: 4 }, { x: 25, y: 5 }]
+    ];
+
+    this.waterAnimationTimer = this.time.addEvent({
+      delay: 600,
+      loop: true,
+      callback: () => {
+        if (!this.groundBaseLayer) return;
+        // Restaura água padrão
+        for (const frameCoords of shimmerCoords) {
+          for (const pos of frameCoords) {
+            this.groundBaseLayer.putTileAt(5, pos.x, pos.y);
+          }
+        }
+        // Aplica o frame de cintilação dinâmico
+        waterFrame = (waterFrame + 1) % 3;
+        for (const pos of shimmerCoords[waterFrame]) {
+          this.groundBaseLayer.putTileAt(16, pos.x, pos.y);
+        }
+      }
+    });
+  }
 }
+

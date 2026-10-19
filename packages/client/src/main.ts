@@ -34,3 +34,5 @@ const config: Phaser.Types.Core.GameConfig = {
 
 // Inicializa a instância do jogo
 export const game = new Phaser.Game(config);
+(window as any).game = game;
+(window as any).Phaser = Phaser;

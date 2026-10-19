@@ -406,3 +406,15 @@ export const CRAFTING_RECIPES: CraftingRecipe[] = [
     ]
   }
 ];
+
+// Constantes de Área de Interesse (AOI) e Sincronização em Rede (Fase 6)
+export const AOI_CONSTANTS = {
+  // Raio de visão para inclusão de entidade no snapshot do jogador (pixels)
+  ENTER_RADIUS_X: 180,
+  ENTER_RADIUS_Y: 120,
+  // Raio com histerese para remoção da entidade do snapshot (evita flickering na borda)
+  LEAVE_RADIUS_X: 220,
+  LEAVE_RADIUS_Y: 150,
+  // Frequência de envio de full snapshot (a cada 20 ticks = 1 segundo a 20 Hz)
+  FULL_SNAPSHOT_INTERVAL_TICKS: 20
+} as const;

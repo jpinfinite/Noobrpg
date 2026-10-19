@@ -330,6 +330,7 @@ describe('NoobRPG Fase 4 - Persistência, Autenticação e Contas', () => {
       assert.equal(listData.characters.length, 1);
       assert.equal(listData.characters[0].name, 'WebWarrior');
     } finally {
+      app.locals.roomManager?.stopAll();
       server.close();
     }
   });
