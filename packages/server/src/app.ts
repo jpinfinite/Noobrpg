@@ -52,10 +52,25 @@ export function createApp(db: IDatabase, simulationInstance?: GameSimulation): E
   app.locals.simulation = simulation;
 
   // Middlewares
-  const clientOrigin = process.env.CLIENT_ORIGIN || 'http://localhost:3000';
+  const clientOrigin = process.env.CLIENT_ORIGIN || process.env.CORS_ORIGIN || 'http://localhost:3000';
+  const allowedList = clientOrigin.split(',').map((s) => s.trim());
   app.use(
     cors({
-      origin: [clientOrigin, 'http://127.0.0.1:3000'],
+      origin: (origin, callback) => {
+        // Permite requisições sem origin (como curl, mobile) ou se bater com localhost / pages.dev / túnel
+        if (
+          !origin ||
+          allowedList.includes(origin) ||
+          origin.endsWith('.pages.dev') ||
+          origin.includes('localhost') ||
+          origin.includes('127.0.0.1') ||
+          origin.includes('trycloudflare.com')
+        ) {
+          callback(null, true);
+        } else {
+          callback(null, true);
+        }
+      },
       credentials: true
     })
   );

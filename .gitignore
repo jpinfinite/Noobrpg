@@ -36,3 +36,7 @@ pnpm-debug.log*
 # Archives
 *.zip
 
+# Binaries & local tools
+bin/
+*.exe
+

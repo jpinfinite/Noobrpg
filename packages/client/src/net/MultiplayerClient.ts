@@ -75,7 +75,13 @@ export class MultiplayerClient {
       let resolved = false;
 
       try {
-        this.socket = new WebSocket(this.serverUrl);
+        let finalUrl = this.serverUrl;
+        const token = localStorage.getItem('noobrpg_session_token');
+        if (token && !finalUrl.includes('token=')) {
+          const sep = finalUrl.includes('?') ? '&' : '?';
+          finalUrl = `${finalUrl}${sep}token=${encodeURIComponent(token)}`;
+        }
+        this.socket = new WebSocket(finalUrl);
       } catch (err) {
         return reject(err);
       }

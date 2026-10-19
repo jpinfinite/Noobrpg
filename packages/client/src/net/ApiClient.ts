@@ -26,14 +26,44 @@ export interface CharacterSummary {
 export class ApiClient {
   private static baseUrl = ((import.meta as any).env?.VITE_API_URL as string) || '/api';
 
+  private static tokenKey = 'noobrpg_session_token';
+
+  public static getToken(): string | null {
+    try {
+      return localStorage.getItem(this.tokenKey);
+    } catch {
+      return null;
+    }
+  }
+
+  public static setToken(token: string): void {
+    try {
+      localStorage.setItem(this.tokenKey, token);
+    } catch {
+      // ignore
+    }
+  }
+
+  public static clearToken(): void {
+    try {
+      localStorage.removeItem(this.tokenKey);
+    } catch {
+      // ignore
+    }
+  }
+
   private static async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    const token = this.getToken();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...((options.headers as Record<string, string>) || {})
+    };
+
     const config: RequestInit = {
       ...options,
       credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options.headers || {})
-      }
+      headers
     };
 
     const res = await fetch(`${this.baseUrl}${endpoint}`, config);
@@ -55,21 +85,33 @@ export class ApiClient {
   }
 
   public static async register(username: string, password: string): Promise<{ account: AuthAccount }> {
-    return this.request<{ account: AuthAccount }>('/auth/register', {
+    const res = await this.request<{ account: AuthAccount; token?: string }>('/auth/register', {
       method: 'POST',
       body: JSON.stringify({ username, password })
     });
+    if (res.token) {
+      this.setToken(res.token);
+    }
+    return res;
   }
 
   public static async login(username: string, password: string): Promise<{ account: AuthAccount }> {
-    return this.request<{ account: AuthAccount }>('/auth/login', {
+    const res = await this.request<{ account: AuthAccount; token?: string }>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ username, password })
     });
+    if (res.token) {
+      this.setToken(res.token);
+    }
+    return res;
   }
 
   public static async logout(): Promise<void> {
-    await this.request('/auth/logout', { method: 'POST' });
+    try {
+      await this.request('/auth/logout', { method: 'POST' });
+    } finally {
+      this.clearToken();
+    }
   }
 
   public static async listCharacters(): Promise<CharacterSummary[]> {
