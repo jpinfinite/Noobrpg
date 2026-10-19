@@ -706,10 +706,26 @@ export class WorldScene extends Phaser.Scene {
       await this.saveProgress(true);
       if (this.chatContainerEl) {
         this.chatContainerEl.remove();
+        this.chatContainerEl = undefined;
       }
       this.multiplayerClient?.disconnect();
       this.scene.stop('UIScene');
       this.scene.start('CharacterSelectScene');
+    });
+
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      if (this.chatContainerEl) {
+        this.chatContainerEl.remove();
+        this.chatContainerEl = undefined;
+      }
+      if (this.autoSaveTimer) {
+        this.autoSaveTimer.destroy();
+      }
+      if (this.waterAnimationTimer) {
+        this.waterAnimationTimer.destroy();
+      }
+      this.multiplayerClient?.disconnect();
+      this.events.removeAllListeners();
     });
   }
 

@@ -75,6 +75,11 @@ export class UIScene extends Phaser.Scene {
   }
 
   public create(): void {
+    this.slotSprites = [];
+    this.equipSlotSprites = {};
+    this.isInventoryOpen = false;
+    this.isCraftingOpen = false;
+
     this.createPlayerStatusPanel();
     this.createHeaderAndDebugPanel();
     this.createBottomActionBar();
@@ -87,23 +92,40 @@ export class UIScene extends Phaser.Scene {
 
     // Listener de redimensionamento de janela
     const onResize = (gameSize: Phaser.Structs.Size) => {
+      if (!this.sys || !this.sys.isActive()) return;
       this.repositionUI(gameSize.width, gameSize.height);
     };
     this.scale.on('resize', onResize);
 
-    // Limpeza de evento ao destruir a cena
+    // Listeners de alternância de interface com desinscrição segura no shutdown
+    const worldScene = this.scene.get('WorldScene');
+    const onToggleInventory = () => {
+      if (!this.sys || !this.sys.isActive()) return;
+      this.toggleInventory();
+    };
+    const onToggleCrafting = () => {
+      if (!this.sys || !this.sys.isActive()) return;
+      this.toggleCrafting();
+    };
+    const onPlayerUpdated = () => {
+      if (!this.sys || !this.sys.isActive()) return;
+      if (this.isInventoryOpen) this.refreshInventoryUI();
+      if (this.isCraftingOpen) this.refreshCraftingUI();
+      this.updateActionBarPotionCount();
+    };
+
+    worldScene.events.on('toggle-inventory', onToggleInventory);
+    worldScene.events.on('toggle-crafting', onToggleCrafting);
+    worldScene.events.on('player-updated', onPlayerUpdated);
+
+    // Limpeza rigorosa de eventos ao destruir/desativar a cena
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.scale.off('resize', onResize);
-    });
-
-    // Listeners de alternância de interface
-    const worldScene = this.scene.get('WorldScene');
-    worldScene.events.on('toggle-inventory', () => this.toggleInventory());
-    worldScene.events.on('toggle-crafting', () => this.toggleCrafting());
-    worldScene.events.on('player-updated', () => {
-      this.refreshInventoryUI();
-      this.refreshCraftingUI();
-      this.updateActionBarPotionCount();
+      worldScene.events.off('toggle-inventory', onToggleInventory);
+      worldScene.events.off('toggle-crafting', onToggleCrafting);
+      worldScene.events.off('player-updated', onPlayerUpdated);
+      this.slotSprites = [];
+      this.equipSlotSprites = {};
     });
 
     // Tecla ESC para fechar janelas
@@ -856,13 +878,15 @@ export class UIScene extends Phaser.Scene {
   }
 
   private refreshInventoryUI(): void {
+    if (!this.sys || !this.sys.isActive() || !this.player || !this.player.playerData) return;
     const inventory = this.player.playerData.inventory;
+    if (!inventory) return;
 
     // Atualiza os 24 slots da grade
     for (let i = 0; i < 24; i++) {
       const slot = inventory[i];
       const slotUI = this.slotSprites[i];
-      if (!slotUI) continue;
+      if (!slotUI || !slotUI.icon || !slotUI.icon.scene) continue;
 
       if (slot) {
         const def = ITEM_DEFINITIONS[slot.itemId];
@@ -877,6 +901,7 @@ export class UIScene extends Phaser.Scene {
 
     // Atualiza os 3 slots equipados
     const equipped = this.player.playerData.equipped;
+    if (!equipped) return;
     const eqKeys = [
       { slot: EquipmentSlot.WEAPON, id: equipped.weapon },
       { slot: EquipmentSlot.ARMOR, id: equipped.armor },
@@ -885,7 +910,7 @@ export class UIScene extends Phaser.Scene {
 
     eqKeys.forEach(item => {
       const ui = this.equipSlotSprites[item.slot];
-      if (!ui) return;
+      if (!ui || !ui.icon || !ui.icon.scene) return;
       if (item.id) {
         const def = ITEM_DEFINITIONS[item.id];
         ui.icon.setTexture(def?.iconKey || 'item_drop_bag');
@@ -901,6 +926,7 @@ export class UIScene extends Phaser.Scene {
   }
 
   private updateStatusBars(): void {
+    if (!this.sys || !this.sys.isActive() || !this.player || !this.player.playerData) return;
     const data = this.player.playerData;
     const attrs = data.attributes;
 
@@ -1030,7 +1056,7 @@ export class UIScene extends Phaser.Scene {
   }
 
   private updateActionBarPotionCount(): void {
-    if (!this.player || !this.potionQtyText) return;
+    if (!this.sys || !this.sys.isActive() || !this.player || !this.player.playerData || !this.potionQtyText || !this.potionIcon || !this.potionIcon.scene) return;
     const potionCount = getItemCount(this.player.playerData.inventory, 'potion_hp_minor');
     this.potionQtyText.setText(`x${potionCount}`);
     if (potionCount <= 0) {
