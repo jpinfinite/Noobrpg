@@ -41,7 +41,7 @@ export class RemotePlayer extends Phaser.GameObjects.Container {
 
     // 1. Sprite do Personagem
     this.sprite = scene.add.sprite(0, 0, textureKey, 0);
-    this.sprite.setOrigin(0.5, 0.85);
+    this.sprite.setOrigin(0.5, 1.0);
     this.add(this.sprite);
 
     // 2. Barra de Vida Flutuante (26px largura, 3px altura)
@@ -146,7 +146,12 @@ export class RemotePlayer extends Phaser.GameObjects.Container {
 
     // Controle visual de morte
     if (this.isDead) {
-      this.sprite.setTint(0x555555);
+      const animPrefix = RemotePlayer.getTextureKey(this.characterClass);
+      if (this.sprite.anims && this.scene.anims.exists(`${animPrefix}_death`)) {
+        this.sprite.anims.play(`${animPrefix}_death`, true);
+      } else {
+        this.sprite.setTint(0x555555);
+      }
       return;
     } else {
       this.sprite.clearTint();
@@ -179,8 +184,13 @@ export class RemotePlayer extends Phaser.GameObjects.Container {
           this.sprite.anims.play(`${animPrefix}_walk_right`, true);
         } else {
           this.lastDirection = Direction.LEFT;
-          this.sprite.setFlipX(true);
-          this.sprite.anims.play(`${animPrefix}_walk_right`, true);
+          if (this.scene.anims.exists(`${animPrefix}_walk_left`)) {
+            this.sprite.setFlipX(false);
+            this.sprite.anims.play(`${animPrefix}_walk_left`, true);
+          } else {
+            this.sprite.setFlipX(true);
+            this.sprite.anims.play(`${animPrefix}_walk_right`, true);
+          }
         }
       }
     } else {
@@ -194,8 +204,13 @@ export class RemotePlayer extends Phaser.GameObjects.Container {
           this.sprite.anims.play(`${animPrefix}_idle_right`, true);
           break;
         case Direction.LEFT:
-          this.sprite.setFlipX(true);
-          this.sprite.anims.play(`${animPrefix}_idle_right`, true);
+          if (this.scene.anims.exists(`${animPrefix}_idle_left`)) {
+            this.sprite.setFlipX(false);
+            this.sprite.anims.play(`${animPrefix}_idle_left`, true);
+          } else {
+            this.sprite.setFlipX(true);
+            this.sprite.anims.play(`${animPrefix}_idle_right`, true);
+          }
           break;
         case Direction.DOWN:
         default:
@@ -223,13 +238,19 @@ export class RemotePlayer extends Phaser.GameObjects.Container {
       }
     }
 
-    let actionFrame = 1;
-    if (this.lastDirection === Direction.UP) actionFrame = 5;
-    else if (this.lastDirection === Direction.RIGHT || this.lastDirection === Direction.LEFT) actionFrame = 9;
+    const animPrefix = RemotePlayer.getTextureKey(this.characterClass);
+    if (this.sprite.anims && this.scene.anims.exists(`${animPrefix}_attack`)) {
+      this.sprite.setFlipX(this.lastDirection === Direction.LEFT);
+      this.sprite.anims.play(`${animPrefix}_attack`, true);
+    } else {
+      let actionFrame = 1;
+      if (this.lastDirection === Direction.UP) actionFrame = 5;
+      else if (this.lastDirection === Direction.RIGHT || this.lastDirection === Direction.LEFT) actionFrame = 9;
 
-    this.sprite.setFlipX(this.lastDirection === Direction.LEFT);
-    this.sprite.anims?.stop();
-    this.sprite.setFrame(actionFrame);
+      this.sprite.setFlipX(this.lastDirection === Direction.LEFT);
+      this.sprite.anims?.stop();
+      this.sprite.setFrame(actionFrame);
+    }
 
     let dirOffsetX = 0;
     let dirOffsetY = 0;

@@ -1,0 +1,5027 @@
+{
+ "project": "NoobRPG",
+ "source_image": "Folha_de_sprites_RPG_em_pixel_art.png",
+ "source_size": [
+  1536,
+  1024
+ ],
+ "engine": "Phaser 3 (nenhum código do jogo foi alterado)",
+ "conventions": {
+  "origin": {
+   "x": 0.5,
+   "y": 1.0
+  },
+  "origin_note": "Pés alinhados à última linha da célula e centralizados horizontalmente; use setOrigin(0.5,1) em todas as animações.",
+  "sheet_layout": "1 linha, N colunas, sem espaçamento e sem margem entre quadros",
+  "alpha": "binário (0/255), sem antialiasing adicionado",
+  "variants": {
+   "original": "Quadros extraídos da prancha na resolução original (fonte principal)",
+   "experimental_16x24": "Redução experimental, caixa/área + alfa binário + paleta de 32 cores por classe; NÃO são sprites nativos"
+  }
+ },
+ "classes": {
+  "warrior": {
+   "phaser_key_hint": "hero_warrior",
+   "variants": {
+    "original": {
+     "animations": {
+      "idle_down": {
+       "sheet": "warrior/original/sheets/warrior_idle_down.png",
+       "frame_files": [
+        "warrior/original/frames/warrior_idle_down_01.png",
+        "warrior/original/frames/warrior_idle_down_02.png",
+        "warrior/original/frames/warrior_idle_down_03.png",
+        "warrior/original/frames/warrior_idle_down_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 66,
+       "cell_height": 80,
+       "direction": "down",
+       "fps_suggested": 5,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 66,
+        "frameHeight": 80,
+        "endFrame": 3
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha IDLE frontal (escala grande)",
+       "scale_group": "big",
+       "source_frame_boxes_xyxy": [
+        [
+         47,
+         166,
+         107,
+         248
+        ],
+        [
+         129,
+         166,
+         185,
+         248
+        ],
+        [
+         204,
+         165,
+         265,
+         248
+        ],
+        [
+         287,
+         165,
+         345,
+         248
+        ]
+       ],
+       "notes": ""
+      },
+      "walk_down": {
+       "sheet": "warrior/original/sheets/warrior_walk_down.png",
+       "frame_files": [
+        "warrior/original/frames/warrior_walk_down_01.png",
+        "warrior/original/frames/warrior_walk_down_02.png",
+        "warrior/original/frames/warrior_walk_down_03.png",
+        "warrior/original/frames/warrior_walk_down_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 66,
+       "cell_height": 80,
+       "direction": "down",
+       "fps_suggested": 8,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 66,
+        "frameHeight": 80,
+        "endFrame": 3
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha WALK frontal (escala grande)",
+       "scale_group": "big",
+       "source_frame_boxes_xyxy": [
+        [
+         53,
+         286,
+         107,
+         369
+        ],
+        [
+         124,
+         287,
+         185,
+         369
+        ],
+        [
+         202,
+         286,
+         264,
+         369
+        ],
+        [
+         280,
+         286,
+         343,
+         369
+        ]
+       ],
+       "notes": ""
+      },
+      "walk_up": {
+       "sheet": "warrior/original/sheets/warrior_walk_up.png",
+       "frame_files": [
+        "warrior/original/frames/warrior_walk_up_01.png",
+        "warrior/original/frames/warrior_walk_up_02.png",
+        "warrior/original/frames/warrior_walk_up_03.png",
+        "warrior/original/frames/warrior_walk_up_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 48,
+       "cell_height": 61,
+       "direction": "up",
+       "fps_suggested": 8,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 48,
+        "frameHeight": 61,
+        "endFrame": 3
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha UP (vista de costas)",
+       "scale_group": "small",
+       "source_frame_boxes_xyxy": [
+        [
+         78,
+         582,
+         120,
+         645
+        ],
+        [
+         151,
+         582,
+         193,
+         645
+        ],
+        [
+         224,
+         582,
+         267,
+         645
+        ],
+        [
+         298,
+         582,
+         340,
+         645
+        ]
+       ],
+       "notes": ""
+      },
+      "walk_left": {
+       "sheet": "warrior/original/sheets/warrior_walk_left.png",
+       "frame_files": [
+        "warrior/original/frames/warrior_walk_left_01.png",
+        "warrior/original/frames/warrior_walk_left_02.png",
+        "warrior/original/frames/warrior_walk_left_03.png",
+        "warrior/original/frames/warrior_walk_left_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 48,
+       "cell_height": 61,
+       "direction": "left",
+       "fps_suggested": 8,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 48,
+        "frameHeight": 61,
+        "endFrame": 3
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha RIGHT da prancha",
+       "scale_group": "small",
+       "source_frame_boxes_xyxy": [
+        [
+         81,
+         515,
+         122,
+         579
+        ],
+        [
+         154,
+         515,
+         195,
+         579
+        ],
+        [
+         228,
+         515,
+         269,
+         579
+        ],
+        [
+         301,
+         515,
+         342,
+         579
+        ]
+       ],
+       "notes": "Rótulo trocado na prancha: os quadros da linha RIGHT olham para a ESQUERDA; usados como walk_left."
+      },
+      "walk_right": {
+       "sheet": "warrior/original/sheets/warrior_walk_right.png",
+       "frame_files": [
+        "warrior/original/frames/warrior_walk_right_01.png",
+        "warrior/original/frames/warrior_walk_right_02.png",
+        "warrior/original/frames/warrior_walk_right_03.png",
+        "warrior/original/frames/warrior_walk_right_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 48,
+       "cell_height": 61,
+       "direction": "right",
+       "fps_suggested": 8,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 48,
+        "frameHeight": 61,
+        "endFrame": 3
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha LEFT da prancha",
+       "scale_group": "small",
+       "source_frame_boxes_xyxy": [
+        [
+         77,
+         450,
+         115,
+         514
+        ],
+        [
+         149,
+         450,
+         190,
+         514
+        ],
+        [
+         223,
+         450,
+         262,
+         514
+        ],
+        [
+         297,
+         450,
+         340,
+         514
+        ]
+       ],
+       "notes": "Rótulo trocado na prancha: os quadros da linha LEFT olham para a DIREITA; usados como walk_right."
+      },
+      "attack_down": {
+       "sheet": "warrior/original/sheets/warrior_attack_down.png",
+       "frame_files": [
+        "warrior/original/frames/warrior_attack_down_01.png",
+        "warrior/original/frames/warrior_attack_down_02.png",
+        "warrior/original/frames/warrior_attack_down_03.png",
+        "warrior/original/frames/warrior_attack_down_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 68,
+       "cell_height": 64,
+       "direction": "down",
+       "fps_suggested": 10,
+       "repeat": 0,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 68,
+        "frameHeight": 64,
+        "endFrame": 3
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha ATTACK",
+       "scale_group": "attack",
+       "source_frame_boxes_xyxy": [
+        [
+         63,
+         676,
+         120,
+         744
+        ],
+        [
+         134,
+         676,
+         192,
+         744
+        ],
+        [
+         202,
+         676,
+         262,
+         744
+        ],
+        [
+         282,
+         676,
+         342,
+         744
+        ]
+       ],
+       "notes": "Pose frontal; golpe de espada."
+      },
+      "hurt": {
+       "sheet": "warrior/original/sheets/warrior_hurt.png",
+       "frame_files": [
+        "warrior/original/frames/warrior_hurt_01.png",
+        "warrior/original/frames/warrior_hurt_02.png"
+       ],
+       "frame_count": 2,
+       "cell_width": 46,
+       "cell_height": 63,
+       "direction": null,
+       "fps_suggested": 8,
+       "repeat": 0,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 46,
+        "frameHeight": 63,
+        "endFrame": 1
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha HURT",
+       "scale_group": "hurt",
+       "source_frame_boxes_xyxy": [
+        [
+         69,
+         772,
+         117,
+         837
+        ],
+        [
+         151,
+         771,
+         196,
+         837
+        ]
+       ],
+       "notes": "Sem variação por direção na prancha."
+      },
+      "death": {
+       "sheet": "warrior/original/sheets/warrior_death.png",
+       "frame_files": [
+        "warrior/original/frames/warrior_death_01.png",
+        "warrior/original/frames/warrior_death_02.png",
+        "warrior/original/frames/warrior_death_03.png",
+        "warrior/original/frames/warrior_death_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 68,
+       "cell_height": 49,
+       "direction": null,
+       "fps_suggested": 6,
+       "repeat": 0,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 68,
+        "frameHeight": 49,
+        "endFrame": 3
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha DEATH",
+       "scale_group": "death",
+       "source_frame_boxes_xyxy": [
+        [
+         65,
+         873,
+         113,
+         927
+        ],
+        [
+         135,
+         879,
+         194,
+         926
+        ],
+        [
+         207,
+         880,
+         270,
+         924
+        ],
+        [
+         281,
+         883,
+         351,
+         924
+        ]
+       ],
+       "notes": "Sem variação por direção; quadro 1 em pé, 2-4 caindo/no chão."
+      }
+     }
+    },
+    "experimental_16x24": {
+     "animations": {
+      "idle_down": {
+       "sheet": "warrior/experimental_16x24/sheets/warrior_idle_down.png",
+       "frame_files": [
+        "warrior/experimental_16x24/frames/warrior_idle_down_01.png",
+        "warrior/experimental_16x24/frames/warrior_idle_down_02.png",
+        "warrior/experimental_16x24/frames/warrior_idle_down_03.png",
+        "warrior/experimental_16x24/frames/warrior_idle_down_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 20,
+       "cell_height": 24,
+       "direction": "down",
+       "fps_suggested": 5,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 20,
+        "frameHeight": 24,
+        "endFrame": 3
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha IDLE frontal (escala grande)",
+       "scale_group": "big",
+       "source_frame_boxes_xyxy": [
+        [
+         47,
+         166,
+         107,
+         248
+        ],
+        [
+         129,
+         166,
+         185,
+         248
+        ],
+        [
+         204,
+         165,
+         265,
+         248
+        ],
+        [
+         287,
+         165,
+         345,
+         248
+        ]
+       ],
+       "notes": "",
+       "downscale_factor": 0.3077,
+       "fits_16x24": false
+      },
+      "walk_down": {
+       "sheet": "warrior/experimental_16x24/sheets/warrior_walk_down.png",
+       "frame_files": [
+        "warrior/experimental_16x24/frames/warrior_walk_down_01.png",
+        "warrior/experimental_16x24/frames/warrior_walk_down_02.png",
+        "warrior/experimental_16x24/frames/warrior_walk_down_03.png",
+        "warrior/experimental_16x24/frames/warrior_walk_down_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 20,
+       "cell_height": 24,
+       "direction": "down",
+       "fps_suggested": 8,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 20,
+        "frameHeight": 24,
+        "endFrame": 3
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha WALK frontal (escala grande)",
+       "scale_group": "big",
+       "source_frame_boxes_xyxy": [
+        [
+         53,
+         286,
+         107,
+         369
+        ],
+        [
+         124,
+         287,
+         185,
+         369
+        ],
+        [
+         202,
+         286,
+         264,
+         369
+        ],
+        [
+         280,
+         286,
+         343,
+         369
+        ]
+       ],
+       "notes": "",
+       "downscale_factor": 0.3077,
+       "fits_16x24": false
+      },
+      "walk_up": {
+       "sheet": "warrior/experimental_16x24/sheets/warrior_walk_up.png",
+       "frame_files": [
+        "warrior/experimental_16x24/frames/warrior_walk_up_01.png",
+        "warrior/experimental_16x24/frames/warrior_walk_up_02.png",
+        "warrior/experimental_16x24/frames/warrior_walk_up_03.png",
+        "warrior/experimental_16x24/frames/warrior_walk_up_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 16,
+       "cell_height": 24,
+       "direction": "up",
+       "fps_suggested": 8,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 16,
+        "frameHeight": 24,
+        "endFrame": 3
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha UP (vista de costas)",
+       "scale_group": "small",
+       "source_frame_boxes_xyxy": [
+        [
+         78,
+         582,
+         120,
+         645
+        ],
+        [
+         151,
+         582,
+         193,
+         645
+        ],
+        [
+         224,
+         582,
+         267,
+         645
+        ],
+        [
+         298,
+         582,
+         340,
+         645
+        ]
+       ],
+       "notes": "",
+       "downscale_factor": 0.3763,
+       "fits_16x24": true
+      },
+      "walk_left": {
+       "sheet": "warrior/experimental_16x24/sheets/warrior_walk_left.png",
+       "frame_files": [
+        "warrior/experimental_16x24/frames/warrior_walk_left_01.png",
+        "warrior/experimental_16x24/frames/warrior_walk_left_02.png",
+        "warrior/experimental_16x24/frames/warrior_walk_left_03.png",
+        "warrior/experimental_16x24/frames/warrior_walk_left_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 16,
+       "cell_height": 24,
+       "direction": "left",
+       "fps_suggested": 8,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 16,
+        "frameHeight": 24,
+        "endFrame": 3
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha RIGHT da prancha",
+       "scale_group": "small",
+       "source_frame_boxes_xyxy": [
+        [
+         81,
+         515,
+         122,
+         579
+        ],
+        [
+         154,
+         515,
+         195,
+         579
+        ],
+        [
+         228,
+         515,
+         269,
+         579
+        ],
+        [
+         301,
+         515,
+         342,
+         579
+        ]
+       ],
+       "notes": "Rótulo trocado na prancha: os quadros da linha RIGHT olham para a ESQUERDA; usados como walk_left.",
+       "downscale_factor": 0.3763,
+       "fits_16x24": true
+      },
+      "walk_right": {
+       "sheet": "warrior/experimental_16x24/sheets/warrior_walk_right.png",
+       "frame_files": [
+        "warrior/experimental_16x24/frames/warrior_walk_right_01.png",
+        "warrior/experimental_16x24/frames/warrior_walk_right_02.png",
+        "warrior/experimental_16x24/frames/warrior_walk_right_03.png",
+        "warrior/experimental_16x24/frames/warrior_walk_right_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 16,
+       "cell_height": 24,
+       "direction": "right",
+       "fps_suggested": 8,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 16,
+        "frameHeight": 24,
+        "endFrame": 3
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha LEFT da prancha",
+       "scale_group": "small",
+       "source_frame_boxes_xyxy": [
+        [
+         77,
+         450,
+         115,
+         514
+        ],
+        [
+         149,
+         450,
+         190,
+         514
+        ],
+        [
+         223,
+         450,
+         262,
+         514
+        ],
+        [
+         297,
+         450,
+         340,
+         514
+        ]
+       ],
+       "notes": "Rótulo trocado na prancha: os quadros da linha LEFT olham para a DIREITA; usados como walk_right.",
+       "downscale_factor": 0.3763,
+       "fits_16x24": true
+      },
+      "attack_down": {
+       "sheet": "warrior/experimental_16x24/sheets/warrior_attack_down.png",
+       "frame_files": [
+        "warrior/experimental_16x24/frames/warrior_attack_down_01.png",
+        "warrior/experimental_16x24/frames/warrior_attack_down_02.png",
+        "warrior/experimental_16x24/frames/warrior_attack_down_03.png",
+        "warrior/experimental_16x24/frames/warrior_attack_down_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 24,
+       "cell_height": 24,
+       "direction": "down",
+       "fps_suggested": 10,
+       "repeat": 0,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 24,
+        "frameHeight": 24,
+        "endFrame": 3
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha ATTACK",
+       "scale_group": "attack",
+       "source_frame_boxes_xyxy": [
+        [
+         63,
+         676,
+         120,
+         744
+        ],
+        [
+         134,
+         676,
+         192,
+         744
+        ],
+        [
+         202,
+         676,
+         262,
+         744
+        ],
+        [
+         282,
+         676,
+         342,
+         744
+        ]
+       ],
+       "notes": "Pose frontal; golpe de espada.",
+       "downscale_factor": 0.3763,
+       "fits_16x24": false
+      },
+      "hurt": {
+       "sheet": "warrior/experimental_16x24/sheets/warrior_hurt.png",
+       "frame_files": [
+        "warrior/experimental_16x24/frames/warrior_hurt_01.png",
+        "warrior/experimental_16x24/frames/warrior_hurt_02.png"
+       ],
+       "frame_count": 2,
+       "cell_width": 16,
+       "cell_height": 24,
+       "direction": null,
+       "fps_suggested": 8,
+       "repeat": 0,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 16,
+        "frameHeight": 24,
+        "endFrame": 1
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha HURT",
+       "scale_group": "hurt",
+       "source_frame_boxes_xyxy": [
+        [
+         69,
+         772,
+         117,
+         837
+        ],
+        [
+         151,
+         771,
+         196,
+         837
+        ]
+       ],
+       "notes": "Sem variação por direção na prancha.",
+       "downscale_factor": 0.3763,
+       "fits_16x24": true
+      },
+      "death": {
+       "sheet": "warrior/experimental_16x24/sheets/warrior_death.png",
+       "frame_files": [
+        "warrior/experimental_16x24/frames/warrior_death_01.png",
+        "warrior/experimental_16x24/frames/warrior_death_02.png",
+        "warrior/experimental_16x24/frames/warrior_death_03.png",
+        "warrior/experimental_16x24/frames/warrior_death_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 24,
+       "cell_height": 24,
+       "direction": null,
+       "fps_suggested": 6,
+       "repeat": 0,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 24,
+        "frameHeight": 24,
+        "endFrame": 3
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha DEATH",
+       "scale_group": "death",
+       "source_frame_boxes_xyxy": [
+        [
+         65,
+         873,
+         113,
+         927
+        ],
+        [
+         135,
+         879,
+         194,
+         926
+        ],
+        [
+         207,
+         880,
+         270,
+         924
+        ],
+        [
+         281,
+         883,
+         351,
+         924
+        ]
+       ],
+       "notes": "Sem variação por direção; quadro 1 em pé, 2-4 caindo/no chão.",
+       "downscale_factor": 0.3763,
+       "fits_16x24": false
+      }
+     }
+    }
+   },
+   "reference": [
+    {
+     "sheet": "warrior/reference/sheets/warrior_ref_down.png",
+     "frame_files": [
+      "warrior/reference/frames/warrior_ref_down_01.png",
+      "warrior/reference/frames/warrior_ref_down_02.png",
+      "warrior/reference/frames/warrior_ref_down_03.png",
+      "warrior/reference/frames/warrior_ref_down_04.png"
+     ],
+     "frame_count": 4,
+     "cell_width": 44,
+     "cell_height": 60,
+     "source_row": "Linha DOWN pequena (referência)",
+     "source_kind": "extracted_original",
+     "note": "Frontal em escala pequena.",
+     "used_in_animations": false
+    }
+   ],
+   "missing": [
+    {
+     "animation": "attack_up",
+     "reason": "A prancha só traz ataque em uma direção"
+    },
+    {
+     "animation": "attack_left",
+     "reason": "A prancha só traz ataque em uma direção"
+    },
+    {
+     "animation": "attack_right",
+     "reason": "A prancha só traz ataque em uma direção"
+    },
+    {
+     "animation": "idle_up",
+     "reason": "A prancha só traz idle frontal"
+    },
+    {
+     "animation": "idle_left",
+     "reason": "A prancha só traz idle frontal"
+    },
+    {
+     "animation": "idle_right",
+     "reason": "A prancha só traz idle frontal"
+    }
+   ]
+  },
+  "ranger": {
+   "phaser_key_hint": null,
+   "variants": {
+    "original": {
+     "animations": {
+      "idle_down": {
+       "sheet": "ranger/original/sheets/ranger_idle_down.png",
+       "frame_files": [
+        "ranger/original/frames/ranger_idle_down_01.png",
+        "ranger/original/frames/ranger_idle_down_02.png",
+        "ranger/original/frames/ranger_idle_down_03.png",
+        "ranger/original/frames/ranger_idle_down_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 62,
+       "cell_height": 78,
+       "direction": "down",
+       "fps_suggested": 5,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 62,
+        "frameHeight": 78,
+        "endFrame": 3
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha IDLE frontal (escala grande)",
+       "scale_group": "big",
+       "source_frame_boxes_xyxy": [
+        [
+         429,
+         166,
+         487,
+         248
+        ],
+        [
+         508,
+         166,
+         565,
+         248
+        ],
+        [
+         586,
+         166,
+         648,
+         248
+        ],
+        [
+         666,
+         166,
+         726,
+         248
+        ]
+       ],
+       "notes": ""
+      },
+      "walk_down": {
+       "sheet": "ranger/original/sheets/ranger_walk_down.png",
+       "frame_files": [
+        "ranger/original/frames/ranger_walk_down_01.png",
+        "ranger/original/frames/ranger_walk_down_02.png",
+        "ranger/original/frames/ranger_walk_down_03.png",
+        "ranger/original/frames/ranger_walk_down_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 62,
+       "cell_height": 78,
+       "direction": "down",
+       "fps_suggested": 8,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 62,
+        "frameHeight": 78,
+        "endFrame": 3
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha WALK frontal (escala grande)",
+       "scale_group": "big",
+       "source_frame_boxes_xyxy": [
+        [
+         429,
+         287,
+         486,
+         369
+        ],
+        [
+         509,
+         287,
+         565,
+         369
+        ],
+        [
+         587,
+         287,
+         648,
+         369
+        ],
+        [
+         666,
+         287,
+         727,
+         369
+        ]
+       ],
+       "notes": ""
+      },
+      "walk_up": {
+       "sheet": "ranger/original/sheets/ranger_walk_up.png",
+       "frame_files": [
+        "ranger/original/frames/ranger_walk_up_01.png",
+        "ranger/original/frames/ranger_walk_up_02.png",
+        "ranger/original/frames/ranger_walk_up_03.png",
+        "ranger/original/frames/ranger_walk_up_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 48,
+       "cell_height": 60,
+       "direction": "up",
+       "fps_suggested": 8,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 48,
+        "frameHeight": 60,
+        "endFrame": 3
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha UP (vista de costas)",
+       "scale_group": "small",
+       "source_frame_boxes_xyxy": [
+        [
+         457,
+         581,
+         502,
+         645
+        ],
+        [
+         529,
+         581,
+         577,
+         645
+        ],
+        [
+         604,
+         581,
+         649,
+         645
+        ],
+        [
+         678,
+         581,
+         722,
+         645
+        ]
+       ],
+       "notes": ""
+      },
+      "walk_left": {
+       "sheet": "ranger/original/sheets/ranger_walk_left.png",
+       "frame_files": [
+        "ranger/original/frames/ranger_walk_left_01.png",
+        "ranger/original/frames/ranger_walk_left_02.png",
+        "ranger/original/frames/ranger_walk_left_03.png",
+        "ranger/original/frames/ranger_walk_left_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 48,
+       "cell_height": 60,
+       "direction": "left",
+       "fps_suggested": 8,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 48,
+        "frameHeight": 60,
+        "endFrame": 3
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha LEFT da prancha",
+       "scale_group": "small",
+       "source_frame_boxes_xyxy": [
+        [
+         458,
+         450,
+         502,
+         514
+        ],
+        [
+         531,
+         450,
+         575,
+         514
+        ],
+        [
+         605,
+         450,
+         648,
+         514
+        ],
+        [
+         677,
+         450,
+         722,
+         514
+        ]
+       ],
+       "notes": ""
+      },
+      "attack_right": {
+       "sheet": "ranger/original/sheets/ranger_attack_right.png",
+       "frame_files": [
+        "ranger/original/frames/ranger_attack_right_01.png",
+        "ranger/original/frames/ranger_attack_right_02.png",
+        "ranger/original/frames/ranger_attack_right_03.png",
+        "ranger/original/frames/ranger_attack_right_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 144,
+       "cell_height": 63,
+       "direction": "right",
+       "fps_suggested": 10,
+       "repeat": 0,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 144,
+        "frameHeight": 63,
+        "endFrame": 3
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha ATTACK",
+       "scale_group": "attack",
+       "source_frame_boxes_xyxy": [
+        [
+         437,
+         677,
+         498,
+         744
+        ],
+        [
+         509,
+         677,
+         573,
+         744
+        ],
+        [
+         573,
+         677,
+         639,
+         744
+        ],
+        [
+         650,
+         677,
+         747,
+         744
+        ]
+       ],
+       "notes": "Arqueiro olha para a DIREITA (flecha sai para a direita); nome usa a direção real."
+      },
+      "hurt": {
+       "sheet": "ranger/original/sheets/ranger_hurt.png",
+       "frame_files": [
+        "ranger/original/frames/ranger_hurt_01.png",
+        "ranger/original/frames/ranger_hurt_02.png"
+       ],
+       "frame_count": 2,
+       "cell_width": 48,
+       "cell_height": 62,
+       "direction": null,
+       "fps_suggested": 8,
+       "repeat": 0,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 48,
+        "frameHeight": 62,
+        "endFrame": 1
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha HURT",
+       "scale_group": "hurt",
+       "source_frame_boxes_xyxy": [
+        [
+         476,
+         772,
+         524,
+         837
+        ],
+        [
+         556,
+         770,
+         604,
+         837
+        ]
+       ],
+       "notes": "Sem variação por direção na prancha."
+      },
+      "death": {
+       "sheet": "ranger/original/sheets/ranger_death.png",
+       "frame_files": [
+        "ranger/original/frames/ranger_death_01.png",
+        "ranger/original/frames/ranger_death_02.png",
+        "ranger/original/frames/ranger_death_03.png",
+        "ranger/original/frames/ranger_death_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 64,
+       "cell_height": 50,
+       "direction": null,
+       "fps_suggested": 6,
+       "repeat": 0,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 64,
+        "frameHeight": 50,
+        "endFrame": 3
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha DEATH",
+       "scale_group": "death",
+       "source_frame_boxes_xyxy": [
+        [
+         442,
+         873,
+         487,
+         927
+        ],
+        [
+         512,
+         873,
+         568,
+         926
+        ],
+        [
+         585,
+         873,
+         644,
+         926
+        ],
+        [
+         659,
+         883,
+         726,
+         926
+        ]
+       ],
+       "notes": "Sem variação por direção; quadro 1 em pé, 2-4 caindo/no chão."
+      }
+     }
+    },
+    "experimental_16x24": {
+     "animations": {
+      "idle_down": {
+       "sheet": "ranger/experimental_16x24/sheets/ranger_idle_down.png",
+       "frame_files": [
+        "ranger/experimental_16x24/frames/ranger_idle_down_01.png",
+        "ranger/experimental_16x24/frames/ranger_idle_down_02.png",
+        "ranger/experimental_16x24/frames/ranger_idle_down_03.png",
+        "ranger/experimental_16x24/frames/ranger_idle_down_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 18,
+       "cell_height": 24,
+       "direction": "down",
+       "fps_suggested": 5,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 18,
+        "frameHeight": 24,
+        "endFrame": 3
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha IDLE frontal (escala grande)",
+       "scale_group": "big",
+       "source_frame_boxes_xyxy": [
+        [
+         429,
+         166,
+         487,
+         248
+        ],
+        [
+         508,
+         166,
+         565,
+         248
+        ],
+        [
+         586,
+         166,
+         648,
+         248
+        ],
+        [
+         666,
+         166,
+         726,
+         248
+        ]
+       ],
+       "notes": "",
+       "downscale_factor": 0.3158,
+       "fits_16x24": false
+      },
+      "walk_down": {
+       "sheet": "ranger/experimental_16x24/sheets/ranger_walk_down.png",
+       "frame_files": [
+        "ranger/experimental_16x24/frames/ranger_walk_down_01.png",
+        "ranger/experimental_16x24/frames/ranger_walk_down_02.png",
+        "ranger/experimental_16x24/frames/ranger_walk_down_03.png",
+        "ranger/experimental_16x24/frames/ranger_walk_down_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 18,
+       "cell_height": 24,
+       "direction": "down",
+       "fps_suggested": 8,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 18,
+        "frameHeight": 24,
+        "endFrame": 3
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha WALK frontal (escala grande)",
+       "scale_group": "big",
+       "source_frame_boxes_xyxy": [
+        [
+         429,
+         287,
+         486,
+         369
+        ],
+        [
+         509,
+         287,
+         565,
+         369
+        ],
+        [
+         587,
+         287,
+         648,
+         369
+        ],
+        [
+         666,
+         287,
+         727,
+         369
+        ]
+       ],
+       "notes": "",
+       "downscale_factor": 0.3158,
+       "fits_16x24": false
+      },
+      "walk_up": {
+       "sheet": "ranger/experimental_16x24/sheets/ranger_walk_up.png",
+       "frame_files": [
+        "ranger/experimental_16x24/frames/ranger_walk_up_01.png",
+        "ranger/experimental_16x24/frames/ranger_walk_up_02.png",
+        "ranger/experimental_16x24/frames/ranger_walk_up_03.png",
+        "ranger/experimental_16x24/frames/ranger_walk_up_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 16,
+       "cell_height": 24,
+       "direction": "up",
+       "fps_suggested": 8,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 16,
+        "frameHeight": 24,
+        "endFrame": 3
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha UP (vista de costas)",
+       "scale_group": "small",
+       "source_frame_boxes_xyxy": [
+        [
+         457,
+         581,
+         502,
+         645
+        ],
+        [
+         529,
+         581,
+         577,
+         645
+        ],
+        [
+         604,
+         581,
+         649,
+         645
+        ],
+        [
+         678,
+         581,
+         722,
+         645
+        ]
+       ],
+       "notes": "",
+       "downscale_factor": 0.3743,
+       "fits_16x24": true
+      },
+      "walk_left": {
+       "sheet": "ranger/experimental_16x24/sheets/ranger_walk_left.png",
+       "frame_files": [
+        "ranger/experimental_16x24/frames/ranger_walk_left_01.png",
+        "ranger/experimental_16x24/frames/ranger_walk_left_02.png",
+        "ranger/experimental_16x24/frames/ranger_walk_left_03.png",
+        "ranger/experimental_16x24/frames/ranger_walk_left_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 16,
+       "cell_height": 24,
+       "direction": "left",
+       "fps_suggested": 8,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 16,
+        "frameHeight": 24,
+        "endFrame": 3
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha LEFT da prancha",
+       "scale_group": "small",
+       "source_frame_boxes_xyxy": [
+        [
+         458,
+         450,
+         502,
+         514
+        ],
+        [
+         531,
+         450,
+         575,
+         514
+        ],
+        [
+         605,
+         450,
+         648,
+         514
+        ],
+        [
+         677,
+         450,
+         722,
+         514
+        ]
+       ],
+       "notes": "",
+       "downscale_factor": 0.3743,
+       "fits_16x24": true
+      },
+      "attack_right": {
+       "sheet": "ranger/experimental_16x24/sheets/ranger_attack_right.png",
+       "frame_files": [
+        "ranger/experimental_16x24/frames/ranger_attack_right_01.png",
+        "ranger/experimental_16x24/frames/ranger_attack_right_02.png",
+        "ranger/experimental_16x24/frames/ranger_attack_right_03.png",
+        "ranger/experimental_16x24/frames/ranger_attack_right_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 54,
+       "cell_height": 24,
+       "direction": "right",
+       "fps_suggested": 10,
+       "repeat": 0,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 54,
+        "frameHeight": 24,
+        "endFrame": 3
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha ATTACK",
+       "scale_group": "attack",
+       "source_frame_boxes_xyxy": [
+        [
+         437,
+         677,
+         498,
+         744
+        ],
+        [
+         509,
+         677,
+         573,
+         744
+        ],
+        [
+         573,
+         677,
+         639,
+         744
+        ],
+        [
+         650,
+         677,
+         747,
+         744
+        ]
+       ],
+       "notes": "Arqueiro olha para a DIREITA (flecha sai para a direita); nome usa a direção real.",
+       "downscale_factor": 0.3743,
+       "fits_16x24": false
+      },
+      "hurt": {
+       "sheet": "ranger/experimental_16x24/sheets/ranger_hurt.png",
+       "frame_files": [
+        "ranger/experimental_16x24/frames/ranger_hurt_01.png",
+        "ranger/experimental_16x24/frames/ranger_hurt_02.png"
+       ],
+       "frame_count": 2,
+       "cell_width": 18,
+       "cell_height": 24,
+       "direction": null,
+       "fps_suggested": 8,
+       "repeat": 0,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 18,
+        "frameHeight": 24,
+        "endFrame": 1
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha HURT",
+       "scale_group": "hurt",
+       "source_frame_boxes_xyxy": [
+        [
+         476,
+         772,
+         524,
+         837
+        ],
+        [
+         556,
+         770,
+         604,
+         837
+        ]
+       ],
+       "notes": "Sem variação por direção na prancha.",
+       "downscale_factor": 0.3743,
+       "fits_16x24": false
+      },
+      "death": {
+       "sheet": "ranger/experimental_16x24/sheets/ranger_death.png",
+       "frame_files": [
+        "ranger/experimental_16x24/frames/ranger_death_01.png",
+        "ranger/experimental_16x24/frames/ranger_death_02.png",
+        "ranger/experimental_16x24/frames/ranger_death_03.png",
+        "ranger/experimental_16x24/frames/ranger_death_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 24,
+       "cell_height": 24,
+       "direction": null,
+       "fps_suggested": 6,
+       "repeat": 0,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 24,
+        "frameHeight": 24,
+        "endFrame": 3
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha DEATH",
+       "scale_group": "death",
+       "source_frame_boxes_xyxy": [
+        [
+         442,
+         873,
+         487,
+         927
+        ],
+        [
+         512,
+         873,
+         568,
+         926
+        ],
+        [
+         585,
+         873,
+         644,
+         926
+        ],
+        [
+         659,
+         883,
+         726,
+         926
+        ]
+       ],
+       "notes": "Sem variação por direção; quadro 1 em pé, 2-4 caindo/no chão.",
+       "downscale_factor": 0.3743,
+       "fits_16x24": false
+      }
+     }
+    }
+   },
+   "reference": [
+    {
+     "sheet": "ranger/reference/sheets/ranger_ref_down.png",
+     "frame_files": [
+      "ranger/reference/frames/ranger_ref_down_01.png",
+      "ranger/reference/frames/ranger_ref_down_02.png",
+      "ranger/reference/frames/ranger_ref_down_03.png",
+      "ranger/reference/frames/ranger_ref_down_04.png"
+     ],
+     "frame_count": 4,
+     "cell_width": 46,
+     "cell_height": 60,
+     "source_row": "Linha DOWN pequena (referência)",
+     "source_kind": "extracted_original",
+     "note": "Mostra o personagem DE COSTAS (capuz sem rosto, aljava): rótulo DOWN inconsistente.",
+     "used_in_animations": false
+    },
+    {
+     "sheet": "ranger/reference/sheets/ranger_ref_right.png",
+     "frame_files": [
+      "ranger/reference/frames/ranger_ref_right_01.png",
+      "ranger/reference/frames/ranger_ref_right_02.png",
+      "ranger/reference/frames/ranger_ref_right_03.png",
+      "ranger/reference/frames/ranger_ref_right_04.png"
+     ],
+     "frame_count": 4,
+     "cell_width": 46,
+     "cell_height": 62,
+     "source_row": "Linha RIGHT (referência)",
+     "source_kind": "extracted_original",
+     "note": "Quadros 1-2 olham para a esquerda e 3-4 estão de costas: inconsistente, não usada.",
+     "used_in_animations": false
+    }
+   ],
+   "missing": [
+    {
+     "animation": "walk_right",
+     "reason": "Linha da prancha ausente ou inconsistente (ver reference/)"
+    },
+    {
+     "animation": "attack_down",
+     "reason": "A prancha só traz ataque em uma direção"
+    },
+    {
+     "animation": "attack_up",
+     "reason": "A prancha só traz ataque em uma direção"
+    },
+    {
+     "animation": "attack_left",
+     "reason": "A prancha só traz ataque em uma direção"
+    },
+    {
+     "animation": "idle_up",
+     "reason": "A prancha só traz idle frontal"
+    },
+    {
+     "animation": "idle_left",
+     "reason": "A prancha só traz idle frontal"
+    },
+    {
+     "animation": "idle_right",
+     "reason": "A prancha só traz idle frontal"
+    }
+   ]
+  },
+  "mage": {
+   "phaser_key_hint": null,
+   "variants": {
+    "original": {
+     "animations": {
+      "idle_down": {
+       "sheet": "mage/original/sheets/mage_idle_down.png",
+       "frame_files": [
+        "mage/original/frames/mage_idle_down_01.png",
+        "mage/original/frames/mage_idle_down_02.png",
+        "mage/original/frames/mage_idle_down_03.png",
+        "mage/original/frames/mage_idle_down_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 64,
+       "cell_height": 79,
+       "direction": "down",
+       "fps_suggested": 5,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 64,
+        "frameHeight": 79,
+        "endFrame": 3
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha IDLE frontal (escala grande)",
+       "scale_group": "big",
+       "source_frame_boxes_xyxy": [
+        [
+         810,
+         165,
+         869,
+         248
+        ],
+        [
+         890,
+         165,
+         946,
+         248
+        ],
+        [
+         969,
+         165,
+         1027,
+         248
+        ],
+        [
+         1047,
+         165,
+         1105,
+         248
+        ]
+       ],
+       "notes": ""
+      },
+      "walk_down": {
+       "sheet": "mage/original/sheets/mage_walk_down.png",
+       "frame_files": [
+        "mage/original/frames/mage_walk_down_01.png",
+        "mage/original/frames/mage_walk_down_02.png",
+        "mage/original/frames/mage_walk_down_03.png",
+        "mage/original/frames/mage_walk_down_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 64,
+       "cell_height": 79,
+       "direction": "down",
+       "fps_suggested": 8,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 64,
+        "frameHeight": 79,
+        "endFrame": 3
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha WALK frontal (escala grande)",
+       "scale_group": "big",
+       "source_frame_boxes_xyxy": [
+        [
+         811,
+         287,
+         869,
+         369
+        ],
+        [
+         890,
+         286,
+         948,
+         369
+        ],
+        [
+         969,
+         286,
+         1026,
+         369
+        ],
+        [
+         1046,
+         286,
+         1104,
+         369
+        ]
+       ],
+       "notes": ""
+      },
+      "walk_up": {
+       "sheet": "mage/original/sheets/mage_walk_up.png",
+       "frame_files": [
+        "mage/original/frames/mage_walk_up_01.png",
+        "mage/original/frames/mage_walk_up_02.png",
+        "mage/original/frames/mage_walk_up_03.png",
+        "mage/original/frames/mage_walk_up_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 46,
+       "cell_height": 60,
+       "direction": "up",
+       "fps_suggested": 8,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 46,
+        "frameHeight": 60,
+        "endFrame": 3
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha UP (vista de costas)",
+       "scale_group": "small",
+       "source_frame_boxes_xyxy": [
+        [
+         838,
+         581,
+         884,
+         645
+        ],
+        [
+         910,
+         582,
+         957,
+         645
+        ],
+        [
+         984,
+         581,
+         1031,
+         645
+        ],
+        [
+         1057,
+         582,
+         1104,
+         645
+        ]
+       ],
+       "notes": ""
+      },
+      "attack_down": {
+       "sheet": "mage/original/sheets/mage_attack_down.png",
+       "frame_files": [
+        "mage/original/frames/mage_attack_down_01.png",
+        "mage/original/frames/mage_attack_down_02.png",
+        "mage/original/frames/mage_attack_down_03.png",
+        "mage/original/frames/mage_attack_down_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 158,
+       "cell_height": 64,
+       "direction": "down",
+       "fps_suggested": 10,
+       "repeat": 0,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 158,
+        "frameHeight": 64,
+        "endFrame": 3
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha ATTACK",
+       "scale_group": "attack",
+       "source_frame_boxes_xyxy": [
+        [
+         816,
+         675,
+         870,
+         744
+        ],
+        [
+         888,
+         676,
+         942,
+         744
+        ],
+        [
+         953,
+         675,
+         1009,
+         744
+        ],
+        [
+         1022,
+         675,
+         1128,
+         744
+        ]
+       ],
+       "notes": "Pose frontal; projétil azul sai para a direita no quadro 4."
+      },
+      "hurt": {
+       "sheet": "mage/original/sheets/mage_hurt.png",
+       "frame_files": [
+        "mage/original/frames/mage_hurt_01.png",
+        "mage/original/frames/mage_hurt_02.png"
+       ],
+       "frame_count": 2,
+       "cell_width": 56,
+       "cell_height": 63,
+       "direction": null,
+       "fps_suggested": 8,
+       "repeat": 0,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 56,
+        "frameHeight": 63,
+        "endFrame": 1
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha HURT",
+       "scale_group": "hurt",
+       "source_frame_boxes_xyxy": [
+        [
+         850,
+         772,
+         904,
+         837
+        ],
+        [
+         933,
+         771,
+         985,
+         837
+        ]
+       ],
+       "notes": "Sem variação por direção na prancha."
+      },
+      "death": {
+       "sheet": "mage/original/sheets/mage_death.png",
+       "frame_files": [
+        "mage/original/frames/mage_death_01.png",
+        "mage/original/frames/mage_death_02.png",
+        "mage/original/frames/mage_death_03.png",
+        "mage/original/frames/mage_death_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 68,
+       "cell_height": 50,
+       "direction": null,
+       "fps_suggested": 6,
+       "repeat": 0,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 68,
+        "frameHeight": 50,
+        "endFrame": 3
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha DEATH",
+       "scale_group": "death",
+       "source_frame_boxes_xyxy": [
+        [
+         823,
+         872,
+         871,
+         927
+        ],
+        [
+         889,
+         879,
+         958,
+         926
+        ],
+        [
+         958,
+         879,
+         1031,
+         926
+        ],
+        [
+         1041,
+         881,
+         1112,
+         925
+        ]
+       ],
+       "notes": "Sem variação por direção; quadro 1 em pé, 2-4 caindo/no chão."
+      }
+     }
+    },
+    "experimental_16x24": {
+     "animations": {
+      "idle_down": {
+       "sheet": "mage/experimental_16x24/sheets/mage_idle_down.png",
+       "frame_files": [
+        "mage/experimental_16x24/frames/mage_idle_down_01.png",
+        "mage/experimental_16x24/frames/mage_idle_down_02.png",
+        "mage/experimental_16x24/frames/mage_idle_down_03.png",
+        "mage/experimental_16x24/frames/mage_idle_down_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 20,
+       "cell_height": 24,
+       "direction": "down",
+       "fps_suggested": 5,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 20,
+        "frameHeight": 24,
+        "endFrame": 3
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha IDLE frontal (escala grande)",
+       "scale_group": "big",
+       "source_frame_boxes_xyxy": [
+        [
+         810,
+         165,
+         869,
+         248
+        ],
+        [
+         890,
+         165,
+         946,
+         248
+        ],
+        [
+         969,
+         165,
+         1027,
+         248
+        ],
+        [
+         1047,
+         165,
+         1105,
+         248
+        ]
+       ],
+       "notes": "",
+       "downscale_factor": 0.3117,
+       "fits_16x24": false
+      },
+      "walk_down": {
+       "sheet": "mage/experimental_16x24/sheets/mage_walk_down.png",
+       "frame_files": [
+        "mage/experimental_16x24/frames/mage_walk_down_01.png",
+        "mage/experimental_16x24/frames/mage_walk_down_02.png",
+        "mage/experimental_16x24/frames/mage_walk_down_03.png",
+        "mage/experimental_16x24/frames/mage_walk_down_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 20,
+       "cell_height": 24,
+       "direction": "down",
+       "fps_suggested": 8,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 20,
+        "frameHeight": 24,
+        "endFrame": 3
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha WALK frontal (escala grande)",
+       "scale_group": "big",
+       "source_frame_boxes_xyxy": [
+        [
+         811,
+         287,
+         869,
+         369
+        ],
+        [
+         890,
+         286,
+         948,
+         369
+        ],
+        [
+         969,
+         286,
+         1026,
+         369
+        ],
+        [
+         1046,
+         286,
+         1104,
+         369
+        ]
+       ],
+       "notes": "",
+       "downscale_factor": 0.3117,
+       "fits_16x24": false
+      },
+      "walk_up": {
+       "sheet": "mage/experimental_16x24/sheets/mage_walk_up.png",
+       "frame_files": [
+        "mage/experimental_16x24/frames/mage_walk_up_01.png",
+        "mage/experimental_16x24/frames/mage_walk_up_02.png",
+        "mage/experimental_16x24/frames/mage_walk_up_03.png",
+        "mage/experimental_16x24/frames/mage_walk_up_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 16,
+       "cell_height": 24,
+       "direction": "up",
+       "fps_suggested": 8,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 16,
+        "frameHeight": 24,
+        "endFrame": 3
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha UP (vista de costas)",
+       "scale_group": "small",
+       "source_frame_boxes_xyxy": [
+        [
+         838,
+         581,
+         884,
+         645
+        ],
+        [
+         910,
+         582,
+         957,
+         645
+        ],
+        [
+         984,
+         581,
+         1031,
+         645
+        ],
+        [
+         1057,
+         582,
+         1104,
+         645
+        ]
+       ],
+       "notes": "",
+       "downscale_factor": 0.3871,
+       "fits_16x24": true
+      },
+      "attack_down": {
+       "sheet": "mage/experimental_16x24/sheets/mage_attack_down.png",
+       "frame_files": [
+        "mage/experimental_16x24/frames/mage_attack_down_01.png",
+        "mage/experimental_16x24/frames/mage_attack_down_02.png",
+        "mage/experimental_16x24/frames/mage_attack_down_03.png",
+        "mage/experimental_16x24/frames/mage_attack_down_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 60,
+       "cell_height": 24,
+       "direction": "down",
+       "fps_suggested": 10,
+       "repeat": 0,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 60,
+        "frameHeight": 24,
+        "endFrame": 3
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha ATTACK",
+       "scale_group": "attack",
+       "source_frame_boxes_xyxy": [
+        [
+         816,
+         675,
+         870,
+         744
+        ],
+        [
+         888,
+         676,
+         942,
+         744
+        ],
+        [
+         953,
+         675,
+         1009,
+         744
+        ],
+        [
+         1022,
+         675,
+         1128,
+         744
+        ]
+       ],
+       "notes": "Pose frontal; projétil azul sai para a direita no quadro 4.",
+       "downscale_factor": 0.3871,
+       "fits_16x24": false
+      },
+      "hurt": {
+       "sheet": "mage/experimental_16x24/sheets/mage_hurt.png",
+       "frame_files": [
+        "mage/experimental_16x24/frames/mage_hurt_01.png",
+        "mage/experimental_16x24/frames/mage_hurt_02.png"
+       ],
+       "frame_count": 2,
+       "cell_width": 20,
+       "cell_height": 24,
+       "direction": null,
+       "fps_suggested": 8,
+       "repeat": 0,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 20,
+        "frameHeight": 24,
+        "endFrame": 1
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha HURT",
+       "scale_group": "hurt",
+       "source_frame_boxes_xyxy": [
+        [
+         850,
+         772,
+         904,
+         837
+        ],
+        [
+         933,
+         771,
+         985,
+         837
+        ]
+       ],
+       "notes": "Sem variação por direção na prancha.",
+       "downscale_factor": 0.3871,
+       "fits_16x24": false
+      },
+      "death": {
+       "sheet": "mage/experimental_16x24/sheets/mage_death.png",
+       "frame_files": [
+        "mage/experimental_16x24/frames/mage_death_01.png",
+        "mage/experimental_16x24/frames/mage_death_02.png",
+        "mage/experimental_16x24/frames/mage_death_03.png",
+        "mage/experimental_16x24/frames/mage_death_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 26,
+       "cell_height": 24,
+       "direction": null,
+       "fps_suggested": 6,
+       "repeat": 0,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 26,
+        "frameHeight": 24,
+        "endFrame": 3
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha DEATH",
+       "scale_group": "death",
+       "source_frame_boxes_xyxy": [
+        [
+         823,
+         872,
+         871,
+         927
+        ],
+        [
+         889,
+         879,
+         958,
+         926
+        ],
+        [
+         958,
+         879,
+         1031,
+         926
+        ],
+        [
+         1041,
+         881,
+         1112,
+         925
+        ]
+       ],
+       "notes": "Sem variação por direção; quadro 1 em pé, 2-4 caindo/no chão.",
+       "downscale_factor": 0.3871,
+       "fits_16x24": false
+      }
+     }
+    }
+   },
+   "reference": [
+    {
+     "sheet": "mage/reference/sheets/mage_ref_down.png",
+     "frame_files": [
+      "mage/reference/frames/mage_ref_down_01.png",
+      "mage/reference/frames/mage_ref_down_02.png",
+      "mage/reference/frames/mage_ref_down_03.png",
+      "mage/reference/frames/mage_ref_down_04.png"
+     ],
+     "frame_count": 4,
+     "cell_width": 48,
+     "cell_height": 63,
+     "source_row": "Linha DOWN pequena (referência)",
+     "source_kind": "extracted_original",
+     "note": "Frontal em escala pequena.",
+     "used_in_animations": false
+    },
+    {
+     "sheet": "mage/reference/sheets/mage_ref_left.png",
+     "frame_files": [
+      "mage/reference/frames/mage_ref_left_01.png",
+      "mage/reference/frames/mage_ref_left_02.png",
+      "mage/reference/frames/mage_ref_left_03.png",
+      "mage/reference/frames/mage_ref_left_04.png"
+     ],
+     "frame_count": 4,
+     "cell_width": 50,
+     "cell_height": 61,
+     "source_row": "Linha LEFT (referência)",
+     "source_kind": "extracted_original",
+     "note": "Vista de costas/3-4 sem rosto visível: direção não identificável, não usada.",
+     "used_in_animations": false
+    },
+    {
+     "sheet": "mage/reference/sheets/mage_ref_right.png",
+     "frame_files": [
+      "mage/reference/frames/mage_ref_right_01.png",
+      "mage/reference/frames/mage_ref_right_02.png",
+      "mage/reference/frames/mage_ref_right_03.png",
+      "mage/reference/frames/mage_ref_right_04.png"
+     ],
+     "frame_count": 4,
+     "cell_width": 48,
+     "cell_height": 61,
+     "source_row": "Linha RIGHT (referência)",
+     "source_kind": "extracted_original",
+     "note": "Vista quase simétrica de frente/costas: direção não identificável, não usada.",
+     "used_in_animations": false
+    }
+   ],
+   "missing": [
+    {
+     "animation": "walk_left",
+     "reason": "Linha da prancha ausente ou inconsistente (ver reference/)"
+    },
+    {
+     "animation": "walk_right",
+     "reason": "Linha da prancha ausente ou inconsistente (ver reference/)"
+    },
+    {
+     "animation": "attack_up",
+     "reason": "A prancha só traz ataque em uma direção"
+    },
+    {
+     "animation": "attack_left",
+     "reason": "A prancha só traz ataque em uma direção"
+    },
+    {
+     "animation": "attack_right",
+     "reason": "A prancha só traz ataque em uma direção"
+    },
+    {
+     "animation": "idle_up",
+     "reason": "A prancha só traz idle frontal"
+    },
+    {
+     "animation": "idle_left",
+     "reason": "A prancha só traz idle frontal"
+    },
+    {
+     "animation": "idle_right",
+     "reason": "A prancha só traz idle frontal"
+    }
+   ]
+  },
+  "druid": {
+   "phaser_key_hint": null,
+   "variants": {
+    "original": {
+     "animations": {
+      "idle_down": {
+       "sheet": "druid/original/sheets/druid_idle_down.png",
+       "frame_files": [
+        "druid/original/frames/druid_idle_down_01.png",
+        "druid/original/frames/druid_idle_down_02.png",
+        "druid/original/frames/druid_idle_down_03.png",
+        "druid/original/frames/druid_idle_down_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 64,
+       "cell_height": 79,
+       "direction": "down",
+       "fps_suggested": 5,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 64,
+        "frameHeight": 79,
+        "endFrame": 3
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha IDLE frontal (escala grande)",
+       "scale_group": "big",
+       "source_frame_boxes_xyxy": [
+        [
+         1189,
+         166,
+         1249,
+         248
+        ],
+        [
+         1267,
+         167,
+         1329,
+         248
+        ],
+        [
+         1350,
+         167,
+         1409,
+         248
+        ],
+        [
+         1429,
+         167,
+         1489,
+         248
+        ]
+       ],
+       "notes": ""
+      },
+      "walk_down": {
+       "sheet": "druid/original/sheets/druid_walk_down.png",
+       "frame_files": [
+        "druid/original/frames/druid_walk_down_01.png",
+        "druid/original/frames/druid_walk_down_02.png",
+        "druid/original/frames/druid_walk_down_03.png",
+        "druid/original/frames/druid_walk_down_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 64,
+       "cell_height": 79,
+       "direction": "down",
+       "fps_suggested": 8,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 64,
+        "frameHeight": 79,
+        "endFrame": 3
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha WALK frontal (escala grande)",
+       "scale_group": "big",
+       "source_frame_boxes_xyxy": [
+        [
+         1189,
+         287,
+         1247,
+         369
+        ],
+        [
+         1268,
+         287,
+         1329,
+         369
+        ],
+        [
+         1350,
+         287,
+         1410,
+         369
+        ],
+        [
+         1429,
+         287,
+         1489,
+         369
+        ]
+       ],
+       "notes": ""
+      },
+      "walk_up": {
+       "sheet": "druid/original/sheets/druid_walk_up.png",
+       "frame_files": [
+        "druid/original/frames/druid_walk_up_01.png",
+        "druid/original/frames/druid_walk_up_02.png",
+        "druid/original/frames/druid_walk_up_03.png",
+        "druid/original/frames/druid_walk_up_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 46,
+       "cell_height": 61,
+       "direction": "up",
+       "fps_suggested": 8,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 46,
+        "frameHeight": 61,
+        "endFrame": 3
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha UP (vista de costas)",
+       "scale_group": "small",
+       "source_frame_boxes_xyxy": [
+        [
+         1221,
+         583,
+         1264,
+         645
+        ],
+        [
+         1293,
+         581,
+         1337,
+         645
+        ],
+        [
+         1367,
+         582,
+         1410,
+         645
+        ],
+        [
+         1440,
+         581,
+         1484,
+         645
+        ]
+       ],
+       "notes": ""
+      },
+      "walk_left": {
+       "sheet": "druid/original/sheets/druid_walk_left.png",
+       "frame_files": [
+        "druid/original/frames/druid_walk_left_01.png",
+        "druid/original/frames/druid_walk_left_02.png",
+        "druid/original/frames/druid_walk_left_03.png",
+        "druid/original/frames/druid_walk_left_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 46,
+       "cell_height": 61,
+       "direction": "left",
+       "fps_suggested": 8,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 46,
+        "frameHeight": 61,
+        "endFrame": 3
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha LEFT da prancha",
+       "scale_group": "small",
+       "source_frame_boxes_xyxy": [
+        [
+         1220,
+         450,
+         1264,
+         514
+        ],
+        [
+         1294,
+         450,
+         1337,
+         514
+        ],
+        [
+         1369,
+         450,
+         1410,
+         514
+        ],
+        [
+         1440,
+         450,
+         1484,
+         514
+        ]
+       ],
+       "notes": ""
+      },
+      "attack_down": {
+       "sheet": "druid/original/sheets/druid_attack_down.png",
+       "frame_files": [
+        "druid/original/frames/druid_attack_down_01.png",
+        "druid/original/frames/druid_attack_down_02.png",
+        "druid/original/frames/druid_attack_down_03.png",
+        "druid/original/frames/druid_attack_down_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 152,
+       "cell_height": 63,
+       "direction": "down",
+       "fps_suggested": 10,
+       "repeat": 0,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 152,
+        "frameHeight": 63,
+        "endFrame": 3
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha ATTACK",
+       "scale_group": "attack",
+       "source_frame_boxes_xyxy": [
+        [
+         1199,
+         677,
+         1255,
+         744
+        ],
+        [
+         1271,
+         676,
+         1321,
+         744
+        ],
+        [
+         1335,
+         677,
+         1392,
+         744
+        ],
+        [
+         1409,
+         676,
+         1511,
+         744
+        ]
+       ],
+       "notes": "Pose frontal; projétil verde sai para a direita no quadro 4."
+      },
+      "hurt": {
+       "sheet": "druid/original/sheets/druid_hurt.png",
+       "frame_files": [
+        "druid/original/frames/druid_hurt_01.png",
+        "druid/original/frames/druid_hurt_02.png"
+       ],
+       "frame_count": 2,
+       "cell_width": 50,
+       "cell_height": 61,
+       "direction": null,
+       "fps_suggested": 8,
+       "repeat": 0,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 50,
+        "frameHeight": 61,
+        "endFrame": 1
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha HURT",
+       "scale_group": "hurt",
+       "source_frame_boxes_xyxy": [
+        [
+         1237,
+         773,
+         1284,
+         837
+        ],
+        [
+         1315,
+         771,
+         1365,
+         837
+        ]
+       ],
+       "notes": "Sem variação por direção na prancha."
+      },
+      "death": {
+       "sheet": "druid/original/sheets/druid_death.png",
+       "frame_files": [
+        "druid/original/frames/druid_death_01.png",
+        "druid/original/frames/druid_death_02.png",
+        "druid/original/frames/druid_death_03.png",
+        "druid/original/frames/druid_death_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 66,
+       "cell_height": 49,
+       "direction": null,
+       "fps_suggested": 6,
+       "repeat": 0,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 66,
+        "frameHeight": 49,
+        "endFrame": 3
+       },
+       "source_kind": "extracted_original",
+       "source_row": "Linha DEATH",
+       "scale_group": "death",
+       "source_frame_boxes_xyxy": [
+        [
+         1204,
+         873,
+         1256,
+         927
+        ],
+        [
+         1271,
+         876,
+         1334,
+         926
+        ],
+        [
+         1346,
+         885,
+         1411,
+         926
+        ],
+        [
+         1421,
+         883,
+         1488,
+         928
+        ]
+       ],
+       "notes": "Sem variação por direção; quadro 1 em pé, 2-4 caindo/no chão."
+      }
+     }
+    },
+    "experimental_16x24": {
+     "animations": {
+      "idle_down": {
+       "sheet": "druid/experimental_16x24/sheets/druid_idle_down.png",
+       "frame_files": [
+        "druid/experimental_16x24/frames/druid_idle_down_01.png",
+        "druid/experimental_16x24/frames/druid_idle_down_02.png",
+        "druid/experimental_16x24/frames/druid_idle_down_03.png",
+        "druid/experimental_16x24/frames/druid_idle_down_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 20,
+       "cell_height": 24,
+       "direction": "down",
+       "fps_suggested": 5,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 20,
+        "frameHeight": 24,
+        "endFrame": 3
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha IDLE frontal (escala grande)",
+       "scale_group": "big",
+       "source_frame_boxes_xyxy": [
+        [
+         1189,
+         166,
+         1249,
+         248
+        ],
+        [
+         1267,
+         167,
+         1329,
+         248
+        ],
+        [
+         1350,
+         167,
+         1409,
+         248
+        ],
+        [
+         1429,
+         167,
+         1489,
+         248
+        ]
+       ],
+       "notes": "",
+       "downscale_factor": 0.3117,
+       "fits_16x24": false
+      },
+      "walk_down": {
+       "sheet": "druid/experimental_16x24/sheets/druid_walk_down.png",
+       "frame_files": [
+        "druid/experimental_16x24/frames/druid_walk_down_01.png",
+        "druid/experimental_16x24/frames/druid_walk_down_02.png",
+        "druid/experimental_16x24/frames/druid_walk_down_03.png",
+        "druid/experimental_16x24/frames/druid_walk_down_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 20,
+       "cell_height": 24,
+       "direction": "down",
+       "fps_suggested": 8,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 20,
+        "frameHeight": 24,
+        "endFrame": 3
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha WALK frontal (escala grande)",
+       "scale_group": "big",
+       "source_frame_boxes_xyxy": [
+        [
+         1189,
+         287,
+         1247,
+         369
+        ],
+        [
+         1268,
+         287,
+         1329,
+         369
+        ],
+        [
+         1350,
+         287,
+         1410,
+         369
+        ],
+        [
+         1429,
+         287,
+         1489,
+         369
+        ]
+       ],
+       "notes": "",
+       "downscale_factor": 0.3117,
+       "fits_16x24": false
+      },
+      "walk_up": {
+       "sheet": "druid/experimental_16x24/sheets/druid_walk_up.png",
+       "frame_files": [
+        "druid/experimental_16x24/frames/druid_walk_up_01.png",
+        "druid/experimental_16x24/frames/druid_walk_up_02.png",
+        "druid/experimental_16x24/frames/druid_walk_up_03.png",
+        "druid/experimental_16x24/frames/druid_walk_up_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 16,
+       "cell_height": 24,
+       "direction": "up",
+       "fps_suggested": 8,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 16,
+        "frameHeight": 24,
+        "endFrame": 3
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha UP (vista de costas)",
+       "scale_group": "small",
+       "source_frame_boxes_xyxy": [
+        [
+         1221,
+         583,
+         1264,
+         645
+        ],
+        [
+         1293,
+         581,
+         1337,
+         645
+        ],
+        [
+         1367,
+         582,
+         1410,
+         645
+        ],
+        [
+         1440,
+         581,
+         1484,
+         645
+        ]
+       ],
+       "notes": "",
+       "downscale_factor": 0.3894,
+       "fits_16x24": true
+      },
+      "walk_left": {
+       "sheet": "druid/experimental_16x24/sheets/druid_walk_left.png",
+       "frame_files": [
+        "druid/experimental_16x24/frames/druid_walk_left_01.png",
+        "druid/experimental_16x24/frames/druid_walk_left_02.png",
+        "druid/experimental_16x24/frames/druid_walk_left_03.png",
+        "druid/experimental_16x24/frames/druid_walk_left_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 16,
+       "cell_height": 24,
+       "direction": "left",
+       "fps_suggested": 8,
+       "repeat": -1,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 16,
+        "frameHeight": 24,
+        "endFrame": 3
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha LEFT da prancha",
+       "scale_group": "small",
+       "source_frame_boxes_xyxy": [
+        [
+         1220,
+         450,
+         1264,
+         514
+        ],
+        [
+         1294,
+         450,
+         1337,
+         514
+        ],
+        [
+         1369,
+         450,
+         1410,
+         514
+        ],
+        [
+         1440,
+         450,
+         1484,
+         514
+        ]
+       ],
+       "notes": "",
+       "downscale_factor": 0.3894,
+       "fits_16x24": true
+      },
+      "attack_down": {
+       "sheet": "druid/experimental_16x24/sheets/druid_attack_down.png",
+       "frame_files": [
+        "druid/experimental_16x24/frames/druid_attack_down_01.png",
+        "druid/experimental_16x24/frames/druid_attack_down_02.png",
+        "druid/experimental_16x24/frames/druid_attack_down_03.png",
+        "druid/experimental_16x24/frames/druid_attack_down_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 58,
+       "cell_height": 24,
+       "direction": "down",
+       "fps_suggested": 10,
+       "repeat": 0,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 58,
+        "frameHeight": 24,
+        "endFrame": 3
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha ATTACK",
+       "scale_group": "attack",
+       "source_frame_boxes_xyxy": [
+        [
+         1199,
+         677,
+         1255,
+         744
+        ],
+        [
+         1271,
+         676,
+         1321,
+         744
+        ],
+        [
+         1335,
+         677,
+         1392,
+         744
+        ],
+        [
+         1409,
+         676,
+         1511,
+         744
+        ]
+       ],
+       "notes": "Pose frontal; projétil verde sai para a direita no quadro 4.",
+       "downscale_factor": 0.3894,
+       "fits_16x24": false
+      },
+      "hurt": {
+       "sheet": "druid/experimental_16x24/sheets/druid_hurt.png",
+       "frame_files": [
+        "druid/experimental_16x24/frames/druid_hurt_01.png",
+        "druid/experimental_16x24/frames/druid_hurt_02.png"
+       ],
+       "frame_count": 2,
+       "cell_width": 18,
+       "cell_height": 24,
+       "direction": null,
+       "fps_suggested": 8,
+       "repeat": 0,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 18,
+        "frameHeight": 24,
+        "endFrame": 1
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha HURT",
+       "scale_group": "hurt",
+       "source_frame_boxes_xyxy": [
+        [
+         1237,
+         773,
+         1284,
+         837
+        ],
+        [
+         1315,
+         771,
+         1365,
+         837
+        ]
+       ],
+       "notes": "Sem variação por direção na prancha.",
+       "downscale_factor": 0.3894,
+       "fits_16x24": false
+      },
+      "death": {
+       "sheet": "druid/experimental_16x24/sheets/druid_death.png",
+       "frame_files": [
+        "druid/experimental_16x24/frames/druid_death_01.png",
+        "druid/experimental_16x24/frames/druid_death_02.png",
+        "druid/experimental_16x24/frames/druid_death_03.png",
+        "druid/experimental_16x24/frames/druid_death_04.png"
+       ],
+       "frame_count": 4,
+       "cell_width": 24,
+       "cell_height": 24,
+       "direction": null,
+       "fps_suggested": 6,
+       "repeat": 0,
+       "origin": {
+        "x": 0.5,
+        "y": 1.0
+       },
+       "phaser_spritesheet": {
+        "frameWidth": 24,
+        "frameHeight": 24,
+        "endFrame": 3
+       },
+       "source_kind": "downscaled_experimental",
+       "source_row": "Linha DEATH",
+       "scale_group": "death",
+       "source_frame_boxes_xyxy": [
+        [
+         1204,
+         873,
+         1256,
+         927
+        ],
+        [
+         1271,
+         876,
+         1334,
+         926
+        ],
+        [
+         1346,
+         885,
+         1411,
+         926
+        ],
+        [
+         1421,
+         883,
+         1488,
+         928
+        ]
+       ],
+       "notes": "Sem variação por direção; quadro 1 em pé, 2-4 caindo/no chão.",
+       "downscale_factor": 0.3894,
+       "fits_16x24": false
+      }
+     }
+    }
+   },
+   "reference": [
+    {
+     "sheet": "druid/reference/sheets/druid_ref_down.png",
+     "frame_files": [
+      "druid/reference/frames/druid_ref_down_01.png",
+      "druid/reference/frames/druid_ref_down_02.png",
+      "druid/reference/frames/druid_ref_down_03.png",
+      "druid/reference/frames/druid_ref_down_04.png"
+     ],
+     "frame_count": 4,
+     "cell_width": 44,
+     "cell_height": 61,
+     "source_row": "Linha DOWN pequena (referência)",
+     "source_kind": "extracted_original",
+     "note": "Mostra o personagem DE COSTAS (capuz sem rosto): rótulo DOWN inconsistente.",
+     "used_in_animations": false
+    },
+    {
+     "sheet": "druid/reference/sheets/druid_ref_right.png",
+     "frame_files": [
+      "druid/reference/frames/druid_ref_right_01.png",
+      "druid/reference/frames/druid_ref_right_02.png",
+      "druid/reference/frames/druid_ref_right_03.png",
+      "druid/reference/frames/druid_ref_right_04.png"
+     ],
+     "frame_count": 4,
+     "cell_width": 48,
+     "cell_height": 61,
+     "source_row": "Linha RIGHT (referência)",
+     "source_kind": "extracted_original",
+     "note": "Pose 3/4 voltada para a esquerda, não consistente com RIGHT: não usada.",
+     "used_in_animations": false
+    }
+   ],
+   "missing": [
+    {
+     "animation": "walk_right",
+     "reason": "Linha da prancha ausente ou inconsistente (ver reference/)"
+    },
+    {
+     "animation": "attack_up",
+     "reason": "A prancha só traz ataque em uma direção"
+    },
+    {
+     "animation": "attack_left",
+     "reason": "A prancha só traz ataque em uma direção"
+    },
+    {
+     "animation": "attack_right",
+     "reason": "A prancha só traz ataque em uma direção"
+    },
+    {
+     "animation": "idle_up",
+     "reason": "A prancha só traz idle frontal"
+    },
+    {
+     "animation": "idle_left",
+     "reason": "A prancha só traz idle frontal"
+    },
+    {
+     "animation": "idle_right",
+     "reason": "A prancha só traz idle frontal"
+    }
+   ]
+  }
+ },
+ "qa": {
+  "checks": {
+   "feet_bottom_row_equal_in_all_sheets": true,
+   "original_standing_feet_x_jitter_max_px": 1.0,
+   "clipped_frames_after_placement": 0,
+   "experimental_silhouette_iou_mean": 0.939,
+   "experimental_parts_lost_frames": 0
+  },
+  "sheets": {
+   "warrior/original/idle_down": {
+    "cell": [
+     66,
+     80
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     79
+    ],
+    "feet_x_offset_from_center_px": [
+     0.1,
+     -0.2,
+     -0.3,
+     -0.4
+    ],
+    "feet_x_jitter_px": 0.4,
+    "tight_height_range": [
+     76,
+     76
+    ],
+    "touching_cell_border": false
+   },
+   "warrior/experimental_16x24/idle_down": {
+    "cell": [
+     20,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     0.2,
+     -0.3,
+     0.2,
+     0.0
+    ],
+    "feet_x_jitter_px": 0.5,
+    "touching_cell_border": false,
+    "tight_height_range": [
+     23,
+     23
+    ],
+    "silhouette_iou_mean": 0.949,
+    "silhouette_iou_min": 0.944,
+    "mean_rgb_error": 29.3,
+    "detached_parts_original": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32
+   },
+   "warrior/original/walk_down": {
+    "cell": [
+     66,
+     80
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     79
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.2,
+     0.3,
+     -0.4,
+     -0.1
+    ],
+    "feet_x_jitter_px": 0.7,
+    "tight_height_range": [
+     76,
+     78
+    ],
+    "touching_cell_border": false
+   },
+   "warrior/experimental_16x24/walk_down": {
+    "cell": [
+     20,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     0.2,
+     0.0,
+     0.3,
+     -0.5
+    ],
+    "feet_x_jitter_px": 0.8,
+    "touching_cell_border": true,
+    "tight_height_range": [
+     23,
+     24
+    ],
+    "silhouette_iou_mean": 0.947,
+    "silhouette_iou_min": 0.945,
+    "mean_rgb_error": 28.1,
+    "detached_parts_original": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32
+   },
+   "warrior/original/walk_up": {
+    "cell": [
+     48,
+     61
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     60
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.4,
+     0.2,
+     0.4,
+     0.2
+    ],
+    "feet_x_jitter_px": 0.7,
+    "tight_height_range": [
+     56,
+     57
+    ],
+    "touching_cell_border": false
+   },
+   "warrior/experimental_16x24/walk_up": {
+    "cell": [
+     16,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     0.0,
+     0.0,
+     0.0,
+     0.2
+    ],
+    "feet_x_jitter_px": 0.2,
+    "touching_cell_border": false,
+    "tight_height_range": [
+     21,
+     21
+    ],
+    "silhouette_iou_mean": 0.944,
+    "silhouette_iou_min": 0.937,
+    "mean_rgb_error": 21.3,
+    "detached_parts_original": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32
+   },
+   "warrior/original/walk_left": {
+    "cell": [
+     48,
+     61
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     60
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.3,
+     0.4,
+     -0.3,
+     -0.2
+    ],
+    "feet_x_jitter_px": 0.7,
+    "tight_height_range": [
+     58,
+     59
+    ],
+    "touching_cell_border": false
+   },
+   "warrior/experimental_16x24/walk_left": {
+    "cell": [
+     16,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.5,
+     -0.3,
+     -0.5,
+     -0.5
+    ],
+    "feet_x_jitter_px": 0.2,
+    "touching_cell_border": true,
+    "tight_height_range": [
+     22,
+     22
+    ],
+    "silhouette_iou_mean": 0.934,
+    "silhouette_iou_min": 0.924,
+    "mean_rgb_error": 23.3,
+    "detached_parts_original": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32
+   },
+   "warrior/original/walk_right": {
+    "cell": [
+     48,
+     61
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     60
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.2,
+     -0.0,
+     -0.3,
+     -0.5
+    ],
+    "feet_x_jitter_px": 0.4,
+    "tight_height_range": [
+     58,
+     59
+    ],
+    "touching_cell_border": false
+   },
+   "warrior/experimental_16x24/walk_right": {
+    "cell": [
+     16,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     0.0,
+     0.0,
+     0.1,
+     0.2
+    ],
+    "feet_x_jitter_px": 0.2,
+    "touching_cell_border": true,
+    "tight_height_range": [
+     22,
+     22
+    ],
+    "silhouette_iou_mean": 0.918,
+    "silhouette_iou_min": 0.884,
+    "mean_rgb_error": 26.3,
+    "detached_parts_original": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32
+   },
+   "warrior/original/attack_down": {
+    "cell": [
+     68,
+     64
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     63
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.3,
+     -0.1,
+     -0.1,
+     -0.0
+    ],
+    "feet_x_jitter_px": 0.3,
+    "tight_height_range": [
+     60,
+     62
+    ],
+    "touching_cell_border": false
+   },
+   "warrior/experimental_16x24/attack_down": {
+    "cell": [
+     24,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     0.3,
+     0.3,
+     0.2,
+     -0.3
+    ],
+    "feet_x_jitter_px": 0.7,
+    "touching_cell_border": true,
+    "tight_height_range": [
+     23,
+     23
+    ],
+    "silhouette_iou_mean": 0.932,
+    "silhouette_iou_min": 0.926,
+    "mean_rgb_error": 26.8,
+    "detached_parts_original": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32
+   },
+   "warrior/original/hurt": {
+    "cell": [
+     46,
+     63
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     62
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.2,
+     0.4
+    ],
+    "feet_x_jitter_px": 0.6,
+    "tight_height_range": [
+     60,
+     61
+    ],
+    "touching_cell_border": false
+   },
+   "warrior/experimental_16x24/hurt": {
+    "cell": [
+     16,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.1,
+     -0.5
+    ],
+    "feet_x_jitter_px": 0.4,
+    "touching_cell_border": true,
+    "tight_height_range": [
+     23,
+     23
+    ],
+    "silhouette_iou_mean": 0.938,
+    "silhouette_iou_min": 0.937,
+    "mean_rgb_error": 24.1,
+    "detached_parts_original": [
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32
+   },
+   "warrior/original/death": {
+    "cell": [
+     68,
+     49
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     48
+    ],
+    "feet_x_offset_from_center_px": [
+     -2.1,
+     -6.5,
+     -2.9,
+     3.8
+    ],
+    "feet_x_jitter_px": 10.3,
+    "tight_height_range": [
+     34,
+     47
+    ],
+    "touching_cell_border": false,
+    "feet_x_note": "sheet de death usa âncora central do bbox; offset de pés não se aplica aos quadros no chão"
+   },
+   "warrior/experimental_16x24/death": {
+    "cell": [
+     24,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.4,
+     -2.0,
+     -1.1,
+     1.2
+    ],
+    "feet_x_jitter_px": 3.3,
+    "touching_cell_border": true,
+    "tight_height_range": [
+     13,
+     18
+    ],
+    "silhouette_iou_mean": 0.945,
+    "silhouette_iou_min": 0.935,
+    "mean_rgb_error": 24.2,
+    "detached_parts_original": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32,
+    "feet_x_note": "sheet de death usa âncora central do bbox; offset de pés não se aplica aos quadros no chão"
+   },
+   "ranger/original/idle_down": {
+    "cell": [
+     62,
+     78
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     77
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.1,
+     -0.1,
+     0.1,
+     0.4
+    ],
+    "feet_x_jitter_px": 0.5,
+    "tight_height_range": [
+     75,
+     76
+    ],
+    "touching_cell_border": false
+   },
+   "ranger/experimental_16x24/idle_down": {
+    "cell": [
+     18,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     0.3,
+     -0.3,
+     -0.3,
+     0.1
+    ],
+    "feet_x_jitter_px": 0.7,
+    "touching_cell_border": true,
+    "tight_height_range": [
+     24,
+     24
+    ],
+    "silhouette_iou_mean": 0.945,
+    "silhouette_iou_min": 0.938,
+    "mean_rgb_error": 20.0,
+    "detached_parts_original": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32
+   },
+   "ranger/original/walk_down": {
+    "cell": [
+     62,
+     78
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     77
+    ],
+    "feet_x_offset_from_center_px": [
+     0.4,
+     -0.4,
+     0.3,
+     0.2
+    ],
+    "feet_x_jitter_px": 0.8,
+    "tight_height_range": [
+     75,
+     76
+    ],
+    "touching_cell_border": false
+   },
+   "ranger/experimental_16x24/walk_down": {
+    "cell": [
+     18,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     0.2,
+     0.0,
+     0.0,
+     -0.3
+    ],
+    "feet_x_jitter_px": 0.5,
+    "touching_cell_border": true,
+    "tight_height_range": [
+     24,
+     24
+    ],
+    "silhouette_iou_mean": 0.946,
+    "silhouette_iou_min": 0.941,
+    "mean_rgb_error": 20.0,
+    "detached_parts_original": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32
+   },
+   "ranger/original/walk_up": {
+    "cell": [
+     48,
+     60
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     59
+    ],
+    "feet_x_offset_from_center_px": [
+     0.1,
+     -0.4,
+     0.4,
+     0.4
+    ],
+    "feet_x_jitter_px": 0.8,
+    "tight_height_range": [
+     57,
+     58
+    ],
+    "touching_cell_border": false
+   },
+   "ranger/experimental_16x24/walk_up": {
+    "cell": [
+     16,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.7,
+     -0.3,
+     0.5,
+     0.0
+    ],
+    "feet_x_jitter_px": 1.2,
+    "touching_cell_border": true,
+    "tight_height_range": [
+     21,
+     22
+    ],
+    "silhouette_iou_mean": 0.941,
+    "silhouette_iou_min": 0.938,
+    "mean_rgb_error": 14.6,
+    "detached_parts_original": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32
+   },
+   "ranger/original/walk_left": {
+    "cell": [
+     48,
+     60
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     59
+    ],
+    "feet_x_offset_from_center_px": [
+     0.4,
+     -0.4,
+     0.2,
+     0.2
+    ],
+    "feet_x_jitter_px": 0.8,
+    "tight_height_range": [
+     57,
+     58
+    ],
+    "touching_cell_border": false
+   },
+   "ranger/experimental_16x24/walk_left": {
+    "cell": [
+     16,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     0.0,
+     0.0,
+     0.7,
+     0.5
+    ],
+    "feet_x_jitter_px": 0.7,
+    "touching_cell_border": true,
+    "tight_height_range": [
+     21,
+     22
+    ],
+    "silhouette_iou_mean": 0.936,
+    "silhouette_iou_min": 0.929,
+    "mean_rgb_error": 17.6,
+    "detached_parts_original": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32
+   },
+   "ranger/original/attack_right": {
+    "cell": [
+     144,
+     63
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     62
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.5,
+     0.2,
+     0.2,
+     0.4
+    ],
+    "feet_x_jitter_px": 0.9,
+    "tight_height_range": [
+     60,
+     61
+    ],
+    "touching_cell_border": false
+   },
+   "ranger/experimental_16x24/attack_right": {
+    "cell": [
+     54,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     0.0,
+     0.0,
+     -0.2,
+     -0.2
+    ],
+    "feet_x_jitter_px": 0.2,
+    "touching_cell_border": false,
+    "tight_height_range": [
+     22,
+     23
+    ],
+    "silhouette_iou_mean": 0.929,
+    "silhouette_iou_min": 0.907,
+    "mean_rgb_error": 17.3,
+    "detached_parts_original": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32
+   },
+   "ranger/original/hurt": {
+    "cell": [
+     48,
+     62
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     61
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.4,
+     0.5
+    ],
+    "feet_x_jitter_px": 0.8,
+    "tight_height_range": [
+     59,
+     60
+    ],
+    "touching_cell_border": false
+   },
+   "ranger/experimental_16x24/hurt": {
+    "cell": [
+     18,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     0.3,
+     -0.2
+    ],
+    "feet_x_jitter_px": 0.5,
+    "touching_cell_border": false,
+    "tight_height_range": [
+     22,
+     22
+    ],
+    "silhouette_iou_mean": 0.941,
+    "silhouette_iou_min": 0.938,
+    "mean_rgb_error": 17.4,
+    "detached_parts_original": [
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32
+   },
+   "ranger/original/death": {
+    "cell": [
+     64,
+     50
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     49
+    ],
+    "feet_x_offset_from_center_px": [
+     -1.2,
+     -5.2,
+     -5.6,
+     10.7
+    ],
+    "feet_x_jitter_px": 16.3,
+    "tight_height_range": [
+     37,
+     48
+    ],
+    "touching_cell_border": false,
+    "feet_x_note": "sheet de death usa âncora central do bbox; offset de pés não se aplica aos quadros no chão"
+   },
+   "ranger/experimental_16x24/death": {
+    "cell": [
+     24,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     0.3,
+     -1.5,
+     -1.2,
+     2.0
+    ],
+    "feet_x_jitter_px": 3.5,
+    "touching_cell_border": false,
+    "tight_height_range": [
+     14,
+     18
+    ],
+    "silhouette_iou_mean": 0.939,
+    "silhouette_iou_min": 0.927,
+    "mean_rgb_error": 16.5,
+    "detached_parts_original": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32,
+    "feet_x_note": "sheet de death usa âncora central do bbox; offset de pés não se aplica aos quadros no chão"
+   },
+   "mage/original/idle_down": {
+    "cell": [
+     64,
+     79
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     78
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.1,
+     0.0,
+     -0.2,
+     -0.0
+    ],
+    "feet_x_jitter_px": 0.3,
+    "tight_height_range": [
+     76,
+     77
+    ],
+    "touching_cell_border": false
+   },
+   "mage/experimental_16x24/idle_down": {
+    "cell": [
+     20,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.0,
+     0.5,
+     -0.1,
+     0.0
+    ],
+    "feet_x_jitter_px": 0.7,
+    "touching_cell_border": true,
+    "tight_height_range": [
+     24,
+     24
+    ],
+    "silhouette_iou_mean": 0.941,
+    "silhouette_iou_min": 0.934,
+    "mean_rgb_error": 24.5,
+    "detached_parts_original": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32
+   },
+   "mage/original/walk_down": {
+    "cell": [
+     64,
+     79
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     78
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.3,
+     0.2,
+     0.2,
+     -0.3
+    ],
+    "feet_x_jitter_px": 0.5,
+    "tight_height_range": [
+     76,
+     77
+    ],
+    "touching_cell_border": false
+   },
+   "mage/experimental_16x24/walk_down": {
+    "cell": [
+     20,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     0.7,
+     -0.0,
+     0.0,
+     0.6
+    ],
+    "feet_x_jitter_px": 0.7,
+    "touching_cell_border": true,
+    "tight_height_range": [
+     24,
+     24
+    ],
+    "silhouette_iou_mean": 0.935,
+    "silhouette_iou_min": 0.915,
+    "mean_rgb_error": 25.8,
+    "detached_parts_original": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32
+   },
+   "mage/original/walk_up": {
+    "cell": [
+     46,
+     60
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     59
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.1,
+     -0.4,
+     0.3,
+     -0.4
+    ],
+    "feet_x_jitter_px": 0.6,
+    "tight_height_range": [
+     57,
+     58
+    ],
+    "touching_cell_border": false
+   },
+   "mage/experimental_16x24/walk_up": {
+    "cell": [
+     16,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.5,
+     -0.7,
+     0.5,
+     -0.9
+    ],
+    "feet_x_jitter_px": 1.4,
+    "touching_cell_border": true,
+    "tight_height_range": [
+     22,
+     22
+    ],
+    "silhouette_iou_mean": 0.933,
+    "silhouette_iou_min": 0.929,
+    "mean_rgb_error": 21.1,
+    "detached_parts_original": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32
+   },
+   "mage/original/attack_down": {
+    "cell": [
+     158,
+     64
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     63
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.4,
+     0.5,
+     -0.5,
+     0.1
+    ],
+    "feet_x_jitter_px": 1.0,
+    "tight_height_range": [
+     61,
+     62
+    ],
+    "touching_cell_border": false
+   },
+   "mage/experimental_16x24/attack_down": {
+    "cell": [
+     60,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.5,
+     0.4,
+     -0.2,
+     0.4
+    ],
+    "feet_x_jitter_px": 0.9,
+    "touching_cell_border": true,
+    "tight_height_range": [
+     24,
+     24
+    ],
+    "silhouette_iou_mean": 0.938,
+    "silhouette_iou_min": 0.932,
+    "mean_rgb_error": 24.5,
+    "detached_parts_original": [
+     1,
+     1,
+     1,
+     2
+    ],
+    "detached_parts_experimental": [
+     1,
+     1,
+     1,
+     2
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32
+   },
+   "mage/original/hurt": {
+    "cell": [
+     56,
+     63
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     62
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.3,
+     -0.2
+    ],
+    "feet_x_jitter_px": 0.1,
+    "tight_height_range": [
+     59,
+     61
+    ],
+    "touching_cell_border": false
+   },
+   "mage/experimental_16x24/hurt": {
+    "cell": [
+     20,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.1,
+     0.3
+    ],
+    "feet_x_jitter_px": 0.3,
+    "touching_cell_border": true,
+    "tight_height_range": [
+     23,
+     24
+    ],
+    "silhouette_iou_mean": 0.935,
+    "silhouette_iou_min": 0.934,
+    "mean_rgb_error": 22.2,
+    "detached_parts_original": [
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32
+   },
+   "mage/original/death": {
+    "cell": [
+     68,
+     50
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     49
+    ],
+    "feet_x_offset_from_center_px": [
+     0.2,
+     2.9,
+     -15.8,
+     10.4
+    ],
+    "feet_x_jitter_px": 26.2,
+    "tight_height_range": [
+     38,
+     48
+    ],
+    "touching_cell_border": false,
+    "feet_x_note": "sheet de death usa âncora central do bbox; offset de pés não se aplica aos quadros no chão"
+   },
+   "mage/experimental_16x24/death": {
+    "cell": [
+     26,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     0.2,
+     -0.6,
+     -2.7,
+     2.5
+    ],
+    "feet_x_jitter_px": 5.2,
+    "touching_cell_border": true,
+    "tight_height_range": [
+     15,
+     19
+    ],
+    "silhouette_iou_mean": 0.933,
+    "silhouette_iou_min": 0.923,
+    "mean_rgb_error": 22.2,
+    "detached_parts_original": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32,
+    "feet_x_note": "sheet de death usa âncora central do bbox; offset de pés não se aplica aos quadros no chão"
+   },
+   "druid/original/idle_down": {
+    "cell": [
+     64,
+     79
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     78
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.0,
+     -0.2,
+     0.4,
+     0.0
+    ],
+    "feet_x_jitter_px": 0.6,
+    "tight_height_range": [
+     74,
+     77
+    ],
+    "touching_cell_border": false
+   },
+   "druid/experimental_16x24/idle_down": {
+    "cell": [
+     20,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.3,
+     -0.2,
+     -0.4,
+     0.2
+    ],
+    "feet_x_jitter_px": 0.6,
+    "touching_cell_border": true,
+    "tight_height_range": [
+     23,
+     24
+    ],
+    "silhouette_iou_mean": 0.946,
+    "silhouette_iou_min": 0.941,
+    "mean_rgb_error": 21.3,
+    "detached_parts_original": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32
+   },
+   "druid/original/walk_down": {
+    "cell": [
+     64,
+     79
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     78
+    ],
+    "feet_x_offset_from_center_px": [
+     0.3,
+     -0.2,
+     -0.4,
+     -0.4
+    ],
+    "feet_x_jitter_px": 0.7,
+    "tight_height_range": [
+     75,
+     75
+    ],
+    "touching_cell_border": false
+   },
+   "druid/experimental_16x24/walk_down": {
+    "cell": [
+     20,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.2,
+     0.1,
+     0.0,
+     0.5
+    ],
+    "feet_x_jitter_px": 0.7,
+    "touching_cell_border": false,
+    "tight_height_range": [
+     23,
+     23
+    ],
+    "silhouette_iou_mean": 0.949,
+    "silhouette_iou_min": 0.945,
+    "mean_rgb_error": 20.2,
+    "detached_parts_original": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32
+   },
+   "druid/original/walk_up": {
+    "cell": [
+     46,
+     61
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     60
+    ],
+    "feet_x_offset_from_center_px": [
+     0.4,
+     0.1,
+     0.4,
+     0.4
+    ],
+    "feet_x_jitter_px": 0.4,
+    "tight_height_range": [
+     57,
+     57
+    ],
+    "touching_cell_border": false
+   },
+   "druid/experimental_16x24/walk_up": {
+    "cell": [
+     16,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     0.2,
+     -0.2,
+     0.0,
+     0.3
+    ],
+    "feet_x_jitter_px": 0.5,
+    "touching_cell_border": true,
+    "tight_height_range": [
+     22,
+     22
+    ],
+    "silhouette_iou_mean": 0.944,
+    "silhouette_iou_min": 0.942,
+    "mean_rgb_error": 15.5,
+    "detached_parts_original": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32
+   },
+   "druid/original/walk_left": {
+    "cell": [
+     46,
+     61
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     60
+    ],
+    "feet_x_offset_from_center_px": [
+     0.0,
+     -0.3,
+     0.0,
+     -0.5
+    ],
+    "feet_x_jitter_px": 0.5,
+    "tight_height_range": [
+     57,
+     59
+    ],
+    "touching_cell_border": false
+   },
+   "druid/experimental_16x24/walk_left": {
+    "cell": [
+     16,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     0.2,
+     0.1,
+     0.2,
+     -0.1
+    ],
+    "feet_x_jitter_px": 0.3,
+    "touching_cell_border": true,
+    "tight_height_range": [
+     22,
+     23
+    ],
+    "silhouette_iou_mean": 0.943,
+    "silhouette_iou_min": 0.941,
+    "mean_rgb_error": 18.6,
+    "detached_parts_original": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32
+   },
+   "druid/original/attack_down": {
+    "cell": [
+     152,
+     63
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     62
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.1,
+     0.2,
+     -0.4,
+     -0.4
+    ],
+    "feet_x_jitter_px": 0.7,
+    "tight_height_range": [
+     60,
+     61
+    ],
+    "touching_cell_border": false
+   },
+   "druid/experimental_16x24/attack_down": {
+    "cell": [
+     58,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     -0.4,
+     0.0,
+     -0.1,
+     0.2
+    ],
+    "feet_x_jitter_px": 0.6,
+    "touching_cell_border": true,
+    "tight_height_range": [
+     23,
+     24
+    ],
+    "silhouette_iou_mean": 0.94,
+    "silhouette_iou_min": 0.917,
+    "mean_rgb_error": 19.9,
+    "detached_parts_original": [
+     1,
+     1,
+     1,
+     2
+    ],
+    "detached_parts_experimental": [
+     1,
+     1,
+     1,
+     2
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32
+   },
+   "druid/original/hurt": {
+    "cell": [
+     50,
+     61
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     60
+    ],
+    "feet_x_offset_from_center_px": [
+     0.2,
+     -0.1
+    ],
+    "feet_x_jitter_px": 0.3,
+    "tight_height_range": [
+     59,
+     59
+    ],
+    "touching_cell_border": false
+   },
+   "druid/experimental_16x24/hurt": {
+    "cell": [
+     18,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     0.1,
+     0.0
+    ],
+    "feet_x_jitter_px": 0.1,
+    "touching_cell_border": true,
+    "tight_height_range": [
+     23,
+     23
+    ],
+    "silhouette_iou_mean": 0.946,
+    "silhouette_iou_min": 0.941,
+    "mean_rgb_error": 17.4,
+    "detached_parts_original": [
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32
+   },
+   "druid/original/death": {
+    "cell": [
+     66,
+     49
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     48
+    ],
+    "feet_x_offset_from_center_px": [
+     -3.9,
+     -2.2,
+     -13.0,
+     15.3
+    ],
+    "feet_x_jitter_px": 28.3,
+    "tight_height_range": [
+     35,
+     47
+    ],
+    "touching_cell_border": false,
+    "feet_x_note": "sheet de death usa âncora central do bbox; offset de pés não se aplica aos quadros no chão"
+   },
+   "druid/experimental_16x24/death": {
+    "cell": [
+     24,
+     24
+    ],
+    "feet_bottom_row_equal": true,
+    "feet_bottom_row": [
+     23
+    ],
+    "feet_x_offset_from_center_px": [
+     -1.1,
+     -1.3,
+     -2.1,
+     3.5
+    ],
+    "feet_x_jitter_px": 5.6,
+    "touching_cell_border": true,
+    "tight_height_range": [
+     14,
+     18
+    ],
+    "silhouette_iou_mean": 0.936,
+    "silhouette_iou_min": 0.934,
+    "mean_rgb_error": 16.9,
+    "detached_parts_original": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "detached_parts_experimental": [
+     1,
+     1,
+     1,
+     1
+    ],
+    "parts_lost_frames": 0,
+    "unique_colors": 32,
+    "feet_x_note": "sheet de death usa âncora central do bbox; offset de pés não se aplica aos quadros no chão"
+   }
+  }
+ },
+ "source_scale_findings": {
+  "idle_walk_down": "~76-78 px de altura (escala grande)",
+  "walk_up_left_right_hurt_attack": "~57-62 px de altura (~0,76x da escala grande)",
+  "death_frame_1": "~34-38 px; quadros 2-4 deitados",
+  "implication": "Na prancha, idle/walk frontais são ~30% maiores que as demais animações. Nos arquivos originais isso foi preservado (ver scale_group). Na versão 16x24 cada família foi normalizada para ~24 px de altura."
+ },
+ "ambiguities": [
+  "warrior: rótulos LEFT/RIGHT trocados na prancha (LEFT olha para a direita, RIGHT para a esquerda); walk_left/walk_right usam a direção real.",
+  "ranger e druid: linha DOWN pequena mostra o personagem de costas; mantida só em reference/. walk_down usa a linha frontal grande.",
+  "ranger: linha RIGHT inconsistente (2 quadros à esquerda, 2 de costas); sem walk_right.",
+  "mage: linhas LEFT e RIGHT sem direção identificável; sem walk_left/walk_right.",
+  "druid: linha RIGHT em 3/4 voltada à esquerda; sem walk_right.",
+  "As linhas UP/LEFT/RIGHT não têm rótulo WALK na prancha; foram tratadas como ciclos de caminhada de 4 quadros.",
+  "attack: só uma direção por classe (warrior/mage/druid frontal, ranger voltado à direita). Projéteis (flecha, magia) fazem parte do quadro 4, o que alarga a célula.",
+  "hurt e death existem sem direção.",
+  "Os quadros 2 e 3 do ataque do ranger e de death do mage encostam um no outro na prancha; o corte foi feito no meio do vão."
+ ],
+ "experimental_16x24_findings": {
+  "how": "Redução por média de área sobre pixels pré-multiplicados, alfa binário (>=50%), paleta de 32 cores por classe, sem dithering. Fator uniforme por família (grande / demais) em cada classe.",
+  "fits_16x24": "walk_up/left/right e (warrior) hurt cabem em 16x24; idle/walk frontais ficam 18-20 px de largura; attack 24-60 px (projétil); death 24-26 px.",
+  "visual": "Rostos e detalhes finos (olhos, cruz do escudo, orbe do cajado) somem ou escurecem nas linhas frontais; silhuetas se mantêm (IoU médio 0,94)."
+ },
+ "recommendation_alternative_size": {
+  "uniform_cell_for_body_animations": "40x48 (personagem ~48 px de altura na família frontal, ~37 px nas demais), pés na base, origem (0.5,1)",
+  "motivo": [
+   "A 24 px de altura o corpo já tem 18-20 px de largura (escudo, chapéu, cajado), então 16 px de largura corta ou obriga a encolher a arte.",
+   "Erro médio de cor cai de ~23 (24 px) para ~14 (48 px) e a silhueta sobe de IoU 0,927 para 0,960; rostos e escudos continuam legíveis.",
+   "A fonte tem ~76-80 px de altura: 48 px é ~0,6x, o menor fator em que os detalhes sobrevivem; 32 px ainda perde rosto/emblemas.",
+   "Projéteis (flecha, magia) devem virar sprites separados em vez de alargar a célula de ataque."
+  ],
+  "alternativa_economica": "32x40 se o jogo precisar de personagens pequenos, aceitando perda de rosto."
+ }
+}

@@ -122,7 +122,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   private initPhysics(): void {
-    this.setOrigin(0.5, 0.85);
+    this.setOrigin(0.5, 1.0);
     const body = this.body as Phaser.Physics.Arcade.Body;
     body.setSize(12, 8);
     body.setOffset(2, 16);
@@ -207,8 +207,13 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         this.anims.play(`${animPrefix}_walk_right`, true);
       } else if (inputX < 0) {
         this.currentDirection = Direction.LEFT;
-        this.setFlipX(true);
-        this.anims.play(`${animPrefix}_walk_right`, true);
+        if (this.scene.anims.exists(`${animPrefix}_walk_left`)) {
+          this.setFlipX(false);
+          this.anims.play(`${animPrefix}_walk_left`, true);
+        } else {
+          this.setFlipX(true);
+          this.anims.play(`${animPrefix}_walk_right`, true);
+        }
       }
     } else {
       if (this.currentDirection === Direction.DOWN) {
@@ -221,8 +226,13 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
         this.setFlipX(false);
         this.anims.play(`${animPrefix}_idle_right`, true);
       } else if (this.currentDirection === Direction.LEFT) {
-        this.setFlipX(true);
-        this.anims.play(`${animPrefix}_idle_right`, true);
+        if (this.scene.anims.exists(`${animPrefix}_idle_left`)) {
+          this.setFlipX(false);
+          this.anims.play(`${animPrefix}_idle_left`, true);
+        } else {
+          this.setFlipX(true);
+          this.anims.play(`${animPrefix}_idle_right`, true);
+        }
       }
     }
   }
@@ -291,15 +301,21 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     }
 
     const dirOffset = this.getDirectionOffset(3);
+    const animPrefix = Player.getTextureKeyForClass(charClass);
 
-    // Frame de ação (golpe / disparo / conjuração)
-    let actionFrame = 1; // Down
-    if (this.currentDirection === Direction.UP) actionFrame = 5;
-    else if (this.currentDirection === Direction.RIGHT || this.currentDirection === Direction.LEFT) actionFrame = 9;
+    // Animação de ataque: toca spritesheet dedicada se existir, senão usa frame procedural de ação
+    if (this.anims && this.scene.anims.exists(`${animPrefix}_attack`)) {
+      this.setFlipX(this.currentDirection === Direction.LEFT);
+      this.anims.play(`${animPrefix}_attack`, true);
+    } else {
+      let actionFrame = 1; // Down
+      if (this.currentDirection === Direction.UP) actionFrame = 5;
+      else if (this.currentDirection === Direction.RIGHT || this.currentDirection === Direction.LEFT) actionFrame = 9;
 
-    this.setFlipX(this.currentDirection === Direction.LEFT);
-    this.anims?.stop();
-    this.setFrame(actionFrame);
+      this.setFlipX(this.currentDirection === Direction.LEFT);
+      this.anims?.stop();
+      this.setFrame(actionFrame);
+    }
 
     // FASE 1: Antecipação (Wind-up, 50ms - recuo leve de 2px)
     const originalX = this.x;
@@ -650,7 +666,11 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     });
 
     this.setTint(0xff5555);
-    this.scene.time.delayedCall(150, () => {
+    const animPrefix = Player.getTextureKeyForClass(this.playerData.characterClass);
+    if (this.anims && this.scene.anims.exists(`${animPrefix}_hurt`)) {
+      this.anims.play(`${animPrefix}_hurt`, true);
+    }
+    this.scene.time.delayedCall(180, () => {
       if (this.active && !this.isDead) this.clearTint();
     });
 
@@ -663,6 +683,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.isDead = true;
     this.setVelocity(0, 0);
     this.setTint(0x555555);
+    const animPrefix = Player.getTextureKeyForClass(this.playerData.characterClass);
+    if (this.anims && this.scene.anims.exists(`${animPrefix}_death`)) {
+      this.anims.play(`${animPrefix}_death`, true);
+    }
 
     this.scene.events.emit('floating-text', {
       x: this.x,
@@ -683,6 +707,10 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.playerData.attributes.currentMp = this.playerData.attributes.maxMp;
     this.isDead = false;
     this.clearTint();
+    const animPrefix = Player.getTextureKeyForClass(this.playerData.characterClass);
+    if (this.anims && this.scene.anims.exists(`${animPrefix}_idle_down`)) {
+      this.anims.play(`${animPrefix}_idle_down`, true);
+    }
 
     this.isInvulnerable = true;
     this.setAlpha(0.6);
