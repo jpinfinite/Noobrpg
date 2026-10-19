@@ -46,9 +46,14 @@ export class MultiplayerClient {
     if (serverWsUrl) {
       this.serverUrl = serverWsUrl;
     } else {
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const host = window.location.hostname || 'localhost';
-      this.serverUrl = `${protocol}//${host}:4000/ws`;
+      const customWsUrl = (import.meta as any).env?.VITE_WS_URL as string;
+      if (customWsUrl) {
+        this.serverUrl = customWsUrl;
+      } else {
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const host = window.location.hostname || 'localhost';
+        this.serverUrl = `${protocol}//${host}:4000/ws`;
+      }
     }
   }
 

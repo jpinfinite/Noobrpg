@@ -24,7 +24,7 @@ export interface CharacterSummary {
 }
 
 export class ApiClient {
-  private static baseUrl = '/api';
+  private static baseUrl = ((import.meta as any).env?.VITE_API_URL as string) || '/api';
 
   private static async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const config: RequestInit = {
