@@ -150,24 +150,20 @@ Todas as tarefas de alta prioridade da auditoria de prontidão e expansão de ga
 - Mapa Canônico de Produção (`map_prototype.json`): **100% Preservado**
 
 ## 3. Próximos Passos (Segurança Operacional, Rede e Governança)
-1. **Quick Tunnel Ativo e Validado On-Wire (Missão 31E):**
-   - Cloudflare Quick Tunnel operando ao vivo: `https://snake-parental-skiing-verified.trycloudflare.com` apontando para o backend local `http://localhost:4000`.
-   - Backend ativo a 20 Hz na porta 4000 com SQLite íntegro e CORS/Anti-CSWSH restrito a `localhost`, `127.0.0.1`, `*.pages.dev` e `CLIENT_ORIGIN`.
-   - Testes de conectividade na rede pública aprovados:
-     - Health check HTTPS: HTTP 200 `{"status":"ok","service":"noobrpg-server"}`
-     - Registro de conta HTTPS: HTTP 201 com token de sessão
-     - Multiplayer WebSocket WSS: Handshake 101 Switching Protocols e conexão estabelecida.
-2. **Link de Teste para Amigos e Testers (R$ 0,00):**
-   - Para jogar via frontend publicado no Cloudflare Pages:
-     `https://noobrpg.pages.dev/?server=snake-parental-skiing-verified.trycloudflare.com`
-   - Para testar contra o frontend local em desenvolvimento:
+1. **Bateria Multiplayer Real Validada On-Wire (Missão 31E):**
+   - Suíte MP-01 a MP-09 aprovada com 100% de sucesso entre 2 clientes independentes via túnel Cloudflare `snake-parental-skiing-verified.trycloudflare.com`.
+   - Autenticação independente, entrada no mundo, sincronização de posição (108ms/101ms), autoridade do servidor contra speedhack, combate, persistência SQLite e isolamento de sessão comprovados.
+   - 229 testes unitários/integração aprovados e build oficial gerado com 0 erros.
+2. **Defeito Identificado e Bloqueio Operacional do Cloudflare Pages:**
+   - **Diagnóstico:** O frontend publicado em `https://noobrpg.pages.dev/` executa um bundle antigo (`assets/index-BSwK1yH8.js`) que possui URLs hardcoded para o túnel expirado `len-bit...` e não possui suporte ao parâmetro `?server=`.
+   - **Ação Necessária (Aguardando Autorização):** O código local já está pronto e compilado (`dist/assets/index-DnKwtGXZ.js`), mas exige deploy manual ou autorização para publicação no Cloudflare Pages para que navegadores externos acessem com sucesso.
+3. **Links de Teste Operacionais:**
+   - Para jogar localmente ou com build sincronizado:
      `http://localhost:3000/?server=snake-parental-skiing-verified.trycloudflare.com`
-3. **Decisão Operacional Pendente do Proprietário:**
-   - Realizar sessões de teste externo de gameplay multiplayer com testers usando o link compartilhado com `?server=...`.
-   - Caso decida migrar para Túnel Nomeado fixo definitivo futuramente, adquirir domínio registrado (~R$ 40/ano) com Zona DNS na Cloudflare.
+   - Para rodar a suíte multiplayer automatizada:
+     `cmd /c npx tsx packages/server/scripts/test_mp_real_suite.ts`
 4. **Dossiê Canônico e Governança NoobCoin (Missões 30T/30V/30W):**
    - Dossiê canônico consolidado em [docs/NOOBCOIN_GOVERNANCE_DOSSIER.md](file:///D:/NoobRPG/docs/NOOBCOIN_GOVERNANCE_DOSSIER.md).
-   - Matriz de 7 Portões de Autorização Independentes (A a G) formalizada na Missão 30W.
    - Bloqueios operacionais on-chain rigorosamente preservados (`WORKER_DRY_RUN=true`, `distribution_paused='1'`, zero carteiras).
 
 

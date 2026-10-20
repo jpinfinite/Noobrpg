@@ -1068,6 +1068,45 @@
    - Zero operações on-chain, zero criação de carteiras Solana, zero chaves privadas criadas.
    - Bloqueios do NoobCoin (`WORKER_DRY_RUN=true`, `distribution_paused='1'`, NetworkGuard) 100% íntegros.
 
+---
+
+## [2026-10-20 00:25 BRT] — Ciclo 35: Missão 31E — Teste Multiplayer Real do NoobRPG (Validação MP-01 a MP-09)
+
+### Metas da Sessão
+- Executar a bateria de testes funcionais MP-01 a MP-09 entre dois clientes independentes (Cliente A e Cliente B) através do túnel público `snake-parental-skiing-verified.trycloudflare.com`.
+- Auditar a integridade da cadeia de pré-voo: backend local na porta 4000, processo `cloudflared`, acessibilidade de `https://noobrpg.pages.dev/`, sanitização de CORS e Anti-CSWSH.
+- Identificar e classificar defeitos ou limitações factuais do frontend publicado no Pages e da automação de navegadores.
+- Reexecutar as suítes de testes automatizados locais (`@noobrpg/shared`, `@noobrpg/solana-worker`, `@noobrpg/server`) e build oficial do cliente.
+- Respeitar o Limite Final: não aplicar correções automáticas de defeitos identificados nesta missão sem prévia autorização humana.
+
+### Ações Executadas
+1. **Auditoria de Pré-Voo e Inspeção Remota:**
+   - Backend ativo na porta 4000 (`http://localhost:4000/api/health` -> HTTP 200).
+   - Quick Tunnel ativo (`https://snake-parental-skiing-verified.trycloudflare.com/api/health` -> HTTP 200).
+   - Constatação de Defeito Alto: o bundle em produção no Cloudflare Pages (`assets/index-BSwK1yH8.js`) continua sendo a compilação antiga com o túnel expirado `len-bit...` hardcoded e sem suporte ao query param `?server=`.
+   - Constatação de Limitação: automação via `browser_subagent` (Playwright) bloqueada por indisponibilidade upstream de download do binário nos servidores da Azureedge (HTTP 404).
+2. **Execução On-Wire da Bateria MP-01 a MP-09:**
+   - Criado e executado o runner de integração [packages/server/scripts/test_mp_real_suite.ts](file:///d:/NoobRPG/packages/server/scripts/test_mp_real_suite.ts) conectando dois clientes reais (A e B) via HTTPS e WSS através do túnel aberto na Cloudflare:
+     - **MP-01 (Autenticação Independente):** PASSOU (Contas A e B criadas com HTTP 201; personagens WARRIOR e RANGER 100% segregados).
+     - **MP-02 (Entrada no Mundo):** PASSOU (Ambos entraram na sala `plains_01` e receberam S2C_JOINED e snapshot inicial de mundo a 20 Hz).
+     - **MP-03 (Presença e Sincronização):** PASSOU (Movimento de A observado por B em 108ms; movimento de B observado por A em 101ms via stream de snapshots).
+     - **MP-04 (Autoridade do Servidor):** PASSOU (Teleporte para (9000, 9000) contido pela simulação; payload JSON corrompido rejeitado com S2C_ERROR sem corrupção de estado).
+     - **MP-05 (Combate):** PASSOU (Ataque contra monstro validado pelo servidor com alcance físico e emissão de S2C_COMBAT_EVENT).
+     - **MP-06 (Persistência):** PASSOU (Desconexão desencadeou persistência atômica no SQLite; recarga REST confirmou atributos íntegros).
+     - **MP-07 (Desconexão e Reconexão):** PASSOU (Desconexão e reconexão de Cliente B processada sem duplicação de sessão ou avatar).
+     - **MP-08 (Falha Controlada de Conectividade):** PASSOU (Conexão rejeitada com ECONNREFUSED; fail-fast defensivo comprovado).
+     - **MP-09 (Segurança e Isolamento):** PASSOU (Acesso REST não autorizado rejeitado com HTTP 403 Forbidden; WebSocket C2S_JOIN em personagem de outra conta rejeitado com S2C_ERROR UNAUTHORIZED_CHARACTER e fechamento de socket código 4003).
+3. **Execução de Testes Automatizados e Build:**
+   - `@noobrpg/shared`: **17/17 PASS** (371ms, saída 0).
+   - `@noobrpg/solana-worker`: **60/60 PASS** (1.9s, saída 0).
+   - `@noobrpg/server`: **152/152 PASS** (12.1s, 14 suítes, saída 0).
+   - Build do cliente (`@noobrpg/client`): **Aprovado com saída 0** em 14.17s (223.62 kB bundle).
+   - **Total de asserções validadas:** **229 testes aprovados (100% verde)**.
+4. **Salvaguarda Inviolável:**
+   - Zero deploys no Cloudflare Pages, zero alterações de DNS.
+   - Zero operações de NoobCoin (sem carteiras, sem faucets, sem mints, sem transações).
+
+
 
 
 
