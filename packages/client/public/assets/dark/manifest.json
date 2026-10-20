@@ -1,0 +1,239 @@
+{
+  "tileset_dark": {
+    "file": "tileset_dark.png",
+    "frameWidth": 16,
+    "frameHeight": 16,
+    "width": 1024,
+    "height": 1024,
+    "type": "tileset"
+  },
+  "hero_warrior": {
+    "file": "hero_warrior.png",
+    "frameWidth": 16,
+    "frameHeight": 24,
+    "directions": [
+      "down",
+      "left",
+      "right",
+      "up"
+    ],
+    "animations": [
+      "idle",
+      "walk",
+      "attack",
+      "hurt",
+      "death"
+    ],
+    "fps": 8,
+    "type": "spritesheet"
+  },
+  "hero_ranger": {
+    "file": "hero_ranger.png",
+    "frameWidth": 16,
+    "frameHeight": 24,
+    "directions": [
+      "down",
+      "left",
+      "right",
+      "up"
+    ],
+    "animations": [
+      "idle",
+      "walk",
+      "attack",
+      "hurt",
+      "death"
+    ],
+    "fps": 8,
+    "type": "spritesheet"
+  },
+  "hero_mage": {
+    "file": "hero_mage.png",
+    "frameWidth": 16,
+    "frameHeight": 24,
+    "directions": [
+      "down",
+      "left",
+      "right",
+      "up"
+    ],
+    "animations": [
+      "idle",
+      "walk",
+      "attack",
+      "hurt",
+      "death"
+    ],
+    "fps": 8,
+    "type": "spritesheet"
+  },
+  "hero_druid": {
+    "file": "hero_druid.png",
+    "frameWidth": 16,
+    "frameHeight": 24,
+    "directions": [
+      "down",
+      "left",
+      "right",
+      "up"
+    ],
+    "animations": [
+      "idle",
+      "walk",
+      "attack",
+      "hurt",
+      "death"
+    ],
+    "fps": 8,
+    "type": "spritesheet"
+  },
+  "mob_slime": {
+    "file": "mob_slime.png",
+    "frameWidth": 16,
+    "frameHeight": 16,
+    "directions": [
+      "down",
+      "left",
+      "right",
+      "up"
+    ],
+    "fps": 6,
+    "type": "spritesheet"
+  },
+  "mob_goblin": {
+    "file": "mob_goblin.png",
+    "frameWidth": 16,
+    "frameHeight": 24,
+    "directions": [
+      "down",
+      "left",
+      "right",
+      "up"
+    ],
+    "fps": 6,
+    "type": "spritesheet"
+  },
+  "mob_skeleton": {
+    "file": "mob_skeleton.png",
+    "frameWidth": 16,
+    "frameHeight": 24,
+    "directions": [
+      "down",
+      "left",
+      "right",
+      "up"
+    ],
+    "fps": 6,
+    "type": "spritesheet"
+  },
+  "npc_blacksmith": {
+    "file": "npc_blacksmith.png",
+    "frameWidth": 16,
+    "frameHeight": 24,
+    "directions": [
+      "down",
+      "left",
+      "right",
+      "up"
+    ],
+    "fps": 6,
+    "type": "spritesheet"
+  },
+  "npc_elder": {
+    "file": "npc_elder.png",
+    "frameWidth": 16,
+    "frameHeight": 24,
+    "directions": [
+      "down",
+      "left",
+      "right",
+      "up"
+    ],
+    "fps": 6,
+    "type": "spritesheet"
+  },
+  "npc_guard": {
+    "file": "npc_guard.png",
+    "frameWidth": 16,
+    "frameHeight": 24,
+    "directions": [
+      "down",
+      "left",
+      "right",
+      "up"
+    ],
+    "fps": 6,
+    "type": "spritesheet"
+  },
+  "npc_tavern": {
+    "file": "npc_tavern.png",
+    "frameWidth": 16,
+    "frameHeight": 24,
+    "directions": [
+      "down",
+      "left",
+      "right",
+      "up"
+    ],
+    "fps": 6,
+    "type": "spritesheet"
+  },
+  "portrait_blacksmith": {
+    "file": "portrait_blacksmith.png",
+    "width": 48,
+    "height": 48,
+    "type": "portrait"
+  },
+  "portrait_elder": {
+    "file": "portrait_elder.png",
+    "width": 48,
+    "height": 48,
+    "type": "portrait"
+  },
+  "portrait_guard": {
+    "file": "portrait_guard.png",
+    "width": 48,
+    "height": 48,
+    "type": "portrait"
+  },
+  "portrait_tavern": {
+    "file": "portrait_tavern.png",
+    "width": 48,
+    "height": 48,
+    "type": "portrait"
+  },
+  "fx_slash": {
+    "file": "fx_slash.png",
+    "frameHeight": 32,
+    "type": "fx"
+  },
+  "fx_arrow": {
+    "file": "fx_arrow.png",
+    "frameHeight": 32,
+    "type": "fx"
+  },
+  "fx_magic_orb": {
+    "file": "fx_magic_orb.png",
+    "frameHeight": 32,
+    "type": "fx"
+  },
+  "fx_nature_burst": {
+    "file": "fx_nature_burst.png",
+    "frameHeight": 32,
+    "type": "fx"
+  },
+  "fx_impact_spark": {
+    "file": "fx_impact_spark.png",
+    "frameHeight": 32,
+    "type": "fx"
+  },
+  "fx_heal_aura": {
+    "file": "fx_heal_aura.png",
+    "frameHeight": 32,
+    "type": "fx"
+  },
+  "ui_frames": {
+    "file": "ui_frames.png",
+    "type": "ui"
+  }
+}

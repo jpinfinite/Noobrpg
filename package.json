@@ -14,6 +14,9 @@
     "tunnel": "bin\\cloudflared.exe tunnel --url http://localhost:4000"
   },
   "devDependencies": {
+    "@types/pngjs": "^6.0.5",
+    "jpeg-js": "^0.4.4",
+    "pngjs": "^7.0.0",
     "tsx": "^4.23.15",
     "typescript": "^5.5.4"
   }
