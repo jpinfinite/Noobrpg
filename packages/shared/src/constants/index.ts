@@ -11,7 +11,12 @@ import {
   ItemDefinition,
   GatheringNodeType,
   GatheringNodeConfig,
-  CraftingRecipe
+  CraftingRecipe,
+  QuestDefinition,
+  QuestType,
+  AchievementCategory,
+  AchievementDefinition,
+  TitleDefinition
 } from '../types/index.js';
 
 // Dimensões do Display e Câmera
@@ -414,6 +419,18 @@ export const GATHERING_NODE_DEFINITIONS: Record<GatheringNodeType, GatheringNode
 
 export const CRAFTING_RECIPES: CraftingRecipe[] = [
   {
+    id: 'recipe_hp_potion_simple',
+    name: 'Poção Menor de Ervas',
+    description: 'Massa medicinal pura de ervas verdes frescas, destilada para regenerar ferimentos leves.',
+    category: ItemCategory.CONSUMABLE,
+    resultItemId: 'potion_hp_minor',
+    resultAmount: 1,
+    requiredLevel: 1,
+    ingredients: [
+      { itemId: 'herb_green', quantity: 3 }
+    ]
+  },
+  {
     id: 'recipe_hp_potion',
     name: 'Poção de Vida Menor',
     description: 'Destila ervas frescas e gel de slime para criar um elixir regenerativo.',
@@ -505,3 +522,268 @@ export const AOI_CONSTANTS = {
   // Frequência de envio de full snapshot (a cada 20 ticks = 1 segundo a 20 Hz)
   FULL_SNAPSHOT_INTERVAL_TICKS: 20
 } as const;
+
+// Configuração Canônica das Missões do Jogo (Fase A - Missão 6)
+export const QUEST_DEFINITIONS: Record<string, QuestDefinition> = {
+  starter_tutorial: {
+    id: 'starter_tutorial',
+    title: 'Iniciação em Aethelgard',
+    description: 'Aprenda os conceitos básicos da vila com o Ancião Aldor e o Ferreiro Brann.',
+    npcId: 'npc_elder',
+    type: QuestType.TUTORIAL,
+    rewards: {
+      gold: 50,
+      xp: 30,
+      items: [
+        { itemId: 'wood_log', quantity: 4 },
+        { itemId: 'iron_ore', quantity: 4 }
+      ]
+    },
+    repeatable: false
+  },
+  quest_plains_threat: {
+    id: 'quest_plains_threat',
+    title: 'Ameaças nas Planícies',
+    description: 'Elimine 3 slimes nas planícies fora da vila para proteger os arredores e provar seu valor.',
+    npcId: 'npc_guard',
+    type: QuestType.HUNT,
+    targetMonsterType: MonsterType.SLIME,
+    targetCount: 3,
+    rewards: {
+      gold: 60,
+      xp: 40,
+      items: [
+        { itemId: 'potion_hp_minor', quantity: 2 }
+      ]
+    },
+    repeatable: false
+  },
+  quest_tavern_supplies: {
+    id: 'quest_tavern_supplies',
+    title: 'Suprimentos para a Taverna',
+    description: 'Colete 3 Ervas Verdes nos arbustos da vila ou das planícies e entregue ao Taverneiro Tobin.',
+    npcId: 'npc_tavern',
+    type: QuestType.GATHER,
+    targetItemId: 'herb_green',
+    targetCount: 3,
+    rewards: {
+      gold: 50,
+      xp: 35,
+      items: [
+        { itemId: 'potion_hp_medium', quantity: 1 }
+      ]
+    },
+    repeatable: false
+  }
+};
+
+// --- CATÁLOGO DE TÍTULOS (FASE 7 / MISSÃO 23) ---
+export const TITLE_DEFINITIONS: Record<string, TitleDefinition> = {
+  title_novice_hunter: {
+    id: 'title_novice_hunter',
+    name: 'Iniciante',
+    description: 'Concedido a quem deu os primeiros passos nos perigos de Aethelgard.',
+    color: '#94a3b8'
+  },
+  title_slime_hunter: {
+    id: 'title_slime_hunter',
+    name: 'Caçador de Slimes',
+    description: 'Especialista em erradicar gosmas perigosas das planícies.',
+    color: '#4ade80'
+  },
+  title_craftsman: {
+    id: 'title_craftsman',
+    name: 'Mestre Artesão',
+    description: 'Conhece os segredos do martelo, da bigorna e dos minérios.',
+    color: '#fb923c'
+  },
+  title_alchemist: {
+    id: 'title_alchemist',
+    name: 'Alquimista',
+    description: 'Destilador de elixires vitais e misturas medicinais.',
+    color: '#c084fc'
+  },
+  title_hero_village: {
+    id: 'title_hero_village',
+    name: 'Herói da Vila',
+    description: 'Concluiu com louvor o treinamento inicial dos anciões.',
+    color: '#facc15'
+  },
+  title_explorer: {
+    id: 'title_explorer',
+    name: 'Explorador',
+    description: 'Viajou entre a pacata vila e os perigos das planícies abertas.',
+    color: '#38bdf8'
+  },
+  title_the_risen: {
+    id: 'title_the_risen',
+    name: 'Em Ascensão',
+    description: 'Evoluiu em poder e superou os limites do nível inicial.',
+    color: '#a78bfa'
+  },
+  title_vanguard: {
+    id: 'title_vanguard',
+    name: 'Vanguarda de Aethelgard',
+    description: 'Completamente equipado para a guerra com armas e armaduras reforçadas.',
+    color: '#f43f5e'
+  }
+};
+
+// --- CATÁLOGO DE CONQUISTAS (FASE 7 / MISSÃO 23) ---
+export const ACHIEVEMENT_DEFINITIONS: Record<string, AchievementDefinition> = {
+  ach_first_blood: {
+    id: 'ach_first_blood',
+    title: 'Primeiro Sangue',
+    description: 'Derrote qualquer criatura hostil em combate autoritativo.',
+    category: AchievementCategory.COMBAT,
+    targetProgress: 1,
+    reward: {
+      gold: 15,
+      xp: 25,
+      titleId: 'title_novice_hunter'
+    }
+  },
+  ach_slime_hunter: {
+    id: 'ach_slime_hunter',
+    title: 'Caçador de Slimes',
+    description: 'Elimine 5 slimes verdes nas planícies ou redondezas.',
+    category: AchievementCategory.COMBAT,
+    targetProgress: 5,
+    reward: {
+      gold: 30,
+      xp: 50,
+      titleId: 'title_slime_hunter'
+    }
+  },
+  ach_skeleton_slayer: {
+    id: 'ach_skeleton_slayer',
+    title: 'Flagelo dos Mortos-Vivos',
+    description: 'Elimine 2 Esqueletos Guerreiros nas zonas exteriores.',
+    category: AchievementCategory.COMBAT,
+    targetProgress: 2,
+    reward: {
+      gold: 50,
+      xp: 80,
+      items: [{ itemId: 'potion_hp_medium', quantity: 1 }]
+    }
+  },
+  ach_woodcutter: {
+    id: 'ach_woodcutter',
+    title: 'Lenhador das Planícies',
+    description: 'Derrube 3 árvores maduras para coletar madeira.',
+    category: AchievementCategory.GATHERING,
+    targetProgress: 3,
+    reward: {
+      gold: 20,
+      xp: 30
+    }
+  },
+  ach_miner: {
+    id: 'ach_miner',
+    title: 'Minerador Determinado',
+    description: 'Extraia minério de 3 veios de ferro bruto.',
+    category: AchievementCategory.GATHERING,
+    targetProgress: 3,
+    reward: {
+      gold: 20,
+      xp: 30
+    }
+  },
+  ach_herbalist: {
+    id: 'ach_herbalist',
+    title: 'Herborista Dedicado',
+    description: 'Colha ervas frescas de 3 arbustos medicinais.',
+    category: AchievementCategory.GATHERING,
+    targetProgress: 3,
+    reward: {
+      gold: 20,
+      xp: 30
+    }
+  },
+  ach_blacksmith_apprentice: {
+    id: 'ach_blacksmith_apprentice',
+    title: 'Aprendiz da Forja',
+    description: 'Fabrique seu primeiro item de combate na bigorna.',
+    category: AchievementCategory.CRAFTING,
+    targetProgress: 1,
+    reward: {
+      gold: 25,
+      xp: 40,
+      titleId: 'title_craftsman'
+    }
+  },
+  ach_alchemist_initiate: {
+    id: 'ach_alchemist_initiate',
+    title: 'Iniciado da Alquimia',
+    description: 'Destile sua primeira poção na bancada de alquimia.',
+    category: AchievementCategory.CRAFTING,
+    targetProgress: 1,
+    reward: {
+      gold: 25,
+      xp: 40,
+      titleId: 'title_alchemist'
+    }
+  },
+  ach_tutorial_complete: {
+    id: 'ach_tutorial_complete',
+    title: 'Iniciação em Aethelgard',
+    description: 'Conclua a missão de tutorial com o Ancião Aldor e o Ferreiro Brann.',
+    category: AchievementCategory.QUESTS,
+    targetProgress: 1,
+    reward: {
+      gold: 40,
+      xp: 50,
+      titleId: 'title_hero_village'
+    }
+  },
+  ach_explorer: {
+    id: 'ach_explorer',
+    title: 'Viajante das Terras Ermas',
+    description: 'Transite com sucesso entre a Vila Inicial e as Planícies.',
+    category: AchievementCategory.EXPLORATION,
+    targetProgress: 2,
+    reward: {
+      gold: 30,
+      xp: 40,
+      titleId: 'title_explorer'
+    }
+  },
+  ach_level_up: {
+    id: 'ach_level_up',
+    title: 'Em Ascensão',
+    description: 'Evolua seu personagem para o Nível 2 ou superior.',
+    category: AchievementCategory.PROGRESSION,
+    targetProgress: 2,
+    reward: {
+      gold: 50,
+      xp: 60,
+      titleId: 'title_the_risen'
+    }
+  },
+  ach_fully_equipped: {
+    id: 'ach_fully_equipped',
+    title: 'Pronto para a Batalha',
+    description: 'Equipe arma, armadura e acessório simultaneamente.',
+    category: AchievementCategory.PROGRESSION,
+    targetProgress: 1,
+    reward: {
+      gold: 60,
+      xp: 80,
+      titleId: 'title_vanguard'
+    }
+  }
+};
+
+// --- CONSTANTES CANÔNICAS DO NOOBCOIN (MISSÃO 30L / FASE 8) ---
+export const NOOBCOIN_DECIMALS = 6 as const;
+export const NOOBCOIN_RAW_PER_TOKEN = 1_000_000 as const;
+
+export const NOOBCOIN_CONSTANTS = {
+  DECIMALS: NOOBCOIN_DECIMALS,
+  RAW_PER_TOKEN: NOOBCOIN_RAW_PER_TOKEN,
+  RAW_PER_TOKEN_BIGINT: 1_000_000n,
+  SYMBOL: 'tNOOB',
+  NAME: 'NoobCoin (Testnet/Devnet)',
+  THEORETICAL_MAX_SUPPLY_RAW: 1_000_000_000_000_000n // 1 bilhão * 10^6
+} as const;
+

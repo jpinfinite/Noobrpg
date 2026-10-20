@@ -8,6 +8,13 @@ import {
   S2C_ChatPayload,
   S2C_CombatEventPayload,
   S2C_ErrorPayload,
+  S2C_QuestUpdatePayload,
+  S2C_MapChangedPayload,
+  S2C_InventoryUpdatePayload,
+  S2C_PendingRewardsUpdatePayload,
+  S2C_AchievementsUpdatePayload,
+  S2C_AchievementUnlockedPayload,
+  S2C_TitleEquippedPayload,
   C2S_JoinPayload,
   C2S_MovePayload,
   C2S_AttackPayload,
@@ -17,7 +24,11 @@ import {
   C2S_CraftPayload,
   C2S_UseItemPayload,
   C2S_EquipPayload,
-  C2S_ChatPayload
+  C2S_ChatPayload,
+  C2S_QuestActionPayload,
+  C2S_ChangeMapPayload,
+  C2S_EquipTitlePayload,
+  C2S_ClaimAchievementRewardPayload
 } from '@noobrpg/shared';
 
 export interface MultiplayerCallbacks {
@@ -28,6 +39,13 @@ export interface MultiplayerCallbacks {
   onPlayerLeft?: (payload: S2C_PlayerLeftPayload) => void;
   onChat?: (payload: S2C_ChatPayload) => void;
   onCombatEvent?: (payload: S2C_CombatEventPayload) => void;
+  onQuestUpdate?: (payload: S2C_QuestUpdatePayload) => void;
+  onMapChanged?: (payload: S2C_MapChangedPayload) => void;
+  onInventoryUpdate?: (payload: S2C_InventoryUpdatePayload) => void;
+  onPendingRewardsUpdate?: (payload: S2C_PendingRewardsUpdatePayload) => void;
+  onAchievementsUpdate?: (payload: S2C_AchievementsUpdatePayload) => void;
+  onAchievementUnlocked?: (payload: S2C_AchievementUnlockedPayload) => void;
+  onTitleEquipped?: (payload: S2C_TitleEquippedPayload) => void;
   onError?: (payload: S2C_ErrorPayload) => void;
   onDisconnect?: () => void;
 }
@@ -40,6 +58,7 @@ export class MultiplayerClient {
   private reconnectTimer: any = null;
   private callbacks: MultiplayerCallbacks = {};
   private serverUrl: string;
+  private activeMapKey: string = 'map_prototype';
 
   constructor(callbacks: MultiplayerCallbacks = {}, serverWsUrl?: string) {
     this.callbacks = callbacks;
@@ -96,7 +115,8 @@ export class MultiplayerClient {
         // Envia mensagem de handshake de entrada na sala
         const joinPayload: C2S_JoinPayload = {
           roomId: this.currentRoomId,
-          characterId: this.characterId!
+          characterId: this.characterId!,
+          mapKey: this.activeMapKey
         };
         this.send(NetMessageType.C2S_JOIN, joinPayload);
       };
@@ -156,6 +176,59 @@ export class MultiplayerClient {
             case NetMessageType.S2C_COMBAT_EVENT: {
               if (this.callbacks.onCombatEvent) {
                 this.callbacks.onCombatEvent(payload as S2C_CombatEventPayload);
+              }
+              break;
+            }
+
+            case NetMessageType.S2C_QUEST_UPDATE: {
+              if (this.callbacks.onQuestUpdate) {
+                this.callbacks.onQuestUpdate(payload as S2C_QuestUpdatePayload);
+              }
+              break;
+            }
+
+            case NetMessageType.S2C_MAP_CHANGED: {
+              const mapPayload = payload as S2C_MapChangedPayload;
+              if (mapPayload?.mapKey) {
+                this.activeMapKey = mapPayload.mapKey;
+              }
+              if (this.callbacks.onMapChanged) {
+                this.callbacks.onMapChanged(mapPayload);
+              }
+              break;
+            }
+
+            case NetMessageType.S2C_INVENTORY_UPDATE: {
+              if (this.callbacks.onInventoryUpdate) {
+                this.callbacks.onInventoryUpdate(payload as S2C_InventoryUpdatePayload);
+              }
+              break;
+            }
+
+            case NetMessageType.S2C_PENDING_REWARDS_UPDATE: {
+              if (this.callbacks.onPendingRewardsUpdate) {
+                this.callbacks.onPendingRewardsUpdate(payload as S2C_PendingRewardsUpdatePayload);
+              }
+              break;
+            }
+
+            case NetMessageType.S2C_ACHIEVEMENTS_UPDATE: {
+              if (this.callbacks.onAchievementsUpdate) {
+                this.callbacks.onAchievementsUpdate(payload as S2C_AchievementsUpdatePayload);
+              }
+              break;
+            }
+
+            case NetMessageType.S2C_ACHIEVEMENT_UNLOCKED: {
+              if (this.callbacks.onAchievementUnlocked) {
+                this.callbacks.onAchievementUnlocked(payload as S2C_AchievementUnlockedPayload);
+              }
+              break;
+            }
+
+            case NetMessageType.S2C_TITLE_EQUIPPED: {
+              if (this.callbacks.onTitleEquipped) {
+                this.callbacks.onTitleEquipped(payload as S2C_TitleEquippedPayload);
               }
               break;
             }
@@ -230,13 +303,18 @@ export class MultiplayerClient {
     }
   }
 
+  public setActiveMapKey(mapKey: string): void {
+    this.activeMapKey = mapKey;
+  }
+
   // --- MÉTODOS DE INTENÇÃO DO CLIENTE ---
 
-  public sendMove(targetX: number, targetY: number, clientDt: number): void {
+  public sendMove(targetX: number, targetY: number, clientDt: number, mapKey?: string): void {
     const payload: C2S_MovePayload = {
       targetX,
       targetY,
-      clientDt
+      clientDt,
+      mapKey: mapKey || this.activeMapKey
     };
     this.send(NetMessageType.C2S_MOVE, payload);
   }
@@ -279,5 +357,33 @@ export class MultiplayerClient {
   public sendChat(message: string): void {
     const payload: C2S_ChatPayload = { message };
     this.send(NetMessageType.C2S_CHAT, payload);
+  }
+
+  public sendQuestAction(questId: string, npcId: string, action: string = 'dialogue_next'): void {
+    const payload: C2S_QuestActionPayload = { questId, npcId, action };
+    this.send(NetMessageType.C2S_QUEST_ACTION, payload);
+  }
+
+  public sendChangeMap(targetMapKey: string, transitionZone?: string): void {
+    const payload: C2S_ChangeMapPayload = { targetMapKey, transitionZone };
+    this.send(NetMessageType.C2S_CHANGE_MAP, payload);
+  }
+
+  public sendClaimPendingRewards(): void {
+    this.send(NetMessageType.C2S_CLAIM_PENDING_REWARDS, {});
+  }
+
+  public sendGetAchievements(): void {
+    this.send(NetMessageType.C2S_GET_ACHIEVEMENTS, {});
+  }
+
+  public sendEquipTitle(titleId: string | null): void {
+    const payload: C2S_EquipTitlePayload = { titleId };
+    this.send(NetMessageType.C2S_EQUIP_TITLE, payload);
+  }
+
+  public sendClaimAchievementReward(achievementId: string): void {
+    const payload: C2S_ClaimAchievementRewardPayload = { achievementId };
+    this.send(NetMessageType.C2S_CLAIM_ACHIEVEMENT_REWARD, payload);
   }
 }

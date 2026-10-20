@@ -849,6 +849,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       text: `Equipado: ${itemDef.name}`,
       color: '#38bdf8'
     });
+    this.scene.events.emit('request-equip-item', { slotIndex });
     this.scene.events.emit('player-updated', this.playerData);
     return true;
   }
@@ -917,6 +918,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     }
 
     removeItemFromSlot(this.playerData.inventory, slotIndex, 1);
+    this.scene.events.emit('request-use-item', { slotIndex });
     this.scene.events.emit('player-updated', this.playerData);
     return true;
   }
@@ -942,6 +944,9 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   public craftItem(recipeId: string): boolean {
+    // Despacha requisição autoritativa de crafting para o servidor
+    this.scene.events.emit('request-craft-recipe', { recipeId });
+
     const result = executeCrafting(this.playerData.inventory, recipeId, this.playerData.level);
 
     if (result.success && result.resultItemId) {

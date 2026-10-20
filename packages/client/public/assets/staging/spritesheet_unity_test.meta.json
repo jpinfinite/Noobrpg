@@ -1,0 +1,19 @@
+{
+  "sheetKey": "sheet_hero_unity_test",
+  "frameWidth": 20,
+  "frameHeight": 24,
+  "frameCount": 4,
+  "suggestedFps": 8,
+  "originX": 0.5,
+  "originY": 1.0,
+  "animations": [
+    "hero_unity_test_idle_down",
+    "hero_unity_test_walk_down"
+  ],
+  "source": {
+    "engine": "Unity 6000.6.4f1 (Sprite / AnimationClip)",
+    "exporter": "NoobRpgSpriteExporter.cs",
+    "license": "CC0 / Propriedade do Projeto NoobRPG",
+    "status": "STAGING_VERIFIED"
+  }
+}

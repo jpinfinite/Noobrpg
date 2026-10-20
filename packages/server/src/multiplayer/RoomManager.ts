@@ -2,20 +2,22 @@ import { Room } from './Room.js';
 import { PlainsRoom } from './PlainsRoom.js';
 import { CharacterService } from '../services/characterService.js';
 import { GameSimulation } from '../simulation/GameSimulation.js';
+import { AchievementService } from '../services/achievementService.js';
 
 export class RoomManager {
   private rooms: Map<string, Room> = new Map();
 
   constructor(
     private characterService: CharacterService,
-    private sharedSimulation?: GameSimulation
+    private sharedSimulation?: GameSimulation,
+    private achievementService?: AchievementService
   ) {
     // Inicializa a sala padrão das planícies
     this.createPlainsRoom();
   }
 
   private createPlainsRoom(): PlainsRoom {
-    const plainsRoom = new PlainsRoom(this.characterService, this.sharedSimulation);
+    const plainsRoom = new PlainsRoom(this.characterService, this.sharedSimulation, this.achievementService);
     plainsRoom.start();
     this.rooms.set(plainsRoom.id, plainsRoom);
     return plainsRoom;

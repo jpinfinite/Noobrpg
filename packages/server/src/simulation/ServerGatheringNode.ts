@@ -28,6 +28,7 @@ export class ServerGatheringNode {
   }
 
   public canInteract(player: ServerPlayer): boolean {
+    if (!player.isAlive()) return false;
     if (this.state !== 'READY') return false;
     const dist = calculateDistance(this.x, this.y, player.x, player.y);
     return dist <= SIMULATION_CONSTANTS.INTERACT_MAX_DISTANCE;

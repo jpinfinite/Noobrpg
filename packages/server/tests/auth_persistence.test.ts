@@ -66,11 +66,19 @@ describe('NoobRPG Fase 4 - Persistência, Autenticação e Contas', () => {
     assert.ok(tableNames.includes('character_inventory'));
     assert.ok(tableNames.includes('character_equipment'));
     assert.ok(tableNames.includes('gold_transactions'));
+    assert.ok(tableNames.includes('character_quests'));
+    assert.ok(tableNames.includes('character_pending_rewards'));
+    assert.ok(tableNames.includes('character_achievements'));
+    assert.ok(tableNames.includes('character_titles'));
+    assert.ok(tableNames.includes('character_active_title'));
+    assert.ok(tableNames.includes('noobcoin_rewards_ledger'));
+    assert.ok(tableNames.includes('noobcoin_daily_limits'));
+    assert.ok(tableNames.includes('noobcoin_config'));
 
     // Roda migrações novamente para testar idempotência
     await runMigrations(db);
     const migrations = await db.query('SELECT * FROM schema_migrations;');
-    assert.equal(migrations.length, 6);
+    assert.equal(migrations.length, 10);
   });
 
   it('2. Registro de conta com Argon2id e bloqueio de nomes duplicados', async () => {

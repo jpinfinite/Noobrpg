@@ -10,7 +10,9 @@ import {
   evaluateLevelProgression,
   addItemToInventory,
   removeItemFromSlot,
-  calculateDistance
+  calculateDistance,
+  QuestProgress,
+  PendingRewardItem
 } from '@noobrpg/shared';
 import { SIMULATION_CONSTANTS } from './SimulationConstants.js';
 import { MapCollisionGrid } from './MapCollisionGrid.js';
@@ -31,6 +33,10 @@ export class ServerPlayer {
   public inventory: (InventorySlot | null)[];
   public equipped: { weapon: string | null; armor: string | null; accessory: string | null };
   public version: number;
+  public mapKey: string = 'map_prototype';
+  public quests: Map<string, QuestProgress> = new Map();
+  public pendingRewards: PendingRewardItem[] = [];
+  public activeTitle: string | null = null;
 
   public lastMoveTimestamp: number = Date.now();
   public lastAttackTimestamp: number = 0;
@@ -54,7 +60,70 @@ export class ServerPlayer {
     this.inventory = data.inventory.map(s => (s ? { ...s } : null));
     this.equipped = { ...data.equipped };
     this.version = data.version || 1;
+    if ((data as any).mapKey) {
+      this.mapKey = (data as any).mapKey;
+    }
+    if (data.quests) {
+      for (const [qId, qProgress] of Object.entries(data.quests)) {
+        this.quests.set(qId, {
+          questId: qProgress.questId,
+          step: qProgress.step,
+          completed: qProgress.completed,
+          claimedRewards: [...(qProgress.claimedRewards || [])]
+        });
+      }
+    }
+    if (data.pendingRewards) {
+      this.pendingRewards = data.pendingRewards.map(p => ({ ...p }));
+    }
+    if (data.activeTitle !== undefined) {
+      this.activeTitle = data.activeTitle || null;
+    }
     this.lastMoveTimestamp = Date.now();
+  }
+
+  public addPendingReward(itemId: string, quantity: number, source: string): PendingRewardItem {
+    const item: PendingRewardItem = {
+      id: `pr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      itemId,
+      quantity,
+      source,
+      createdAt: new Date().toISOString()
+    };
+    this.pendingRewards.push(item);
+    return item;
+  }
+
+  public getQuest(questId: string): QuestProgress {
+    let q = this.quests.get(questId);
+    if (!q) {
+      q = {
+        questId,
+        step: 0,
+        completed: false,
+        claimedRewards: []
+      };
+      this.quests.set(questId, q);
+    }
+    return q;
+  }
+
+  public setQuest(questId: string, progress: QuestProgress): void {
+    this.quests.set(questId, {
+      ...progress,
+      claimedRewards: [...(progress.claimedRewards || [])]
+    });
+  }
+
+  public getAllQuests(): Record<string, QuestProgress> {
+    const result: Record<string, QuestProgress> = {};
+    for (const [id, q] of this.quests.entries()) {
+      result[id] = {
+        ...q,
+        claimedRewards: [...q.claimedRewards]
+      };
+    }
+    return result;
   }
 
   public isAlive(): boolean {
@@ -81,8 +150,24 @@ export class ServerPlayer {
     return this.getAttributes().maxHp;
   }
 
+  public get currentHp(): number {
+    return this.hp;
+  }
+
+  public set currentHp(val: number) {
+    this.hp = val;
+  }
+
   public getMaxMp(): number {
     return this.getAttributes().maxMp;
+  }
+
+  public get currentMp(): number {
+    return this.mp;
+  }
+
+  public set currentMp(val: number) {
+    this.mp = val;
   }
 
   public getCombatConfig() {
@@ -116,8 +201,8 @@ export class ServerPlayer {
       return { success: true, x: this.x, y: this.y };
     }
 
-    // 1. Colisão no Mapa (Paredes e Obstáculos)
-    if (!MapCollisionGrid.isWalkable(newX, newY)) {
+    // 1. Colisão no Mapa (Paredes, Lago e Obstáculos consistentes)
+    if (!MapCollisionGrid.isWalkable(newX, newY, 5, this.mapKey)) {
       this.lastMoveTimestamp = now;
       return {
         success: false,
@@ -148,7 +233,7 @@ export class ServerPlayer {
       const clampedX = Math.round(this.x + dx * ratio);
       const clampedY = Math.round(this.y + dy * ratio);
 
-      if (MapCollisionGrid.isWalkable(clampedX, clampedY)) {
+      if (MapCollisionGrid.isWalkable(clampedX, clampedY, 5, this.mapKey)) {
         this.x = clampedX;
         this.y = clampedY;
         this.lastMoveTimestamp = now;
@@ -247,6 +332,7 @@ export class ServerPlayer {
   }
 
   public useConsumable(slotIndex: number): { success: boolean; reason?: string } {
+    if (!this.isAlive()) return { success: false, reason: 'PLAYER_DEAD' };
     if (slotIndex < 0 || slotIndex >= this.inventory.length) {
       return { success: false, reason: 'INVALID_SLOT' };
     }
@@ -273,6 +359,7 @@ export class ServerPlayer {
   }
 
   public equipItem(slotIndex: number): { success: boolean; reason?: string } {
+    if (!this.isAlive()) return { success: false, reason: 'PLAYER_DEAD' };
     if (slotIndex < 0 || slotIndex >= this.inventory.length) {
       return { success: false, reason: 'INVALID_SLOT' };
     }
@@ -338,7 +425,10 @@ export class ServerPlayer {
       position: { x: Math.round(this.x), y: Math.round(this.y) },
       direction: Direction.DOWN,
       inventory: this.inventory.map(s => (s ? { ...s } : null)),
-      equipped: { ...this.equipped }
+      equipped: { ...this.equipped },
+      quests: this.getAllQuests(),
+      pendingRewards: this.pendingRewards.map(p => ({ ...p })),
+      activeTitle: this.activeTitle
     };
   }
 }

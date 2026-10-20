@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { CharacterClass, Direction, PlayerSnapshotState } from '@noobrpg/shared';
+import { CharacterClass, Direction, PlayerSnapshotState, TITLE_DEFINITIONS } from '@noobrpg/shared';
 
 export class RemotePlayer extends Phaser.GameObjects.Container {
   public readonly characterId: string;
@@ -9,6 +9,7 @@ export class RemotePlayer extends Phaser.GameObjects.Container {
 
   private sprite: Phaser.GameObjects.Sprite;
   private nameText: Phaser.GameObjects.Text;
+  private titleText: Phaser.GameObjects.Text;
   private hpBarBackground: Phaser.GameObjects.Rectangle;
   private hpBarFill: Phaser.GameObjects.Rectangle;
   private chatBubbleContainer: Phaser.GameObjects.Container;
@@ -61,6 +62,23 @@ export class RemotePlayer extends Phaser.GameObjects.Container {
     });
     this.nameText.setOrigin(0.5);
     this.add(this.nameText);
+
+    // 3b. Título Honorífico do Jogador
+    this.titleText = scene.add.text(0, -44, '', {
+      fontFamily: 'monospace',
+      fontSize: '7px',
+      color: '#facc15',
+      stroke: '#000000',
+      strokeThickness: 2,
+      fontStyle: 'bold'
+    });
+    this.titleText.setOrigin(0.5);
+    this.titleText.setVisible(false);
+    this.add(this.titleText);
+
+    if (state.activeTitle) {
+      this.setTitle(state.activeTitle);
+    }
 
     // 4. Balão de Fala de Chat
     this.chatBubbleContainer = scene.add.container(0, -52);
@@ -120,6 +138,23 @@ export class RemotePlayer extends Phaser.GameObjects.Container {
       this.characterClass = state.characterClass;
       this.sprite.setTexture(RemotePlayer.getTextureKey(state.characterClass));
     }
+    if (state.activeTitle !== undefined) {
+      this.setTitle(state.activeTitle);
+    }
+  }
+
+  public setTitle(titleId: string | null): void {
+    if (!titleId || !TITLE_DEFINITIONS[titleId]) {
+      this.titleText.setVisible(false);
+      this.titleText.setText('');
+      return;
+    }
+    const def = TITLE_DEFINITIONS[titleId];
+    this.titleText.setText(`<${def.name}>`);
+    if (def.color) {
+      this.titleText.setColor(def.color);
+    }
+    this.titleText.setVisible(true);
   }
 
   public updateInterpolation(_time: number, _delta: number): void {

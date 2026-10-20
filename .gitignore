@@ -11,11 +11,22 @@ coverage/
 dist/
 build/
 
-# Environment variables
+# Environment variables and secrets
 .env
-.env.local
-.env.*.local
+.env.*
 !.env.example
+!.env.*.example
+*.env
+*.env.local
+
+# Private Keys, Certificates and Wallets
+*.pem
+*.key
+*.cert
+*.crt
+id_rsa*
+*keypair*.json
+*secret*.json
 
 # IDE & OS
 .vscode/

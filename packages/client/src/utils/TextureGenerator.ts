@@ -74,8 +74,25 @@ export class TextureGenerator {
     if (!scene.textures.exists('prop_anvil')) {
       this.generateAnvilProp(scene);
     }
+    if (!scene.textures.exists('prop_alchemy_bench')) {
+      this.generateAlchemyBenchProp(scene);
+    }
     if (!scene.textures.exists('item_drop_bag')) {
       this.generateDropBag(scene);
+    }
+
+    // --- NPCs DA VILA INICIAL ---
+    if (!scene.textures.exists('npc_blacksmith')) {
+      this.generateBlacksmithSpritesheet(scene);
+    }
+    if (!scene.textures.exists('npc_elder')) {
+      this.generateElderSpritesheet(scene);
+    }
+    if (!scene.textures.exists('npc_guard')) {
+      this.generateGuardSpritesheet(scene);
+    }
+    if (!scene.textures.exists('npc_tavern')) {
+      this.generateTavernkeeperSpritesheet(scene);
     }
 
     // Ícones de itens
@@ -1753,6 +1770,66 @@ export class TextureGenerator {
     canvas.refresh();
   }
 
+  private static generateAlchemyBenchProp(scene: Phaser.Scene): void {
+    const canvas = scene.textures.createCanvas('prop_alchemy_bench', 22, 24);
+    if (!canvas) return;
+    const ctx = canvas.getContext();
+
+    ctx.clearRect(0, 0, 22, 24);
+
+    // Sombra ovalada no chão
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+    ctx.beginPath();
+    ctx.ellipse(11, 21, 9, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Pernas da bancada rústica de carvalho
+    ctx.fillStyle = '#451a03';
+    ctx.fillRect(3, 13, 3, 8);
+    ctx.fillRect(16, 13, 3, 8);
+    ctx.fillStyle = '#78350f';
+    ctx.fillRect(4, 13, 2, 8);
+    ctx.fillRect(17, 13, 2, 8);
+
+    // Tampo da mesa de madeira
+    ctx.fillStyle = '#78350f';
+    ctx.fillRect(2, 9, 18, 5);
+    ctx.fillStyle = '#92400e';
+    ctx.fillRect(2, 8, 18, 2);
+    ctx.fillStyle = '#b45309';
+    ctx.fillRect(3, 8, 16, 1);
+
+    // Frasco de elixir verde esmeralda (erva)
+    ctx.fillStyle = '#065f46';
+    ctx.fillRect(4, 4, 4, 5);
+    ctx.fillStyle = '#10b981';
+    ctx.fillRect(5, 5, 2, 3);
+    ctx.fillStyle = '#34d399';
+    ctx.fillRect(5, 5, 1, 1);
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fillRect(5, 3, 2, 1); // rolha/tampa
+
+    // Frasco de poção vermelha de cura
+    ctx.fillStyle = '#991b1b';
+    ctx.fillRect(10, 4, 4, 5);
+    ctx.fillStyle = '#ef4444';
+    ctx.fillRect(11, 5, 2, 3);
+    ctx.fillStyle = '#fca5a5';
+    ctx.fillRect(11, 5, 1, 1);
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fillRect(11, 3, 2, 1);
+
+    // Alambique / Retorta de vidro
+    ctx.fillStyle = '#94a3b8';
+    ctx.fillRect(16, 3, 3, 6);
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillRect(16, 6, 3, 3);
+    ctx.fillStyle = '#fbbf24';
+    ctx.fillRect(17, 2, 1, 1); // vapor / chama
+
+    canvas.refresh();
+  }
+
   private static generateDropBag(scene: Phaser.Scene): void {
     const canvas = scene.textures.createCanvas('item_drop_bag', 12, 12);
     if (!canvas) return;
@@ -1968,6 +2045,31 @@ export class TextureGenerator {
           ctx.fillStyle = '#e2e8f0';
           ctx.fillRect(7, 3, 1, 11);
         }
+      },
+      {
+        key: 'icon_trophy',
+        draw: ctx => {
+          // Troféu Dourado de Conquistas (pixel art 16x16)
+          ctx.fillStyle = '#f59e0b';
+          ctx.fillRect(4, 2, 8, 6);
+          ctx.fillStyle = '#fbbf24';
+          ctx.fillRect(5, 3, 6, 4);
+
+          // Alças laterais
+          ctx.fillStyle = '#d97706';
+          ctx.fillRect(2, 3, 2, 4);
+          ctx.fillRect(12, 3, 2, 4);
+
+          // Haste
+          ctx.fillStyle = '#b45309';
+          ctx.fillRect(7, 8, 2, 3);
+
+          // Base
+          ctx.fillStyle = '#78350f';
+          ctx.fillRect(4, 11, 8, 3);
+          ctx.fillStyle = '#f59e0b';
+          ctx.fillRect(5, 11, 6, 1);
+        }
       }
     ];
 
@@ -1983,4 +2085,674 @@ export class TextureGenerator {
       }
     });
   }
+
+  // --- 8. FERREIRO BRANN (Avental de couro resistente, barba ruiva, braços fortes e martelo de forja) ---
+  private static generateBlacksmithSpritesheet(scene: Phaser.Scene): void {
+    const canvas = scene.textures.createCanvas('npc_blacksmith', 64, 72);
+    if (!canvas) return;
+    const ctx = canvas.getContext();
+    ctx.clearRect(0, 0, 64, 72);
+
+    for (let dir = 0; dir < 3; dir++) {
+      const yOffset = dir * 24;
+      for (let frame = 0; frame < 4; frame++) {
+        const xOffset = frame * 16;
+        this.drawBlacksmithFrame(ctx, xOffset, yOffset, dir, frame);
+        const frameIndex = dir * 4 + frame;
+        canvas.add(frameIndex, 0, xOffset, yOffset, 16, 24);
+      }
+    }
+    canvas.refresh();
+  }
+
+  private static drawBlacksmithFrame(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    direction: number,
+    frame: number
+  ): void {
+    // Sombra padronizada
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+    ctx.beginPath();
+    ctx.ellipse(x + 8, y + 22, 5, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    const breathe = frame === 1 || frame === 3 ? 1 : 0;
+    const hammerLift = frame === 1 ? -2 : frame === 3 ? 1 : 0;
+
+    if (direction === 0) {
+      // FRENTE (DOWN)
+      // Botas pesadas
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(x + 3, y + 19, 4, 4);
+      ctx.fillRect(x + 9, y + 19, 4, 4);
+      ctx.fillStyle = '#475569';
+      ctx.fillRect(x + 3, y + 20, 4, 1);
+      ctx.fillRect(x + 9, y + 20, 4, 1);
+
+      // Calças escuras
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(x + 4, y + 16, 8, 4);
+
+      // Camisa de mangas arregaçadas (tecido cru)
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillRect(x + 2, y + 9 - breathe, 12, 7);
+
+      // Avental de couro de ferreiro (marrom quente com tiras)
+      ctx.fillStyle = '#7c2d12';
+      ctx.fillRect(x + 4, y + 9 - breathe, 8, 10);
+      ctx.fillStyle = '#9a3412';
+      ctx.fillRect(x + 5, y + 10 - breathe, 6, 8);
+      // Tiras do avental cruzadas no peito e cinto
+      ctx.fillStyle = '#451a03';
+      ctx.fillRect(x + 4, y + 15 - breathe, 8, 2);
+      ctx.fillStyle = '#f59e0b'; // Fivela de bronze
+      ctx.fillRect(x + 7, y + 15 - breathe, 2, 2);
+
+      // Braço esquerdo musculoso (pele)
+      ctx.fillStyle = '#fed7aa';
+      ctx.fillRect(x + 1, y + 10 - breathe, 2, 6);
+      ctx.fillStyle = '#78350f'; // Luva de couro curta
+      ctx.fillRect(x + 1, y + 15 - breathe, 2, 3);
+
+      // Braço direito segurando martelo de forja
+      ctx.fillStyle = '#fed7aa';
+      ctx.fillRect(x + 13, y + 10 - breathe, 2, 5);
+      ctx.fillStyle = '#78350f'; // Luva
+      ctx.fillRect(x + 13, y + 14 - breathe, 2, 3);
+
+      // Martelo de forja pesado
+      ctx.fillStyle = '#5c2e0b'; // Cabo de madeira
+      ctx.fillRect(x + 14, y + 11 + hammerLift, 1, 9);
+      ctx.fillStyle = '#334155'; // Cabeça de aço temperado
+      ctx.fillRect(x + 12, y + 8 + hammerLift, 5, 4);
+      ctx.fillStyle = '#64748b';
+      ctx.fillRect(x + 13, y + 9 + hammerLift, 3, 2);
+      ctx.fillStyle = '#cbd5e1'; // Brilho no topo do martelo
+      ctx.fillRect(x + 12, y + 8 + hammerLift, 5, 1);
+
+      // Cabeça / Rosto
+      ctx.fillStyle = '#fed7aa'; // Tom de pele
+      ctx.fillRect(x + 5, y + 4 - breathe, 6, 6);
+
+      // Olhos concentrados
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(x + 6, y + 5 - breathe, 1, 1);
+      ctx.fillRect(x + 9, y + 5 - breathe, 1, 1);
+
+      // Farta barba ruiva cobrindo queixo e descendo no peito
+      ctx.fillStyle = '#c2410c';
+      ctx.fillRect(x + 4, y + 6 - breathe, 8, 4);
+      ctx.fillRect(x + 5, y + 10 - breathe, 6, 2);
+      ctx.fillStyle = '#ea580c';
+      ctx.fillRect(x + 5, y + 7 - breathe, 6, 2);
+
+      // Cabelo ruivo desgrenhado e bandana na testa
+      ctx.fillStyle = '#9a3412';
+      ctx.fillRect(x + 4, y + 1 - breathe, 8, 3);
+      ctx.fillRect(x + 3, y + 3 - breathe, 1, 3);
+      ctx.fillRect(x + 12, y + 3 - breathe, 1, 3);
+      ctx.fillStyle = '#991b1b'; // Bandana vermelha
+      ctx.fillRect(x + 4, y + 3 - breathe, 8, 2);
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(x + 5, y + 3 - breathe, 2, 1);
+
+    } else if (direction === 1) {
+      // COSTAS (UP)
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(x + 3, y + 19, 4, 4);
+      ctx.fillRect(x + 9, y + 19, 4, 4);
+
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(x + 4, y + 16, 8, 4);
+
+      // Costas da camisa e tiras cruzadas do avental
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillRect(x + 2, y + 9 - breathe, 12, 7);
+      ctx.fillStyle = '#7c2d12'; // Tiras em X
+      ctx.fillRect(x + 4, y + 9 - breathe, 2, 7);
+      ctx.fillRect(x + 10, y + 9 - breathe, 2, 7);
+
+      // Cinto nas costas
+      ctx.fillStyle = '#451a03';
+      ctx.fillRect(x + 4, y + 15 - breathe, 8, 2);
+
+      // Martelo visível de costas
+      ctx.fillStyle = '#5c2e0b';
+      ctx.fillRect(x + 14, y + 11 + hammerLift, 1, 9);
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(x + 12, y + 8 + hammerLift, 5, 4);
+
+      // Cabelo ruivo e bandana vista de costas com nó
+      ctx.fillStyle = '#9a3412';
+      ctx.fillRect(x + 4, y + 1 - breathe, 8, 6);
+      ctx.fillStyle = '#991b1b';
+      ctx.fillRect(x + 4, y + 4 - breathe, 8, 2);
+      ctx.fillStyle = '#ef4444'; // Ponta do nó da bandana
+      ctx.fillRect(x + 7, y + 5 - breathe, 2, 3);
+
+    } else {
+      // PERFIL / LADO (RIGHT)
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(x + 5, y + 19, 5, 4);
+
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(x + 5, y + 16, 6, 4);
+
+      // Camisa e avental de perfil
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillRect(x + 3, y + 9 - breathe, 8, 7);
+      ctx.fillStyle = '#7c2d12';
+      ctx.fillRect(x + 6, y + 9 - breathe, 5, 9);
+      ctx.fillStyle = '#451a03';
+      ctx.fillRect(x + 4, y + 15 - breathe, 8, 2);
+
+      // Martelo de perfil na mão
+      ctx.fillStyle = '#5c2e0b';
+      ctx.fillRect(x + 11, y + 11 + hammerLift, 2, 8);
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(x + 9, y + 7 + hammerLift, 5, 5);
+      ctx.fillStyle = '#cbd5e1';
+      ctx.fillRect(x + 9, y + 7 + hammerLift, 5, 1);
+
+      // Braço em primeiro plano
+      ctx.fillStyle = '#fed7aa';
+      ctx.fillRect(x + 7, y + 10 - breathe, 3, 5);
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(x + 9, y + 13 - breathe, 3, 3);
+
+      // Rosto e barba de perfil
+      ctx.fillStyle = '#fed7aa';
+      ctx.fillRect(x + 5, y + 4 - breathe, 6, 5);
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(x + 9, y + 5 - breathe, 1, 1); // Olho
+      ctx.fillStyle = '#c2410c';
+      ctx.fillRect(x + 8, y + 6 - breathe, 5, 5); // Barba perfil
+
+      // Cabelo e bandana
+      ctx.fillStyle = '#9a3412';
+      ctx.fillRect(x + 3, y + 1 - breathe, 8, 4);
+      ctx.fillStyle = '#991b1b';
+      ctx.fillRect(x + 4, y + 3 - breathe, 7, 2);
+    }
+  }
+
+  // --- 9. ANCIÃO ALDOR (Túnica azul cerimonial com bordados de ouro, barba branca e cajado com cristal) ---
+  private static generateElderSpritesheet(scene: Phaser.Scene): void {
+    const canvas = scene.textures.createCanvas('npc_elder', 64, 72);
+    if (!canvas) return;
+    const ctx = canvas.getContext();
+    ctx.clearRect(0, 0, 64, 72);
+
+    for (let dir = 0; dir < 3; dir++) {
+      const yOffset = dir * 24;
+      for (let frame = 0; frame < 4; frame++) {
+        const xOffset = frame * 16;
+        this.drawElderFrame(ctx, xOffset, yOffset, dir, frame);
+        const frameIndex = dir * 4 + frame;
+        canvas.add(frameIndex, 0, xOffset, yOffset, 16, 24);
+      }
+    }
+    canvas.refresh();
+  }
+
+  private static drawElderFrame(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    direction: number,
+    frame: number
+  ): void {
+    // Sombra padronizada
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+    ctx.beginPath();
+    ctx.ellipse(x + 8, y + 22, 5, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    const breathe = frame === 1 || frame === 3 ? 1 : 0;
+    const crystalGlow = frame === 1 || frame === 2;
+
+    if (direction === 0) {
+      // FRENTE (DOWN)
+      // Túnica longa cobrindo as pernas
+      ctx.fillStyle = '#1e3a8a'; // Azul real profundo
+      ctx.fillRect(x + 3, y + 9 - breathe, 10, 13);
+      ctx.fillStyle = '#1d4ed8'; // Luz central da túnica
+      ctx.fillRect(x + 5, y + 10 - breathe, 6, 12);
+
+      // Bordado sagrado em fio de ouro na barra da túnica
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(x + 3, y + 21, 10, 1);
+      ctx.fillRect(x + 4, y + 20, 8, 1);
+      ctx.fillStyle = '#fef08a';
+      ctx.fillRect(x + 7, y + 20, 2, 1);
+
+      // Faixa / Cinto cerimonial dourado com medalhão
+      ctx.fillStyle = '#d97706';
+      ctx.fillRect(x + 4, y + 13 - breathe, 8, 2);
+      ctx.fillStyle = '#fef08a';
+      ctx.fillRect(x + 7, y + 13 - breathe, 2, 2);
+
+      // Mão direita do Ancião segurando a túnica
+      ctx.fillStyle = '#fed7aa';
+      ctx.fillRect(x + 2, y + 12 - breathe, 2, 3);
+
+      // Braço esquerdo estendido segurando o cajado ancestral
+      ctx.fillStyle = '#1e3a8a';
+      ctx.fillRect(x + 12, y + 10 - breathe, 3, 3);
+      ctx.fillStyle = '#fed7aa';
+      ctx.fillRect(x + 12, y + 13 - breathe, 2, 2);
+
+      // Cajado sagrado de carvalho ancestral
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(x + 13, y + 3, 1, 19);
+      ctx.fillStyle = '#92400e';
+      ctx.fillRect(x + 13, y + 5, 1, 4);
+
+      // Engaste superior do cajado
+      ctx.fillStyle = '#d97706';
+      ctx.fillRect(x + 12, y + 2, 3, 2);
+
+      // Cristal mágico pulsante no topo do cajado
+      ctx.fillStyle = crystalGlow ? '#67e8f9' : '#38bdf8';
+      ctx.fillRect(x + 12, y + 0, 3, 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(x + 13, y + 0, 1, 1);
+
+      // Aura sutil de magia ao redor do cristal
+      if (crystalGlow) {
+        ctx.fillStyle = 'rgba(103, 232, 249, 0.45)';
+        ctx.fillRect(x + 11, y + 0, 5, 3);
+      }
+
+      // Rosto do Ancião
+      ctx.fillStyle = '#fed7aa';
+      ctx.fillRect(x + 5, y + 4 - breathe, 6, 5);
+
+      // Olhos sábios azuis luminosos
+      ctx.fillStyle = '#0284c7';
+      ctx.fillRect(x + 6, y + 5 - breathe, 1, 1);
+      ctx.fillRect(x + 9, y + 5 - breathe, 1, 1);
+
+      // Barba venerável longa branca descendo sobre o peito
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(x + 5, y + 6 - breathe, 6, 7);
+      ctx.fillRect(x + 6, y + 13 - breathe, 4, 3);
+      ctx.fillRect(x + 7, y + 16 - breathe, 2, 1);
+      ctx.fillStyle = '#e2e8f0'; // Sombra da barba
+      ctx.fillRect(x + 5, y + 8 - breathe, 1, 4);
+      ctx.fillRect(x + 10, y + 8 - breathe, 1, 4);
+
+      // Cabelo longo branco nas laterais e topo
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(x + 4, y + 1 - breathe, 8, 3);
+      ctx.fillRect(x + 3, y + 3 - breathe, 2, 6);
+      ctx.fillRect(x + 11, y + 3 - breathe, 2, 6);
+      // Diadema / Tiara de ouro na testa
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(x + 5, y + 3 - breathe, 6, 1);
+      ctx.fillStyle = '#38bdf8'; // Gema azul no centro do diadema
+      ctx.fillRect(x + 7, y + 3 - breathe, 2, 1);
+
+    } else if (direction === 1) {
+      // COSTAS (UP)
+      // Manto azul fluindo pelas costas
+      ctx.fillStyle = '#1e3a8a';
+      ctx.fillRect(x + 3, y + 9 - breathe, 10, 13);
+      ctx.fillStyle = '#172554';
+      ctx.fillRect(x + 4, y + 11 - breathe, 8, 10);
+
+      // Bordado dourado na barra
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(x + 3, y + 21, 10, 1);
+
+      // Cajado visto de trás
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(x + 13, y + 3, 1, 19);
+      ctx.fillStyle = crystalGlow ? '#67e8f9' : '#38bdf8';
+      ctx.fillRect(x + 12, y + 0, 3, 2);
+
+      // Longos cabelos alvos cobrindo as costas
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(x + 4, y + 1 - breathe, 8, 9);
+      ctx.fillRect(x + 5, y + 10 - breathe, 6, 3);
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillRect(x + 5, y + 5 - breathe, 6, 5);
+
+    } else {
+      // PERFIL / LADO (RIGHT)
+      // Túnica de perfil
+      ctx.fillStyle = '#1e3a8a';
+      ctx.fillRect(x + 4, y + 9 - breathe, 8, 13);
+      ctx.fillStyle = '#1d4ed8';
+      ctx.fillRect(x + 5, y + 10 - breathe, 6, 11);
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(x + 4, y + 21, 8, 1);
+
+      // Cajado empunhado à frente
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(x + 11, y + 3, 1, 19);
+      ctx.fillStyle = crystalGlow ? '#67e8f9' : '#38bdf8';
+      ctx.fillRect(x + 10, y + 0, 3, 2);
+
+      // Mão segurando cajado
+      ctx.fillStyle = '#fed7aa';
+      ctx.fillRect(x + 10, y + 12 - breathe, 2, 2);
+
+      // Rosto e perfil com barba
+      ctx.fillStyle = '#fed7aa';
+      ctx.fillRect(x + 5, y + 4 - breathe, 5, 5);
+      ctx.fillStyle = '#0284c7';
+      ctx.fillRect(x + 9, y + 5 - breathe, 1, 1); // Olho
+      ctx.fillStyle = '#f8fafc'; // Barba fluindo à frente
+      ctx.fillRect(x + 7, y + 6 - breathe, 5, 8);
+      ctx.fillRect(x + 8, y + 14 - breathe, 3, 3);
+
+      // Cabelo branco de perfil
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(x + 3, y + 1 - breathe, 7, 7);
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(x + 5, y + 3 - breathe, 4, 1);
+    }
+  }
+
+  // --- 10. GUARDA DO PORTÃO (Armadura de aço polido, elmo com pluma escarlate, alabarda e escudo azul) ---
+  private static generateGuardSpritesheet(scene: Phaser.Scene): void {
+    const canvas = scene.textures.createCanvas('npc_guard', 64, 72);
+    if (!canvas) return;
+    const ctx = canvas.getContext();
+    ctx.clearRect(0, 0, 64, 72);
+
+    for (let dir = 0; dir < 3; dir++) {
+      const yOffset = dir * 24;
+      for (let frame = 0; frame < 4; frame++) {
+        const xOffset = frame * 16;
+        this.drawGuardFrame(ctx, xOffset, yOffset, dir, frame);
+        const frameIndex = dir * 4 + frame;
+        canvas.add(frameIndex, 0, xOffset, yOffset, 16, 24);
+      }
+    }
+    canvas.refresh();
+  }
+
+  private static drawGuardFrame(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    direction: number,
+    frame: number
+  ): void {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+    ctx.beginPath();
+    ctx.ellipse(x + 8, y + 22, 5, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    const breathe = frame === 1 || frame === 3 ? 1 : 0;
+
+    if (direction === 0) {
+      // FRENTE (DOWN)
+      // Botas de ferro
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(x + 4, y + 20, 3, 3);
+      ctx.fillRect(x + 9, y + 20, 3, 3);
+      ctx.fillStyle = '#64748b';
+      ctx.fillRect(x + 4, y + 20, 3, 1);
+      ctx.fillRect(x + 9, y + 20, 3, 1);
+
+      // Grevas e pernas
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(x + 4, y + 15, 3, 5);
+      ctx.fillRect(x + 9, y + 15, 3, 5);
+
+      // Cota de malha e saia de placas
+      ctx.fillStyle = '#475569';
+      ctx.fillRect(x + 4, y + 13 - breathe, 8, 3);
+
+      // Peitoral de aço polido
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillRect(x + 4, y + 8 - breathe, 8, 6);
+      ctx.fillStyle = '#cbd5e1'; // Brilho metálico
+      ctx.fillRect(x + 5, y + 9 - breathe, 2, 4);
+      ctx.fillStyle = '#475569'; // Sombra da armadura
+      ctx.fillRect(x + 10, y + 9 - breathe, 2, 4);
+
+      // Faixa azul da guarnição de Aethelgard
+      ctx.fillStyle = '#2563eb';
+      ctx.fillRect(x + 5, y + 8 - breathe, 6, 2);
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(x + 7, y + 8 - breathe, 2, 2);
+
+      // Alabarda erguida na mão direita
+      ctx.fillStyle = '#78350f'; // Haste
+      ctx.fillRect(x + 13, y + 1, 1, 21);
+      ctx.fillStyle = '#e2e8f0'; // Lâmina de aço
+      ctx.fillRect(x + 12, y + 0, 3, 3);
+      ctx.fillRect(x + 14, y + 2, 2, 2);
+      ctx.fillStyle = '#64748b'; // Manopla
+      ctx.fillRect(x + 12, y + 11 - breathe, 2, 3);
+
+      // Escudo com brasão na mão esquerda
+      ctx.fillStyle = '#1d4ed8'; // Azul
+      ctx.fillRect(x + 1, y + 9 - breathe, 4, 8);
+      ctx.fillStyle = '#f59e0b'; // Borda dourada
+      ctx.strokeRect(x + 0.5, y + 8.5 - breathe, 5, 9);
+      ctx.fillStyle = '#fef08a'; // Emblema
+      ctx.fillRect(x + 2, y + 12 - breathe, 2, 2);
+
+      // Elmo fechado de guarda com viseira
+      ctx.fillStyle = '#64748b';
+      ctx.fillRect(x + 4, y + 3 - breathe, 8, 6);
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillRect(x + 5, y + 3 - breathe, 6, 2);
+      // Viseira horizontal
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(x + 5, y + 6 - breathe, 6, 1);
+
+      // Pluma escarlate no topo do elmo
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(x + 7, y + 0 - breathe, 2, 3);
+      ctx.fillStyle = '#ef4444';
+      ctx.fillRect(x + 8, y + 1 - breathe, 1, 2);
+
+    } else if (direction === 1) {
+      // COSTAS (UP)
+      // Botas
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(x + 4, y + 20, 3, 3);
+      ctx.fillRect(x + 9, y + 20, 3, 3);
+
+      // Armadura dorsal
+      ctx.fillStyle = '#475569';
+      ctx.fillRect(x + 4, y + 8 - breathe, 8, 8);
+      ctx.fillStyle = '#64748b';
+      ctx.fillRect(x + 5, y + 9 - breathe, 6, 6);
+
+      // Alabarda
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(x + 13, y + 1, 1, 21);
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillRect(x + 12, y + 0, 3, 3);
+
+      // Escudo nas costas/lado
+      ctx.fillStyle = '#1d4ed8';
+      ctx.fillRect(x + 1, y + 9 - breathe, 4, 8);
+
+      // Elmo visto de trás com pluma
+      ctx.fillStyle = '#64748b';
+      ctx.fillRect(x + 4, y + 3 - breathe, 8, 6);
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(x + 7, y + 0 - breathe, 2, 4);
+
+    } else {
+      // PERFIL (RIGHT)
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(x + 5, y + 20, 4, 3);
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(x + 5, y + 15, 4, 5);
+
+      // Armadura de perfil
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillRect(x + 4, y + 8 - breathe, 7, 7);
+
+      // Alabarda empunhada à frente
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(x + 12, y + 1, 1, 21);
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillRect(x + 11, y + 0, 3, 3);
+
+      // Manopla
+      ctx.fillStyle = '#64748b';
+      ctx.fillRect(x + 11, y + 11 - breathe, 2, 3);
+
+      // Elmo de perfil com viseira
+      ctx.fillStyle = '#64748b';
+      ctx.fillRect(x + 4, y + 3 - breathe, 7, 6);
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(x + 8, y + 6 - breathe, 3, 1);
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(x + 6, y + 0 - breathe, 2, 4);
+    }
+  }
+
+  // --- 11. TAVERNEIRO TOBIN (Avental de couro, camisa rústica, caneco espumante e bigode ruivo) ---
+  private static generateTavernkeeperSpritesheet(scene: Phaser.Scene): void {
+    const canvas = scene.textures.createCanvas('npc_tavern', 64, 72);
+    if (!canvas) return;
+    const ctx = canvas.getContext();
+    ctx.clearRect(0, 0, 64, 72);
+
+    for (let dir = 0; dir < 3; dir++) {
+      const yOffset = dir * 24;
+      for (let frame = 0; frame < 4; frame++) {
+        const xOffset = frame * 16;
+        this.drawTavernkeeperFrame(ctx, xOffset, yOffset, dir, frame);
+        const frameIndex = dir * 4 + frame;
+        canvas.add(frameIndex, 0, xOffset, yOffset, 16, 24);
+      }
+    }
+    canvas.refresh();
+  }
+
+  private static drawTavernkeeperFrame(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    direction: number,
+    frame: number
+  ): void {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+    ctx.beginPath();
+    ctx.ellipse(x + 8, y + 22, 5, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    const breathe = frame === 1 || frame === 3 ? 1 : 0;
+
+    if (direction === 0) {
+      // FRENTE (DOWN)
+      // Botas marrons
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(x + 4, y + 21, 3, 2);
+      ctx.fillRect(x + 9, y + 21, 3, 2);
+
+      // Calças escuras
+      ctx.fillStyle = '#451a03';
+      ctx.fillRect(x + 4, y + 16, 8, 5);
+
+      // Camisa creme/branca de mangas compridas
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(x + 3, y + 8 - breathe, 10, 8);
+
+      // Avental de taverneiro de couro
+      ctx.fillStyle = '#b45309';
+      ctx.fillRect(x + 5, y + 10 - breathe, 6, 9);
+      ctx.fillStyle = '#92400e';
+      ctx.fillRect(x + 4, y + 13 - breathe, 8, 1); // Cinto do avental
+
+      // Caneco de madeira espumante na mão esquerda
+      ctx.fillStyle = '#92400e'; // Caneco
+      ctx.fillRect(x + 12, y + 11 - breathe, 3, 4);
+      ctx.fillStyle = '#fef08a'; // Cerveja/infusão
+      ctx.fillRect(x + 12, y + 10 - breathe, 3, 1);
+      ctx.fillStyle = '#ffffff'; // Espuma
+      ctx.fillRect(x + 12, y + 9 - breathe, 3, 2);
+
+      // Pano de prato no ombro direito
+      ctx.fillStyle = '#cbd5e1';
+      ctx.fillRect(x + 3, y + 8 - breathe, 2, 5);
+
+      // Rosto amigável e bochechas
+      ctx.fillStyle = '#fed7aa';
+      ctx.fillRect(x + 5, y + 3 - breathe, 6, 6);
+      ctx.fillStyle = '#f43f5e'; // Bochechas coradas
+      ctx.fillRect(x + 5, y + 6 - breathe, 1, 1);
+      ctx.fillRect(x + 10, y + 6 - breathe, 1, 1);
+
+      // Olhos castanhos alegres
+      ctx.fillStyle = '#451a03';
+      ctx.fillRect(x + 6, y + 5 - breathe, 1, 1);
+      ctx.fillRect(x + 9, y + 5 - breathe, 1, 1);
+
+      // Bigode espesso ruivo/castanho
+      ctx.fillStyle = '#9a3412';
+      ctx.fillRect(x + 5, y + 7 - breathe, 6, 2);
+
+      // Cabelo castanho com entradas
+      ctx.fillStyle = '#7c2d12';
+      ctx.fillRect(x + 4, y + 1 - breathe, 8, 3);
+      ctx.fillRect(x + 3, y + 3 - breathe, 2, 4);
+      ctx.fillRect(x + 11, y + 3 - breathe, 2, 4);
+
+    } else if (direction === 1) {
+      // COSTAS (UP)
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(x + 4, y + 21, 3, 2);
+      ctx.fillRect(x + 9, y + 21, 3, 2);
+
+      ctx.fillStyle = '#451a03';
+      ctx.fillRect(x + 4, y + 16, 8, 5);
+
+      // Camisa e tiras do avental nas costas
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(x + 3, y + 8 - breathe, 10, 8);
+      ctx.fillStyle = '#b45309';
+      ctx.fillRect(x + 5, y + 9 - breathe, 1, 6);
+      ctx.fillRect(x + 10, y + 9 - breathe, 1, 6);
+
+      // Cabelo visto de trás
+      ctx.fillStyle = '#7c2d12';
+      ctx.fillRect(x + 4, y + 1 - breathe, 8, 6);
+
+    } else {
+      // PERFIL (RIGHT)
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(x + 5, y + 21, 4, 2);
+      ctx.fillStyle = '#451a03';
+      ctx.fillRect(x + 5, y + 16, 4, 5);
+
+      // Camisa e avental de perfil
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(x + 4, y + 8 - breathe, 7, 8);
+      ctx.fillStyle = '#b45309';
+      ctx.fillRect(x + 6, y + 10 - breathe, 5, 8);
+
+      // Caneco à frente
+      ctx.fillStyle = '#92400e';
+      ctx.fillRect(x + 11, y + 11 - breathe, 3, 4);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(x + 11, y + 9 - breathe, 3, 2);
+
+      // Rosto e bigode de perfil
+      ctx.fillStyle = '#fed7aa';
+      ctx.fillRect(x + 5, y + 3 - breathe, 5, 6);
+      ctx.fillStyle = '#451a03';
+      ctx.fillRect(x + 9, y + 5 - breathe, 1, 1); // Olho
+      ctx.fillStyle = '#9a3412';
+      ctx.fillRect(x + 8, y + 7 - breathe, 4, 2); // Bigode
+
+      ctx.fillStyle = '#7c2d12';
+      ctx.fillRect(x + 3, y + 1 - breathe, 7, 5);
+    }
+  }
 }
+

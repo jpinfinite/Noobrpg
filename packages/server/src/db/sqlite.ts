@@ -24,15 +24,37 @@ export class SqliteDatabase implements IDatabase {
     };
   }
 
+  private transactionQueue: Promise<void> = Promise.resolve();
+
   public async transaction<T>(callback: (tx: IDatabase) => Promise<T>): Promise<T> {
-    this.db.exec('BEGIN TRANSACTION;');
+    const executeTx = async () => {
+      this.db.exec('BEGIN TRANSACTION;');
+      try {
+        const result = await callback(this);
+        this.db.exec('COMMIT;');
+        return result;
+      } catch (err) {
+        try {
+          this.db.exec('ROLLBACK;');
+        } catch (_) {
+          // Ignora erro se já abortado
+        }
+        throw err;
+      }
+    };
+
+    // Serializa a execução de transações na conexão SQLite de escrita única
+    let releaseQueue: () => void;
+    const previousQueue = this.transactionQueue;
+    this.transactionQueue = new Promise<void>(resolve => {
+      releaseQueue = resolve;
+    });
+
+    await previousQueue;
     try {
-      const result = await callback(this);
-      this.db.exec('COMMIT;');
-      return result;
-    } catch (err) {
-      this.db.exec('ROLLBACK;');
-      throw err;
+      return await executeTx();
+    } finally {
+      releaseQueue!();
     }
   }
 

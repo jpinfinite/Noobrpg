@@ -1,0 +1,17 @@
+{
+  "name": "tileset_prototype",
+  "image": "tileset_prototype.png",
+  "imagewidth": 128,
+  "imageheight": 64,
+  "tilewidth": 16,
+  "tileheight": 16,
+  "tilecount": 32,
+  "columns": 8,
+  "margin": 0,
+  "spacing": 0,
+  "properties": {
+    "pixelArt": true,
+    "filterMode": "Point",
+    "compression": "None"
+  }
+}

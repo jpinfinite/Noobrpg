@@ -62,3 +62,64 @@ export interface SessionRecord {
   created_at: string;
 }
 
+export interface CharacterAchievementRecord {
+  id: string;
+  character_id: string;
+  achievement_id: string;
+  progress: number;
+  completed: number;
+  unlocked_at: string | null;
+  reward_claimed: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CharacterTitleRecord {
+  id: string;
+  character_id: string;
+  title_id: string;
+  unlocked_at: string;
+}
+
+export type NoobCoinRewardStatus =
+  | 'PENDING'
+  | 'APPROVED'
+  | 'QUEUED'
+  | 'SUBMITTED'
+  | 'CONFIRMED'
+  | 'REJECTED'
+  | 'CANCELLED';
+
+export interface NoobCoinRewardRecord {
+  id: string;
+  character_id: string;
+  account_id: string;
+  reward_type: string;
+  source_event: string;
+  amount_raw: number; // Unidades mínimas inteiras (6 decimais: 1 NOOB = 1.000.000)
+  status: NoobCoinRewardStatus;
+  idempotency_key: string;
+  source_operation_id: string | null;
+  onchain_tx_signature: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NoobCoinDailyLimitRecord {
+  id: string;
+  entity_type: 'ACCOUNT' | 'CHARACTER';
+  entity_id: string;
+  limit_date: string;
+  total_amount_raw: number;
+  rewards_count: number;
+  updated_at: string;
+}
+
+export interface NoobCoinConfigRecord {
+  key: string;
+  value: string;
+  updated_at: string;
+}
+
+
+

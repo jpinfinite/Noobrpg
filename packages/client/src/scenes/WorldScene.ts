@@ -6,7 +6,9 @@ import { RemotePlayer } from '../entities/RemotePlayer.js';
 import { EnvironmentProp } from '../entities/EnvironmentProp.js';
 import { GatheringNode } from '../entities/GatheringNode.js';
 import { CraftingStation } from '../entities/CraftingStation.js';
+import { AlchemyStation } from '../entities/AlchemyStation.js';
 import { GroundItem } from '../entities/GroundItem.js';
+import { NPC } from '../entities/NPC.js';
 import { ApiClient } from '../net/ApiClient.js';
 import { MultiplayerClient } from '../net/MultiplayerClient.js';
 import { SoundEffects } from '../audio/SoundEffects.js';
@@ -19,6 +21,8 @@ export class WorldScene extends Phaser.Scene {
   private gatheringNodes: GatheringNode[] = [];
   private groundItems: GroundItem[] = [];
   private craftingStation!: CraftingStation;
+  private alchemyStation!: AlchemyStation;
+  private npcs: NPC[] = [];
   private map!: Phaser.Tilemaps.Tilemap;
   private groundBaseLayer?: Phaser.Tilemaps.TilemapLayer;
   private groundDecoLayer?: Phaser.Tilemaps.TilemapLayer;
@@ -28,6 +32,7 @@ export class WorldScene extends Phaser.Scene {
   private waterAnimationTimer?: Phaser.Time.TimerEvent;
   private initialPlayerData?: PlayerData;
   private autoSaveTimer?: Phaser.Time.TimerEvent;
+  private activeMapKey: string = 'map_prototype';
 
   // Multiplayer em Tempo Real (Fase 5B e 6)
   private localPlayerId: string = '';
@@ -44,6 +49,7 @@ export class WorldScene extends Phaser.Scene {
   private unreadChatCount: number = 0;
   private chatBadgeEl?: HTMLElement;
   private chatToggleBtnEl?: HTMLElement;
+  private gateHintText?: Phaser.GameObjects.Text;
 
   constructor() {
     super({ key: 'WorldScene' });
@@ -57,11 +63,17 @@ export class WorldScene extends Phaser.Scene {
   }
 
   public create(): void {
-    // 0. Inicializa sistema de áudio retrô
+    // 0. Inicializa sistema de áudio retrô e transição visual suave
     SoundEffects.getInstance().init();
+    this.cameras.main.fadeIn(250, 0, 0, 0);
 
-    // 1. Tilemap
-    this.map = this.make.tilemap({ key: 'map_prototype' });
+    // 1. Tilemap (Suporta alternância segura para staging via URL param ?map=starter_village)
+    const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+    const isStarterVillage = searchParams?.get('map') === 'starter_village';
+    const activeMapKey = isStarterVillage ? 'map_starter_village' : 'map_prototype';
+    this.activeMapKey = activeMapKey;
+
+    this.map = this.make.tilemap({ key: activeMapKey });
     const tileset = this.map.addTilesetImage('tileset_prototype', 'tileset_prototype');
 
     if (!tileset) {
@@ -78,32 +90,48 @@ export class WorldScene extends Phaser.Scene {
     this.groundDecoLayer = this.map.createLayer('Ground_Deco', tileset, 0, 0) as Phaser.Tilemaps.TilemapLayer;
     this.groundDecoLayer?.setDepth(1);
 
-    // Camada física sólida de colisão
+    // Camada física sólida de colisão (compatível tanto com propriedade 'collides' quanto exclusão)
     this.collisionLayer = this.map.createLayer('Collision', tileset, 0, 0) as Phaser.Tilemaps.TilemapLayer;
     this.collisionLayer?.setDepth(2);
     this.collisionLayer.setCollisionByProperty({ collides: true });
+    this.collisionLayer.setCollisionByExclusion([-1, 0]);
 
     // Camada superior de folhagem/copas aéreas (renderizada acima das entidades)
     this.overheadFoliageLayer = this.map.createLayer('Overhead_Foliage', tileset, 0, 0) as Phaser.Tilemaps.TilemapLayer;
     this.overheadFoliageLayer?.setDepth(2000);
 
-    // Animação sutil de cintilação do lago em 3 frames
-    this.setupWaterAnimation();
+    // Animação sutil de cintilação do lago em 3 frames (específica do lago do protótipo)
+    if (!isStarterVillage) {
+      this.setupWaterAnimation();
+    }
 
     // 2. Props decorativos
     this.propsGroup = this.physics.add.staticGroup();
     this.spawnEnvironmentProps();
 
-    // 3. Forja de Crafting na praça
-    this.craftingStation = new CraftingStation(this, 190, 140);
+    // 3. Forja de Crafting na praça (ajustada para a praça da vila inicial em staging)
+    const craftingX = isStarterVillage ? 440 : 190;
+    const craftingY = isStarterVillage ? 310 : 140;
+    this.craftingStation = new CraftingStation(this, craftingX, craftingY);
     this.propsGroup.add(this.craftingStation);
 
+    // 3.2. Bancada de Alquimia (próxima à taverna para preparo de poções)
+    const alchemyX = isStarterVillage ? 530 : 220;
+    const alchemyY = isStarterVillage ? 290 : 180;
+    this.alchemyStation = new AlchemyStation(this, alchemyX, alchemyY);
+    this.propsGroup.add(this.alchemyStation);
+
+    // 3.5. NPCs Interativos (Ferreiro Brann e Ancião Aldor)
+    this.spawnNpcs(isStarterVillage);
+
     // 4. Nós de Coleta
-    this.spawnGatheringNodes();
+    this.spawnGatheringNodes(isStarterVillage);
 
     // 5. Jogador carregado com dados autoritativos do servidor
-    const spawnX = this.initialPlayerData?.position?.x || 180;
-    const spawnY = this.initialPlayerData?.position?.y || 160;
+    const defaultSpawnX = isStarterVillage ? 464 : 180;
+    const defaultSpawnY = isStarterVillage ? 320 : 160;
+    const spawnX = this.initialPlayerData?.position?.x || defaultSpawnX;
+    const spawnY = this.initialPlayerData?.position?.y || defaultSpawnY;
     const charClass = this.initialPlayerData?.characterClass || CharacterClass.WARRIOR;
     this.player = new Player(this, spawnX, spawnY, charClass, this.initialPlayerData);
     this.lastSentX = spawnX;
@@ -111,7 +139,7 @@ export class WorldScene extends Phaser.Scene {
 
     // 6. Monstros locais/estáticos
     this.monstersGroup = this.physics.add.group();
-    this.spawnMonsters();
+    this.spawnMonsters(isStarterVillage);
 
     // 7. Colisões
     this.physics.add.collider(this.player, this.collisionLayer);
@@ -150,10 +178,22 @@ export class WorldScene extends Phaser.Scene {
     // 11. Interface de Chat no DOM
     this.setupChatUI();
 
-    // 12. UIScene
+    // 12. Indicador Flutuante de Portões de Transição
+    this.gateHintText = this.add.text(0, 0, '', {
+      fontSize: '11px',
+      fontFamily: 'monospace',
+      color: '#facc15',
+      backgroundColor: 'rgba(0, 0, 0, 0.75)',
+      padding: { x: 5, y: 3 }
+    }).setOrigin(0.5, 1).setDepth(1500).setVisible(false);
+
+    // 13. Seletor de Mapa Dev/Staging (permite alternar para a Vila Inicial do Unity)
+    this.setupDevMapToggle(isStarterVillage);
+
+    // 13. UIScene
     this.scene.launch('UIScene', { player: this.player });
 
-    // 13. Hook de encerramento da cena (limpeza garantida)
+    // 14. Hook de encerramento da cena (limpeza garantida)
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.shutdown());
   }
 
@@ -192,9 +232,17 @@ export class WorldScene extends Phaser.Scene {
       node.updateNode(delta, this.player, this.player.isInteractDown);
     }
 
-    // Atualiza interação com a bigorna
+    // Atualiza interação com a bigorna e bancada de alquimia
     if (this.craftingStation) {
       this.craftingStation.updateStation(this.player, this.player.isInteractDown);
+    }
+    if (this.alchemyStation) {
+      this.alchemyStation.updateStation(this.player, this.player.isInteractDown);
+    }
+
+    // Atualiza NPCs interativos (Ferreiro Brann e Ancião Aldor)
+    for (const npc of this.npcs) {
+      npc.updateNPC(delta, this.player, this.player.isInteractDown);
     }
 
     // Checa coleta de itens soltos no chão
@@ -211,6 +259,49 @@ export class WorldScene extends Phaser.Scene {
     if (this.player) {
       for (const tree of this.environmentTrees) {
         tree.updateCanopyOcclusion(this.player.x, this.player.y);
+      }
+
+      // Checagem de saídas / portões bidirecionais
+      const isVillage = this.activeMapKey === 'map_starter_village';
+      if (isVillage) {
+        const distNorth = Phaser.Math.Distance.Between(this.player.x, this.player.y, 456, 30);
+        const distSouth = Phaser.Math.Distance.Between(this.player.x, this.player.y, 456, 600);
+        const nearNorth = distNorth <= 40;
+        const nearSouth = distSouth <= 40;
+        if (nearNorth || nearSouth) {
+          if (this.gateHintText) {
+            this.gateHintText
+              .setText(nearNorth ? '[F] Portão Norte (Planícies)' : '[F] Portão Sul (Planícies)')
+              .setPosition(this.player.x, this.player.y - 28)
+              .setVisible(true);
+          }
+          if (this.player.isInteractDown) {
+            this.events.emit('request-change-map', {
+              targetMapKey: 'map_prototype',
+              transitionZone: nearNorth ? 'gate_north' : 'gate_south'
+            });
+          }
+        } else if (this.gateHintText && this.gateHintText.visible) {
+          this.gateHintText.setVisible(false);
+        }
+      } else {
+        const distPlainsGate = Phaser.Math.Distance.Between(this.player.x, this.player.y, 180, 160);
+        if (distPlainsGate <= 40) {
+          if (this.gateHintText) {
+            this.gateHintText
+              .setText('[F] Estrada para a Vila Inicial')
+              .setPosition(this.player.x, this.player.y - 28)
+              .setVisible(true);
+          }
+          if (this.player.isInteractDown) {
+            this.events.emit('request-change-map', {
+              targetMapKey: 'map_starter_village',
+              transitionZone: 'gate_plains_to_village'
+            });
+          }
+        } else if (this.gateHintText && this.gateHintText.visible) {
+          this.gateHintText.setVisible(false);
+        }
       }
     }
   }
@@ -301,7 +392,120 @@ export class WorldScene extends Phaser.Scene {
         }
       },
       onError: (err) => {
-        this.addChatMessage('Erro', err.message, 'system');
+        this.addChatMessage('Aviso', err.message, 'system');
+        if (this.player) {
+          this.events.emit('floating-text', {
+            x: this.player.x,
+            y: this.player.y - 25,
+            text: `⚠️ ${err.message}`,
+            color: '#f87171'
+          });
+        }
+      },
+      onQuestUpdate: (payload) => {
+        this.events.emit('quest-updated', payload);
+      },
+      onInventoryUpdate: (payload) => {
+        if (this.player && this.player.playerData) {
+          this.player.playerData.inventory = payload.inventory;
+          this.player.playerData.equipped = payload.equipped;
+          this.player.playerData.gold = payload.gold;
+          this.player.playerData.currentXp = payload.currentXp;
+          this.player.playerData.level = payload.level;
+
+          this.events.emit('player-updated', this.player.playerData);
+          this.events.emit('inventory-updated', payload.inventory);
+
+          if (payload.message) {
+            this.addChatMessage('Sistema', payload.message, 'system');
+            this.events.emit('floating-text', {
+              x: this.player.x,
+              y: this.player.y - 25,
+              text: payload.message,
+              color: '#38bdf8'
+            });
+          }
+        }
+      },
+      onPendingRewardsUpdate: (payload) => {
+        if (this.player) {
+          this.player.playerData.pendingRewards = payload.pendingRewards;
+          this.events.emit('pending-rewards-updated', payload);
+          if (payload.message) {
+            this.addChatMessage('Sistema', payload.message, 'system');
+            this.events.emit('floating-text', {
+              x: this.player.x,
+              y: this.player.y - 35,
+              text: payload.message,
+              color: '#f59e0b'
+            });
+          }
+        }
+      },
+      onAchievementsUpdate: (payload) => {
+        this.events.emit('achievements-updated', payload);
+      },
+      onAchievementUnlocked: (payload) => {
+        this.events.emit('achievement-unlocked', payload);
+        const achTitle = payload.achievement?.title || 'Nova Conquista';
+        this.addChatMessage('Sistema', `🏆 Conquista Desbloqueada: ${achTitle}!`, 'system');
+        if (this.player) {
+          this.events.emit('floating-text', {
+            x: this.player.x,
+            y: this.player.y - 30,
+            text: `🏆 ${achTitle}!`,
+            color: '#facc15'
+          });
+        }
+      },
+      onTitleEquipped: (payload) => {
+        if (payload.characterId === this.localPlayerId && this.player) {
+          this.player.playerData.activeTitle = payload.titleId;
+          this.events.emit('player-updated', this.player.playerData);
+        }
+        const remote = this.remotePlayers.get(payload.characterId);
+        if (remote) {
+          remote.setTitle(payload.titleId);
+        }
+      },
+      onMapChanged: (payload) => {
+        if (this.player) {
+          this.player.setPosition(payload.spawnX, payload.spawnY);
+          this.addChatMessage('Sistema', payload.message || `Transição para o mapa ${payload.mapKey}`, 'system');
+          this.events.emit('floating-text', {
+            x: this.player.x,
+            y: this.player.y - 30,
+            text: `🗺️ Entrando em: ${payload.mapKey}`,
+            color: '#a855f7'
+          });
+
+          if (typeof window !== 'undefined') {
+            const url = new URL(window.location.href);
+            if (payload.mapKey === 'map_starter_village' || payload.mapKey === 'starter_village') {
+              url.searchParams.set('map', 'starter_village');
+            } else {
+              url.searchParams.delete('map');
+            }
+            window.history.replaceState({}, '', url.toString());
+          }
+
+          // Polimento visual: transição suave com fade-out e fallback seguro contra tela preta
+          this.cameras.main.fadeOut(250, 0, 0, 0);
+          let restarted = false;
+          const doRestart = () => {
+            if (restarted) return;
+            restarted = true;
+            this.scene.restart({
+              playerData: {
+                ...this.player.playerData,
+                position: { x: payload.spawnX, y: payload.spawnY }
+              }
+            });
+          };
+
+          this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, doRestart);
+          this.time.delayedCall(300, doRestart);
+        }
       },
       onDisconnect: () => {
         this.addChatMessage('Aviso', 'Conexão com o servidor perdida. Tentando reconectar...', 'system');
@@ -393,6 +597,18 @@ export class WorldScene extends Phaser.Scene {
           this.monstersGroup.add(mob);
         }
         mob.updateFromSnapshot(mState);
+      }
+    }
+
+    // 5. Sincroniza itens no chão (GroundItems) autoritativos
+    if (snapshot.groundItems) {
+      for (const itemState of snapshot.groundItems) {
+        let existing = this.groundItems.find(gi => (gi as any).serverDropId === itemState.id);
+        if (!existing) {
+          const newItem = new GroundItem(this, itemState.x, itemState.y, itemState.itemId, itemState.quantity);
+          (newItem as any).serverDropId = itemState.id;
+          this.groundItems.push(newItem);
+        }
       }
     }
   }
@@ -627,7 +843,27 @@ export class WorldScene extends Phaser.Scene {
     }
   }
 
-  private spawnGatheringNodes(): void {
+  private spawnGatheringNodes(isStarterVillage: boolean = false): void {
+    if (isStarterVillage) {
+      // Nós de coleta posicionados nas áreas periféricas livres da Vila Inicial
+      const tree1 = new GatheringNode(this, 220, 180, GatheringNodeType.TREE);
+      const tree2 = new GatheringNode(this, 700, 180, GatheringNodeType.TREE);
+      this.gatheringNodes.push(tree1, tree2);
+      this.propsGroup.add(tree1);
+      this.propsGroup.add(tree2);
+
+      const ore1 = new GatheringNode(this, 180, 140, GatheringNodeType.ORE_VEIN);
+      const ore2 = new GatheringNode(this, 280, 100, GatheringNodeType.ORE_VEIN);
+      this.gatheringNodes.push(ore1, ore2);
+      this.propsGroup.add(ore1);
+      this.propsGroup.add(ore2);
+
+      const herb1 = new GatheringNode(this, 360, 420, GatheringNodeType.HERB_BUSH);
+      const herb2 = new GatheringNode(this, 640, 300, GatheringNodeType.HERB_BUSH);
+      this.gatheringNodes.push(herb1, herb2);
+      return;
+    }
+
     const treeNode1 = new GatheringNode(this, 90, 80, GatheringNodeType.TREE);
     const treeNode2 = new GatheringNode(this, 300, 210, GatheringNodeType.TREE);
     this.gatheringNodes.push(treeNode1, treeNode2);
@@ -645,7 +881,71 @@ export class WorldScene extends Phaser.Scene {
     this.gatheringNodes.push(herbNode1, herbNode2);
   }
 
-  private spawnMonsters(): void {
+  private spawnNpcs(isStarterVillage: boolean): void {
+    const elderPos = isStarterVillage ? { x: 464, y: 280 } : { x: 180, y: 120 };
+    const blacksmithPos = isStarterVillage ? { x: 410, y: 310 } : { x: 160, y: 140 };
+    const guardPos = isStarterVillage ? { x: 450, y: 90 } : { x: 210, y: 130 };
+    const tavernPos = isStarterVillage ? { x: 510, y: 290 } : { x: 200, y: 180 };
+
+    const elder = new NPC(this, elderPos.x, elderPos.y, {
+      id: 'npc_elder',
+      name: 'Ancião Aldor',
+      role: 'Guia de Aethelgard',
+      textureKey: 'npc_elder',
+      nameColor: '#fef08a'
+    });
+
+    const blacksmith = new NPC(this, blacksmithPos.x, blacksmithPos.y, {
+      id: 'npc_blacksmith',
+      name: 'Ferreiro Brann',
+      role: 'Mestre da Forja',
+      textureKey: 'npc_blacksmith',
+      nameColor: '#fb923c'
+    });
+
+    const guard = new NPC(this, guardPos.x, guardPos.y, {
+      id: 'npc_guard',
+      name: 'Guarda Alistair',
+      role: 'Sentinela do Portão',
+      textureKey: 'npc_guard',
+      nameColor: '#38bdf8'
+    });
+
+    const tavern = new NPC(this, tavernPos.x, tavernPos.y, {
+      id: 'npc_tavern',
+      name: 'Taverneiro Tobin',
+      role: 'Hospedeiro da Taverna',
+      textureKey: 'npc_tavern',
+      nameColor: '#4ade80'
+    });
+
+    this.npcs.push(elder, blacksmith, guard, tavern);
+    this.propsGroup.add(elder);
+    this.propsGroup.add(blacksmith);
+    this.propsGroup.add(guard);
+    this.propsGroup.add(tavern);
+  }
+
+  private spawnMonsters(isStarterVillage: boolean = false): void {
+    if (isStarterVillage) {
+      // Monstros da Zona Exterior da Vila Inicial (fora da Safe Zone da praça central)
+      const villageMobs = [
+        { id: 'mob_village_slime_1', type: MonsterType.SLIME, x: 620, y: 220 },
+        { id: 'mob_village_slime_2', type: MonsterType.SLIME, x: 680, y: 240 },
+        { id: 'mob_village_slime_3', type: MonsterType.SLIME, x: 320, y: 460 },
+        { id: 'mob_village_goblin_1', type: MonsterType.GOBLIN, x: 260, y: 220 },
+        { id: 'mob_village_skeleton_1', type: MonsterType.SKELETON, x: 180, y: 520 },
+        { id: 'mob_village_skeleton_2', type: MonsterType.SKELETON, x: 260, y: 540 }
+      ];
+
+      villageMobs.forEach(m => {
+        const mob = new Monster(this, m.x, m.y, m.type, m.id);
+        this.monsters.push(mob);
+        this.monstersGroup.add(mob);
+      });
+      return;
+    }
+
     const slimeSpawns = [
       { id: 'mob_slime_1', x: 220, y: 130 },
       { id: 'mob_slime_2', x: 120, y: 190 },
@@ -722,7 +1022,41 @@ export class WorldScene extends Phaser.Scene {
 
     this.events.on('player-attack-action', (data: { targetMonsterId?: string; isSkill: boolean }) => {
       if (data.targetMonsterId && this.multiplayerClient) {
-        this.multiplayerClient.sendAttack(data.targetMonsterId);
+        if (data.isSkill) {
+          this.multiplayerClient.sendSkill1(data.targetMonsterId);
+        } else {
+          this.multiplayerClient.sendAttack(data.targetMonsterId);
+        }
+      }
+    });
+
+    this.events.on('request-craft-recipe', (data: { recipeId: string }) => {
+      if (this.multiplayerClient && this.multiplayerClient.isConnected()) {
+        this.multiplayerClient.sendCraft(data.recipeId);
+      }
+    });
+
+    this.events.on('request-pickup-item', (data: { groundItemId: string }) => {
+      if (this.multiplayerClient && this.multiplayerClient.isConnected()) {
+        this.multiplayerClient.sendPickup(data.groundItemId);
+      }
+    });
+
+    this.events.on('request-equip-item', (data: { slotIndex: number }) => {
+      if (this.multiplayerClient && this.multiplayerClient.isConnected()) {
+        this.multiplayerClient.sendEquip(data.slotIndex);
+      }
+    });
+
+    this.events.on('request-use-item', (data: { slotIndex: number }) => {
+      if (this.multiplayerClient && this.multiplayerClient.isConnected()) {
+        this.multiplayerClient.sendUseItem(data.slotIndex);
+      }
+    });
+
+    this.events.on('request-change-map', (data: { targetMapKey: string; transitionZone?: string }) => {
+      if (this.multiplayerClient && this.multiplayerClient.isConnected()) {
+        this.multiplayerClient.sendChangeMap(data.targetMapKey, data.transitionZone);
       }
     });
 
@@ -748,6 +1082,40 @@ export class WorldScene extends Phaser.Scene {
       delay: 20000,
       loop: true,
       callback: () => this.saveProgress()
+    });
+
+    this.events.on('request-quest-action', (data: { questId: string; npcId: string; action?: string }) => {
+      if (this.multiplayerClient && this.multiplayerClient.isConnected()) {
+        this.multiplayerClient.sendQuestAction(data.questId, data.npcId, data.action);
+      }
+    });
+
+    this.events.on('claim-pending-rewards', () => {
+      if (this.multiplayerClient && this.multiplayerClient.isConnected()) {
+        this.multiplayerClient.sendClaimPendingRewards();
+      }
+    });
+
+    this.events.on('request-get-achievements', () => {
+      if (this.multiplayerClient && this.multiplayerClient.isConnected()) {
+        this.multiplayerClient.sendGetAchievements();
+      }
+    });
+
+    this.events.on('request-equip-title', (data: { titleId: string | null }) => {
+      if (this.multiplayerClient && this.multiplayerClient.isConnected()) {
+        this.multiplayerClient.sendEquipTitle(data.titleId);
+      }
+    });
+
+    this.events.on('request-claim-achievement-reward', (data: { achievementId: string }) => {
+      if (this.multiplayerClient && this.multiplayerClient.isConnected()) {
+        this.multiplayerClient.sendClaimAchievementReward(data.achievementId);
+      }
+    });
+
+    this.input.keyboard?.on('keydown-Y', () => {
+      this.events.emit('toggle-achievements');
     });
 
     this.events.on('request-save-and-exit', async () => {
@@ -832,6 +1200,69 @@ export class WorldScene extends Phaser.Scene {
     }
     this.remotePlayers.clear();
     this.environmentTrees = [];
+
+    for (const npc of this.npcs) {
+      npc.destroy();
+    }
+    this.npcs = [];
+
+    const mapToggle = document.getElementById('noobrpg-dev-map-toggle');
+    if (mapToggle) mapToggle.remove();
+  }
+
+  private setupDevMapToggle(isStarterVillage: boolean): void {
+    const prev = document.getElementById('noobrpg-dev-map-toggle');
+    if (prev) prev.remove();
+
+    const viewport = document.getElementById('game-viewport') || document.body;
+    const btn = document.createElement('button');
+    btn.id = 'noobrpg-dev-map-toggle';
+    btn.style.position = 'absolute';
+    btn.style.top = '10px';
+    btn.style.right = '10px';
+    btn.style.zIndex = '99999';
+    btn.style.background = 'rgba(15, 23, 42, 0.88)';
+    btn.style.color = isStarterVillage ? '#38bdf8' : '#e2e8f0';
+    btn.style.border = isStarterVillage ? '1px solid #38bdf8' : '1px solid #475569';
+    btn.style.borderRadius = '6px';
+    btn.style.padding = '6px 12px';
+    btn.style.fontSize = '11px';
+    btn.style.fontFamily = 'monospace';
+    btn.style.cursor = 'pointer';
+    btn.style.backdropFilter = 'blur(6px)';
+    btn.style.boxShadow = '0 2px 8px rgba(0,0,0,0.6)';
+    btn.style.transition = 'all 0.2s ease';
+    btn.textContent = isStarterVillage
+      ? '🗺️ Vila Inicial (Unity Staging) ➔ Voltar ao Protótipo'
+      : '🗺️ Testar Vila Inicial (Unity Staging)';
+
+    btn.title = 'Alternar entre o mapa de produção e a Vila Inicial criada com Unity 6';
+
+    btn.onmouseover = () => {
+      btn.style.transform = 'scale(1.04)';
+      btn.style.borderColor = '#38bdf8';
+    };
+    btn.onmouseout = () => {
+      btn.style.transform = 'scale(1.0)';
+      btn.style.borderColor = isStarterVillage ? '#38bdf8' : '#475569';
+    };
+
+    btn.onclick = () => {
+      const targetMap = isStarterVillage ? 'map_prototype' : 'map_starter_village';
+      if (this.multiplayerClient && this.multiplayerClient.isConnected()) {
+        this.events.emit('request-change-map', { targetMapKey: targetMap });
+      } else {
+        const url = new URL(window.location.href);
+        if (isStarterVillage) {
+          url.searchParams.delete('map');
+        } else {
+          url.searchParams.set('map', 'starter_village');
+        }
+        window.location.href = url.toString();
+      }
+    };
+
+    viewport.appendChild(btn);
   }
 
   private setupWaterAnimation(): void {

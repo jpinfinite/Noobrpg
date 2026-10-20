@@ -9,6 +9,7 @@ export class PreloadScene extends Phaser.Scene {
     const assetsBaseUrl = ((import.meta as any).env?.VITE_ASSETS_BASE_URL as string) || './assets';
     const cleanBase = assetsBaseUrl.endsWith('/') ? assetsBaseUrl.slice(0, -1) : assetsBaseUrl;
     this.load.tilemapTiledJSON('map_prototype', `${cleanBase}/maps/map_prototype.json`);
+    this.load.tilemapTiledJSON('map_starter_village', `${cleanBase}/staging/map_starter_village.json`);
 
     // Carregamento dos spritesheets pixel art das 4 classes de personagens (Fase 3.4)
     const heroSheets = [

@@ -10,6 +10,7 @@ export interface RoomClient {
   characterId: string;
   characterName: string;
   joinedAt: number;
+  mapKey?: string;
 }
 
 export abstract class Room {
@@ -37,7 +38,7 @@ export abstract class Room {
 
   public abstract onJoin(client: RoomClient): Promise<boolean>;
   public abstract onLeave(characterId: string): Promise<void>;
-  public abstract onMessage(characterId: string, type: NetMessageType, payload: any): void;
+  public abstract onMessage(characterId: string, type: NetMessageType, payload: any): void | Promise<void>;
 
   /**
    * Envia uma mensagem para um cliente específico na sala

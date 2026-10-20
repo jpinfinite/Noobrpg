@@ -397,4 +397,29 @@ export class SoundEffects {
       osc.stop(start + 0.08);
     });
   }
+
+  /**
+   * Clique sutil de interface / diálogo
+   */
+  public playUiClick(): void {
+    if (!this.ensureReady() || !this.ctx || !this.masterGain) return;
+    const now = this.ctx.currentTime;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(800, now);
+    osc.frequency.exponentialRampToValueAtTime(400, now + 0.04);
+
+    gain.gain.setValueAtTime(0.2, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+
+    osc.connect(gain);
+    gain.connect(this.masterGain);
+
+    osc.start(now);
+    osc.stop(now + 0.04);
+  }
 }
+

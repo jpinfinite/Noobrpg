@@ -4,6 +4,8 @@ import {
   Direction,
   InventorySlot,
   PlayerData,
+  QuestProgress,
+  PendingRewardItem,
   CLASS_BASE_ATTRIBUTES,
   ITEM_DEFINITIONS,
   INVENTORY_CONSTANTS,
@@ -15,6 +17,9 @@ import { CharacterRepository } from '../repositories/characterRepository.js';
 import { InventoryRepository } from '../repositories/inventoryRepository.js';
 import { EquipmentRepository } from '../repositories/equipmentRepository.js';
 import { GoldLedgerRepository } from '../repositories/goldLedgerRepository.js';
+import { QuestRepository } from '../repositories/questRepository.js';
+import { PendingRewardRepository } from '../repositories/pendingRewardRepository.js';
+import { AchievementRepository } from '../repositories/achievementRepository.js';
 
 export interface SaveCharacterPayload {
   position?: { x: number; y: number };
@@ -27,13 +32,24 @@ export interface SaveCharacterPayload {
 }
 
 export class CharacterService {
+  private questRepo: QuestRepository;
+  private pendingRewardRepo: PendingRewardRepository;
+  private achievementRepo: AchievementRepository;
+
   constructor(
     private db: IDatabase,
     private characterRepo: CharacterRepository,
     private inventoryRepo: InventoryRepository,
     private equipmentRepo: EquipmentRepository,
-    private goldLedgerRepo: GoldLedgerRepository
-  ) {}
+    private goldLedgerRepo: GoldLedgerRepository,
+    questRepo?: QuestRepository,
+    pendingRewardRepo?: PendingRewardRepository,
+    achievementRepo?: AchievementRepository
+  ) {
+    this.questRepo = questRepo || new QuestRepository(db);
+    this.pendingRewardRepo = pendingRewardRepo || new PendingRewardRepository(db);
+    this.achievementRepo = achievementRepo || new AchievementRepository(db);
+  }
 
   public async createCharacter(
     accountId: string,
@@ -148,14 +164,23 @@ export class CharacterService {
     return this.characterRepo.listByAccountId(accountId);
   }
 
-  public async getCharacter(accountId: string, characterId: string): Promise<PlayerData> {
-    const char = await this.characterRepo.findByIdAndAccount(characterId, accountId);
+  public async getCharacter(accountOrCharId: string, maybeCharId?: string): Promise<PlayerData> {
+    const accountId = maybeCharId ? accountOrCharId : undefined;
+    const characterId = maybeCharId || accountOrCharId;
+
+    const char = accountId
+      ? await this.characterRepo.findByIdAndAccount(characterId, accountId)
+      : await this.characterRepo.findById(characterId);
+
     if (!char) {
       throw new Error('Personagem não encontrado ou você não tem permissão para acessá-lo.');
     }
 
     const inventoryRows = await this.inventoryRepo.getByCharacterId(characterId);
     const equipmentRow = await this.equipmentRepo.getByCharacterId(characterId);
+    const quests = await this.questRepo.getAllQuests(characterId);
+    const pendingRewards = await this.pendingRewardRepo.getByCharacterId(characterId);
+    const activeTitle = await this.achievementRepo.getActiveTitle(characterId);
 
     const inventorySlots = inventoryRows.map(r => ({
       slotIndex: r.slot_index,
@@ -169,16 +194,28 @@ export class CharacterService {
       accessory: equipmentRow?.accessory_item_id || null
     };
 
-    return this.formatPlayerData(char, inventorySlots, equipment);
+    return this.formatPlayerData(char, inventorySlots, equipment, quests, pendingRewards, activeTitle);
   }
 
   public async getCharacterRecord(characterId: string): Promise<CharacterRecord | null> {
     return this.characterRepo.findById(characterId);
   }
 
+  public async saveQuestProgress(characterId: string, quest: QuestProgress): Promise<void> {
+    await this.questRepo.saveQuest(characterId, quest);
+  }
+
+  public async getQuestProgress(characterId: string, questId: string): Promise<QuestProgress | null> {
+    return this.questRepo.getQuest(characterId, questId);
+  }
+
+  public async getAllQuests(characterId: string): Promise<Record<string, QuestProgress>> {
+    return this.questRepo.getAllQuests(characterId);
+  }
+
   public async saveAuthoritativePlayer(
-    playerId: string,
-    state: {
+    playerOrId: string | any,
+    statePayload?: {
       level: number;
       currentXp: number;
       gold: number;
@@ -189,13 +226,57 @@ export class CharacterService {
       version: number;
       inventory: (InventorySlot | null)[];
       equipped: { weapon: string | null; armor: string | null; accessory: string | null };
+      quests?: Record<string, QuestProgress>;
+      pendingRewards?: PendingRewardItem[];
+      goldSource?: string;
     }
   ): Promise<PlayerData> {
+    let playerId: string;
+    let state: {
+      level: number;
+      currentXp: number;
+      gold: number;
+      hp: number;
+      mp: number;
+      x: number;
+      y: number;
+      version: number;
+      inventory: (InventorySlot | null)[];
+      equipped: { weapon: string | null; armor: string | null; accessory: string | null };
+      quests?: Record<string, QuestProgress>;
+      pendingRewards?: PendingRewardItem[];
+      goldSource?: string;
+    };
+
+    if (typeof playerOrId === 'string') {
+      playerId = playerOrId;
+      state = statePayload!;
+    } else {
+      playerId = playerOrId.id;
+      state = {
+        level: playerOrId.level,
+        currentXp: playerOrId.currentXp,
+        gold: playerOrId.gold,
+        hp: playerOrId.hp ?? playerOrId.currentHp,
+        mp: playerOrId.mp ?? playerOrId.currentMp,
+        x: Math.round(playerOrId.x),
+        y: Math.round(playerOrId.y),
+        version: playerOrId.version,
+        inventory: playerOrId.inventory,
+        equipped: playerOrId.equipped,
+        quests: typeof playerOrId.getAllQuests === 'function' ? playerOrId.getAllQuests() : playerOrId.quests,
+        pendingRewards: playerOrId.pendingRewards,
+        goldSource: playerOrId.goldSource
+      };
+    }
+
     return await this.db.transaction(async tx => {
       const charRepo = new CharacterRepository(tx);
       const invRepo = new InventoryRepository(tx);
       const eqRepo = new EquipmentRepository(tx);
       const goldRepo = new GoldLedgerRepository(tx);
+      const questRepo = new QuestRepository(tx);
+      const pendingRepo = new PendingRewardRepository(tx);
 
       const char = await charRepo.findById(playerId);
       if (!char) {
@@ -209,7 +290,7 @@ export class CharacterService {
           playerId,
           goldDiff,
           state.gold,
-          'simulation_reward',
+          state.goldSource || 'simulation_reward',
           tx
         );
       }
@@ -243,7 +324,22 @@ export class CharacterService {
       // Persiste equipamentos
       await eqRepo.saveEquipment(playerId, state.equipped, tx);
 
-      return this.formatPlayerData(updatedChar, slotsToSave, state.equipped);
+      // Persiste quests se fornecido
+      if (state.quests) {
+        for (const quest of Object.values(state.quests)) {
+          await questRepo.saveQuest(playerId, quest, tx);
+        }
+      }
+
+      // Persiste recompensas pendentes se fornecido
+      if (state.pendingRewards !== undefined) {
+        await pendingRepo.savePendingRewards(playerId, state.pendingRewards, tx);
+      }
+
+      const quests = state.quests || await questRepo.getAllQuests(playerId, tx);
+      const pendingRewards = state.pendingRewards || await pendingRepo.getByCharacterId(playerId, tx);
+
+      return this.formatPlayerData(updatedChar, slotsToSave, state.equipped, quests, pendingRewards);
     });
   }
 
@@ -393,7 +489,10 @@ export class CharacterService {
   private formatPlayerData(
     char: CharacterRecord,
     inventorySlots: { slotIndex: number; itemId: string; quantity: number }[],
-    equipment: { weapon: string | null; armor: string | null; accessory: string | null }
+    equipment: { weapon: string | null; armor: string | null; accessory: string | null },
+    quests?: Record<string, QuestProgress>,
+    pendingRewards: PendingRewardItem[] = [],
+    activeTitle: string | null = null
   ): PlayerData {
     const charClass = char.character_class as CharacterClass;
     const baseAttrs = calculateAttributesForLevel(charClass, char.level);
@@ -454,7 +553,11 @@ export class CharacterService {
       position: { x: char.pos_x, y: char.pos_y },
       direction: Direction.DOWN,
       inventory: inventoryArray,
-      equipped: equipment
-    };
+      equipped: equipment,
+      quests: quests || {},
+      pendingRewards: pendingRewards || [],
+      activeTitle: activeTitle || null,
+      version: char.version
+    } as any;
   }
 }

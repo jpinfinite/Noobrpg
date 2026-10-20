@@ -1,0 +1,26 @@
+{
+  "name": "@noobrpg/solana-worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Serviço isolado em background para distribuição controlada e reconciliação do NoobCoin na Solana Devnet",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "test": "node --import tsx --test tests/*.test.ts"
+  },
+  "dependencies": {
+    "@noobrpg/shared": "*",
+    "@solana/spl-token": "^0.4.8",
+    "@solana/web3.js": "^1.95.3",
+    "bs58": "^6.0.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.4",
+    "tsx": "^4.19.1",
+    "typescript": "^5.5.4"
+  }
+}

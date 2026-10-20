@@ -57,6 +57,10 @@ export class GroundItem extends Phaser.Physics.Arcade.Sprite {
           color: '#38bdf8'
         });
 
+        this.scene.events.emit('request-pickup-item', {
+          groundItemId: (this as any).serverDropId || this.itemId
+        });
+
         this.destroy();
       } else {
         this.scene.events.emit('floating-text', {

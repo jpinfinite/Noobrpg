@@ -7,8 +7,10 @@ import { CharacterRepository } from './repositories/characterRepository.js';
 import { InventoryRepository } from './repositories/inventoryRepository.js';
 import { EquipmentRepository } from './repositories/equipmentRepository.js';
 import { GoldLedgerRepository } from './repositories/goldLedgerRepository.js';
+import { AchievementRepository } from './repositories/achievementRepository.js';
 import { AuthService } from './services/authService.js';
 import { CharacterService } from './services/characterService.js';
+import { AchievementService } from './services/achievementService.js';
 import { createAuthMiddleware } from './middleware/authMiddleware.js';
 import { createAuthRoutes } from './routes/authRoutes.js';
 import { createCharacterRoutes } from './routes/characterRoutes.js';
@@ -26,28 +28,35 @@ export function createApp(db: IDatabase, simulationInstance?: GameSimulation): E
   const inventoryRepo = new InventoryRepository(db);
   const equipmentRepo = new EquipmentRepository(db);
   const goldLedgerRepo = new GoldLedgerRepository(db);
+  const achievementRepo = new AchievementRepository(db);
 
   // Serviços
   const authService = new AuthService(accountRepo, sessionRepo);
+  const achievementService = new AchievementService(db, achievementRepo);
   const characterService = new CharacterService(
     db,
     characterRepo,
     inventoryRepo,
     equipmentRepo,
-    goldLedgerRepo
+    goldLedgerRepo,
+    undefined,
+    undefined,
+    achievementRepo
   );
 
   // Simulação Autoritativa
   const simulation = simulationInstance || new GameSimulation();
 
-  // Gerenciador de Salas Multiplayer (Fase 5B)
-  const roomManager = new RoomManager(characterService, simulation);
+  // Gerenciador de Salas Multiplayer (Fase 5B) com Conquistas
+  const roomManager = new RoomManager(characterService, simulation, achievementService);
 
   // Armazena no app.locals para consumo pelo servidor HTTP/WebSocket e testes
   app.locals.db = db;
   app.locals.authService = authService;
   app.locals.characterService = characterService;
   app.locals.characterRepo = characterRepo;
+  app.locals.achievementService = achievementService;
+  app.locals.achievementRepo = achievementRepo;
   app.locals.roomManager = roomManager;
   app.locals.simulation = simulation;
 

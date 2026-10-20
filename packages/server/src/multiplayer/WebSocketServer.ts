@@ -262,7 +262,8 @@ export class GameWebSocketServer {
       accountId: ws.accountId,
       characterId: character.id,
       characterName: character.name,
-      joinedAt: Date.now()
+      joinedAt: Date.now(),
+      mapKey: payload.mapKey
     });
 
     if (!joined) {

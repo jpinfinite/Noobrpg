@@ -120,7 +120,8 @@ export class AreaOfInterestManager {
           maxHp: p.getMaxHp(),
           mp: p.mp,
           maxMp: p.getMaxMp(),
-          isDead: p.isDead
+          isDead: p.isDead,
+          activeTitle: p.activeTitle || null
         });
       }
     }
@@ -205,7 +206,7 @@ export class AreaOfInterestManager {
       } else {
         // Já era visível: checa o que mudou
         const last = clientState.lastKnownPlayerStates.get(pId);
-        if (!last || last.x !== pState.x || last.y !== pState.y || last.hp !== pState.hp || last.mp !== pState.mp || last.level !== pState.level || last.isDead !== pState.isDead) {
+        if (!last || last.x !== pState.x || last.y !== pState.y || last.hp !== pState.hp || last.mp !== pState.mp || last.level !== pState.level || last.isDead !== pState.isDead || last.activeTitle !== pState.activeTitle) {
           const delta: PlayerDeltaState = { id: pId };
           if (!last || last.x !== pState.x) delta.x = pState.x;
           if (!last || last.y !== pState.y) delta.y = pState.y;
@@ -215,6 +216,7 @@ export class AreaOfInterestManager {
           if (!last || last.maxMp !== pState.maxMp) delta.maxMp = pState.maxMp;
           if (!last || last.level !== pState.level) delta.level = pState.level;
           if (!last || last.isDead !== pState.isDead) delta.isDead = pState.isDead;
+          if (!last || last.activeTitle !== pState.activeTitle) delta.activeTitle = pState.activeTitle;
           changedPlayers.push(delta);
         }
       }
