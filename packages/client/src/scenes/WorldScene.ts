@@ -69,15 +69,22 @@ export class WorldScene extends Phaser.Scene {
 
     // 1. Tilemap (Suporta alternância segura para staging via URL param ?map=starter_village)
     const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-    const isStarterVillage = searchParams?.get('map') === 'starter_village';
-    const activeMapKey = isStarterVillage ? 'map_starter_village' : 'map_prototype';
+    const isDarkArt = typeof window !== 'undefined' && (
+      searchParams?.get('art') === 'dark' ||
+      searchParams?.get('art') === 'new' ||
+      localStorage.getItem('art_theme') === 'dark' ||
+      (import.meta as any).env?.VITE_NEW_ART === '1'
+    );
+    const isStarterVillage = isDarkArt || searchParams?.get('map') === 'starter_village';
+    const activeMapKey = isDarkArt ? 'map_starter_village_dark' : (isStarterVillage ? 'map_starter_village' : 'map_prototype');
     this.activeMapKey = activeMapKey;
 
     this.map = this.make.tilemap({ key: activeMapKey });
-    const tileset = this.map.addTilesetImage('tileset_prototype', 'tileset_prototype');
+    const tilesetKey = isDarkArt ? 'tileset_dark' : 'tileset_prototype';
+    const tileset = this.map.addTilesetImage(tilesetKey, tilesetKey) || this.map.addTilesetImage('tileset_prototype', 'tileset_prototype');
 
     if (!tileset) {
-      console.error('Falha ao carregar tileset tileset_prototype');
+      console.error(`Falha ao carregar tileset ${tilesetKey}`);
       return;
     }
 
