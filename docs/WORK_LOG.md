@@ -1106,12 +1106,127 @@
    - Zero deploys no Cloudflare Pages, zero alterações de DNS.
    - Zero operações de NoobCoin (sem carteiras, sem faucets, sem mints, sem transações).
 
+---
 
+## [2026-10-20 00:45 BRT] — Ciclo 36: Missão 32 — Auditoria Final de Publicação e Preparação Segura do Deploy
 
+### Metas da Sessão
+- Inspecionar o estado real do repositório, branch Git, commits recentes e integridade da árvore de trabalho.
+- Auditar minuciosamente o frontend atualmente publicado em `https://noobrpg.pages.dev/` e comparar com o bundle local (`dist/`).
+- Executar e validar o build de produção oficial do cliente sem alterações destrutivas.
+- Executar testes automatizados relevantes de configuração de rede e salvaguarda de credenciais.
+- Avaliar os critérios formais para recomendação de deploy e identificar bloqueadores reais vs melhorias opcionais.
+- Estruturar a lista exata de ações, arquivos e comandos de deploy sem executá-los.
+- Preservar restrições invioláveis: zero deploy, zero alterações de DNS, zero criação de credenciais/carteiras/túneis e zero operações on-chain.
 
+### Ações Executadas
+1. **Inspeção do Repositório e Controle de Versão:**
+   - Branch: `master`.
+   - Commit HEAD local: `5e9a95f` (`test(multiplayer): bateria real MP-01 a MP-09 on-wire via Quick Tunnel e documentacao do Ciclo 35`).
+   - Status frente a `origin/master`: 3 commits locais à frente (`b6f9fa6`, `8bc0362`, `5e9a95f`).
+   - Árvore de trabalho: 100% limpa (`nothing to commit, working tree clean`), sem risco de perda de alterações.
+2. **Inspeção do Frontend Publicado (`https://noobrpg.pages.dev/`):**
+   - Status HTTP: `200 OK` (Cloudflare CDN).
+   - Bundle carregado: `assets/index-BSwK1yH8.js`.
+   - Constatação Factual: o bundle remoto é legado e contém URLs fixas para o túnel expirado `len-bit-election-notebooks.trycloudflare.com` (`serverUrl` e `baseUrl`), sem suporte ao parâmetro dinâmico `?server=`.
+3. **Inspeção do Bundle de Produção Local (`packages/client/dist/`):**
+   - Bundle gerado: `dist/assets/index-DnKwtGXZ.js` (223.62 kB) e `dist/assets/phaser-CaWnzXme.js` (1.48 MB).
+   - Verificação Factual via script Node:
+     - `Contains len-bit`: **false**
+     - `Contains trycloudflare`: **false**
+     - `WSS / HTTPS matches`: **null** (zero URLs hardcoded!)
+     - `VITE_WS_URL / VITE_API_URL`: **true** (lê do ambiente em tempo de build)
+     - `Suporte dinâmico`: **true** (processa `?server=`, `?ws=`, `?api=` com prevenção compulsória de Mixed Content).
+4. **Reprodução do Build e Testes Automatizados:**
+   - Build de produção oficial (`npm run build`): compilado com sucesso em 7.63s (código de saída 0).
+   - Testes de rede, credenciais e guarda Solana (`client_network_config.test.ts`, `security_credentials_guard.test.ts`, `network_guard.test.ts`): **27/27 PASS** (0 falhas em 559ms).
+5. **Classificação e Parecer Final:**
+   - Deploy de Produção com Backend Permanente: **`BLOQUEADO`** (não existe servidor/túnel permanente provisionado; Quick Tunnel é efêmero de teste).
+   - Atualização do Frontend no Pages para Staging / Testes Dinâmicos: **`PRONTO PARA AUTORIZAÇÃO DE DEPLOY`** (código compilado e validado, aguardando aprovação explícita do operador).
+6. **Salvaguarda Inviolável Confirmada:**
+   - Zero deploys executados no Cloudflare Pages.
+   - Zero alterações de DNS ou criação de túneis.
+   - Zero operações on-chain de NoobCoin.
 
+---
 
+## [2026-10-20 01:00 BRT] — Ciclo 37: Missão 33 — Preparação Segura do Git Push para Cloudflare Pages — Staging
 
+### Metas da Sessão
+- Auditar a integridade e prontidão do repositório para envio dos commits candidatos ao Cloudflare Pages via Git Push (`origin/master`).
+- Validar minuciosamente a relação entre HEAD local (`5e9a95f`) e `origin/master` (`252e19a`), com avanço linear estrito (ahead 3, behind 0).
+- Inspecionar isoladamente cada um dos 3 commits locais candidatos (`b6f9fa6`, `8bc0362`, `5e9a95f`) para confirmar ausência de segredos, ausência de alterações não relacionadas e presença exclusiva das correções de rede e testes.
+- Comprovar que o backend local (porta 4000) e o Quick Tunnel Cloudflare (`snake-parental-skiing-verified.trycloudflare.com`) continuam 100% ativos e saudáveis para testes externos imediatos pós-deploy.
+- Executar os testes automatizados de rede, credenciais e guards (27/27 PASS) e o build oficial de produção (código de saída 0 em 8.29s).
+- Estruturar o procedimento de verificação pós-deploy e o plano de reversão seguro sem comandos destrutivos.
+- Manter a salvaguarda principal da Missão 33: **zero execução de `git push`**, zero deploy pelo Wrangler, zero alterações remotas e zero transações de blockchain.
 
+### Ações Executadas
+1. **Inspeção de Controle de Versão e Commits Candidatos:**
+   - Branch: `master`. HEAD local: `5e9a95f` (3 commits à frente de `origin/master: 252e19a`, 0 commits atrás).
+   - Candidato 1 (`b6f9fa6`): Centralização de rede, módulo `networkConfig.ts`, injeção `?server=`, erradicação do túnel antigo `len-bit...`, WSS compulsório em HTTPS e 11 testes em `client_network_config.test.ts`.
+   - Candidato 2 (`8bc0362`): Documentação do Ciclo 34 (validação E2E do Quick Tunnel).
+   - Candidato 3 (`5e9a95f`): Script runner da suíte multiplayer MP-01 a MP-09 e documentação do Ciclo 35.
+2. **Validação do Destino Remoto e Efeito do Push:**
+   - Remote `origin`: `https://github.com/jpinfinite/Noobrpg.git` (sem credenciais embutidas).
+   - Fluxo Cloudflare Pages: O projeto `noobrpg` compila a branch `master` e atualiza diretamente o domínio público `https://noobrpg.pages.dev/`.
+3. **Auditoria da Infraestrutura de Staging:**
+   - Backend local (`http://localhost:4000/api/health`): HTTP 200 `{"status":"ok"}`.
+   - Quick Tunnel (`https://snake-parental-skiing-verified.trycloudflare.com/api/health`): HTTP 200 `{"status":"ok"}`.
+   - Ambos ativos e prontos para atender clientes externos que utilizem o parâmetro `?server=`.
+4. **Build e Testes Automatizados:**
+   - Testes de rede, credenciais e guard Solana (`client_network_config.test.ts`, `security_credentials_guard.test.ts`, `network_guard.test.ts`): **27/27 PASS** (0 falhas em 576ms).
+   - Build de produção (`npm run build`): compilado com sucesso em 8.29s (código 0).
+5. **NoobCoin e Governança:**
+   - Comprovada a ausência de chaves, carteiras ou transações no frontend e no build.
+   - Trava de `distribution_paused` e `WORKER_DRY_RUN` mantidas.
+6. **Salvaguarda Inviolável Cumprida:**
+   - O comando `git push origin master` foi estruturado e documentado no relatório, **SEM SER EXECUTADO**.
+   - Zero deploys, zero alterações DNS e zero operações on-chain.
+
+---
+
+## [2026-10-20 02:25 BRT] — Ciclo 38: Missão 37 — Publicação Controlada do Frontend NoobRPG em Produção
+
+### Metas da Sessão
+- Executar exclusivamente a atualização *fast-forward* da branch remota `main` para o commit atual validado de `master` (`5e9a95f`) via `git push origin master:main`.
+- Validar minuciosamente as pré-condições da Fase 1: HEAD local, integridade de `origin/master` e `origin/main`, linearidade genealógica estrita e preservação de alterações documentais não commitadas.
+- Confirmar com `git ls-remote` a sincronização de `origin/main` e `origin/master` no commit `5e9a95f`.
+- Acompanhar a conclusão do pipeline de build de produção no Cloudflare Pages e validar a atualização da URL raiz `https://noobrpg.pages.dev/`.
+- Comprovar criptograficamente a equivalência bit a bit do bundle servido na raiz em relação ao build local auditado (`assets/index-DnKwtGXZ.js`).
+- Manter restrições invioláveis: zero operações on-chain de NoobCoin, zero alterações de DNS ou variáveis no Cloudflare.
+
+### Ações Executadas
+1. **Pré-Verificação Obrigatória (Fase 1):**
+   - Confirmado `origin/main` pré-push em `6416f91d31e336865cc83d599d9dc6046e15284e`.
+   - Confirmado `origin/master` pré-push em `5e9a95fbb9026d471445b7c5e92fb90d5c5e8287`.
+   - Confirmado que `origin/main` é ancestral estrito de `HEAD` (`git merge-base --is-ancestor origin/main HEAD` -> 0).
+   - Identificados exatamente os 4 commits lineares (`252e19a`, `b6f9fa6`, `8bc0362`, `5e9a95f`).
+2. **Execução do Push Autorizado (Fase 2):**
+   - Comando executado: `git push origin master:main`.
+   - Código de saída: `0` (Sucesso).
+   - Saída: `6416f91..5e9a95f master -> main`.
+3. **Verificação Imediata Pós-Push (Fase 3):**
+   - `git ls-remote origin refs/heads/main refs/heads/master` comprovou:
+     - `origin/main`: `5e9a95fbb9026d471445b7c5e92fb90d5c5e8287`
+     - `origin/master`: `5e9a95fbb9026d471445b7c5e92fb90d5c5e8287`
+   - `git status --short`: alterações documentais não commitadas permanecem 100% preservadas.
+4. **Verificação de Produção no Cloudflare Pages:**
+   - URL raiz `https://noobrpg.pages.dev/` atualizada com sucesso pelo pipeline automático.
+   - Tag de script servida: `/assets/index-DnKwtGXZ.js`.
+   - Auditoria do conteúdo servido:
+     - `Contains len-bit`: **`false`** (túnel expirado 100% erradicado).
+     - `Contains trycloudflare`: **`false`**.
+     - `WSS fixo hardcoded`: **`null`**.
+     - `Suporte dinâmico`: **`true`** (processa `?server=`, `?ws=`, `?api=` e força WSS em HTTPS).
+5. **Auditoria Criptográfica de Equivalência:**
+   - Hash SHA-256 Local (`packages/client/dist/assets/index-DnKwtGXZ.js`):  
+     `e16697b6e21b1cf199b681c71fa28ea8cd613988938464457c6592c4df4ecab1`
+   - Hash SHA-256 Produção (`https://noobrpg.pages.dev/assets/index-DnKwtGXZ.js`):  
+     `e16697b6e21b1cf199b681c71fa28ea8cd613988938464457c6592c4df4ecab1`
+   - **Resultado:** **Idêntico bit a bit (`Bit-for-bit identical: true`)**.
+6. **Salvaguarda Inviolável:**
+   - Zero operações on-chain de NoobCoin.
+   - Zero alterações de DNS ou infraestrutura externa.
 
 

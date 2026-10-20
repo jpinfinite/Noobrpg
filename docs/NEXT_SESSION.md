@@ -150,19 +150,22 @@ Todas as tarefas de alta prioridade da auditoria de prontidão e expansão de ga
 - Mapa Canônico de Produção (`map_prototype.json`): **100% Preservado**
 
 ## 3. Próximos Passos (Segurança Operacional, Rede e Governança)
-1. **Bateria Multiplayer Real Validada On-Wire (Missão 31E):**
-   - Suíte MP-01 a MP-09 aprovada com 100% de sucesso entre 2 clientes independentes via túnel Cloudflare `snake-parental-skiing-verified.trycloudflare.com`.
-   - Autenticação independente, entrada no mundo, sincronização de posição (108ms/101ms), autoridade do servidor contra speedhack, combate, persistência SQLite e isolamento de sessão comprovados.
-   - 229 testes unitários/integração aprovados e build oficial gerado com 0 erros.
-2. **Defeito Identificado e Bloqueio Operacional do Cloudflare Pages:**
-   - **Diagnóstico:** O frontend publicado em `https://noobrpg.pages.dev/` executa um bundle antigo (`assets/index-BSwK1yH8.js`) que possui URLs hardcoded para o túnel expirado `len-bit...` e não possui suporte ao parâmetro `?server=`.
-   - **Ação Necessária (Aguardando Autorização):** O código local já está pronto e compilado (`dist/assets/index-DnKwtGXZ.js`), mas exige deploy manual ou autorização para publicação no Cloudflare Pages para que navegadores externos acessem com sucesso.
-3. **Links de Teste Operacionais:**
-   - Para jogar localmente ou com build sincronizado:
-     `http://localhost:3000/?server=snake-parental-skiing-verified.trycloudflare.com`
-   - Para rodar a suíte multiplayer automatizada:
-     `cmd /c npx tsx packages/server/scripts/test_mp_real_suite.ts`
-4. **Dossiê Canônico e Governança NoobCoin (Missões 30T/30V/30W):**
+1. **Publicação em Produção Concluída no Cloudflare Pages (Missão 37 Concluída):**
+   - Push executado com sucesso: `git push origin master:main` (avanço *fast-forward* limpo).
+   - `origin/main` e `origin/master` sincronizadas no commit `5e9a95fbb9026d471445b7c5e92fb90d5c5e8287`.
+   - Pipeline de build da Cloudflare concluído com sucesso e URL raiz `https://noobrpg.pages.dev/` servindo o novo bundle `assets/index-DnKwtGXZ.js`.
+   - Comprovação criptográfica SHA-256 bit a bit idêntica ao build local (`Bit-for-bit identical: true`).
+   - Erradicação definitiva do túnel expirado `len-bit...` e ativação do suporte dinâmico a `?server=`.
+2. **Estado dos Endpoints Públicos de Acesso:**
+   - **URL Raiz de Produção com Staging Dinâmico:**
+     `https://noobrpg.pages.dev/?server=snake-parental-skiing-verified.trycloudflare.com`
+   - **URL de Preview da Branch Master:**
+     `https://master.noobrpg.pages.dev/?server=snake-parental-skiing-verified.trycloudflare.com`
+   - **Acesso Local Direto:**
+     `http://localhost:3000/`
+3. **Limitação Remanescente e Próxima Fase:**
+   - **Backend Permanente:** O jogo utiliza um Quick Tunnel temporário via máquina local. O multiplayer padrão direto (sem query param `?server=`) exige o provisionamento de um backend permanente em nuvem (ex: Cloud Run, VPS ou Cloudflare Tunnel nomeado com domínio próprio) configurado com WSS e registrado em `VITE_WS_URL`.
+4. **Dossiê Canônico e Governança NoobCoin:**
    - Dossiê canônico consolidado em [docs/NOOBCOIN_GOVERNANCE_DOSSIER.md](file:///D:/NoobRPG/docs/NOOBCOIN_GOVERNANCE_DOSSIER.md).
    - Bloqueios operacionais on-chain rigorosamente preservados (`WORKER_DRY_RUN=true`, `distribution_paused='1'`, zero carteiras).
 
