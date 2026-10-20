@@ -1,0 +1,31 @@
+{
+  "name": "NoobRPG Dark Medieval Palette",
+  "totalColors": 24,
+  "description": "Paleta estrita de 24 cores para arte medieval sombria: madeira escura, pedra gasta, musgo, água fria, tochas quentes e contornos profundos de 1px.",
+  "colors": [
+    { "index": 0, "hex": "#08060a", "name": "Void Black", "usage": "Contornos de 1px e sombra absoluta" },
+    { "index": 1, "hex": "#14111d", "name": "Night Slate", "usage": "Sombras de pedra e telhado" },
+    { "index": 2, "hex": "#221e31", "name": "Dungeon Stone", "usage": "Paredes de pedra escura e masmorra" },
+    { "index": 3, "hex": "#383447", "name": "Worn Stone", "usage": "Pedra gasta e calçamento" },
+    { "index": 4, "hex": "#565166", "name": "Weathered Stone", "usage": "Destaque médio de pedra e lâminas" },
+    { "index": 5, "hex": "#848094", "name": "Stone Highlight", "usage": "Brilho de pedra e reflexo de armadura" },
+    { "index": 6, "hex": "#1c120c", "name": "Bog Oak", "usage": "Madeira queimada e sombras de troncos" },
+    { "index": 7, "hex": "#2e1d13", "name": "Dark Timber", "usage": "Vigas de madeira e portas reforçadas" },
+    { "index": 8, "hex": "#4d3220", "name": "Rustic Wood", "usage": "Cercas, barris e tábuas" },
+    { "index": 9, "hex": "#735034", "name": "Worn Leather", "usage": "Destaque de madeira, cabos e couro" },
+    { "index": 10, "hex": "#121e14", "name": "Dark Peat", "usage": "Terra úmida, lama e raiz escura" },
+    { "index": 11, "hex": "#1c301e", "name": "Deep Moss", "usage": "Grama escura e base de copas" },
+    { "index": 12, "hex": "#2d4a2d", "name": "Forest Canopy", "usage": "Folhagem de árvores e musgo nas pedras" },
+    { "index": 13, "hex": "#476b3f", "name": "Ancient Moss", "usage": "Destaque de folhas e ervas" },
+    { "index": 14, "hex": "#15222e", "name": "Deep Water", "usage": "Profundeza do lago e poças escuras" },
+    { "index": 15, "hex": "#22384a", "name": "Cold Mist", "usage": "Água corrente e reflexos de neblina" },
+    { "index": 16, "hex": "#3c5c73", "name": "Water Ripple", "usage": "Espuma d'água e brilho gelado" },
+    { "index": 17, "hex": "#9c3030", "name": "Crimson Gore", "usage": "Sangue escuro, rubis e capa desgastada" },
+    { "index": 18, "hex": "#e04f26", "name": "Torch Flame", "usage": "Chama de tochas e calor de forja" },
+    { "index": 19, "hex": "#f29929", "name": "Warm Torch Glow", "usage": "Luz quente da tocha e ouro antigo" },
+    { "index": 20, "hex": "#fce072", "name": "Torch Core", "usage": "Núcleo da tocha e brilho máximo de ouro" },
+    { "index": 21, "hex": "#8a7b70", "name": "Dull Skin Shadow", "usage": "Sombras de pele pálida e poeira" },
+    { "index": 22, "hex": "#c4b3a3", "name": "Bone Flesh", "usage": "Tom de pele pálida e ossos" },
+    { "index": 23, "hex": "#e8ded1", "name": "Ancient Parchment", "usage": "Luz especular, pergaminho e dentes" }
+  ]
+}

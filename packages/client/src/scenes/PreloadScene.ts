@@ -11,6 +11,42 @@ export class PreloadScene extends Phaser.Scene {
     this.load.tilemapTiledJSON('map_prototype', `${cleanBase}/maps/map_prototype.json`);
     this.load.tilemapTiledJSON('map_starter_village', `${cleanBase}/staging/map_starter_village.json`);
 
+    // Flag de arte sombria medieval (Missão Noturna Autônoma)
+    const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+    const isDarkArt = typeof window !== 'undefined' && (
+      searchParams?.get('art') === 'dark' ||
+      searchParams?.get('art') === 'new' ||
+      localStorage.getItem('art_theme') === 'dark' ||
+      (import.meta as any).env?.VITE_NEW_ART === '1'
+    );
+
+    if (isDarkArt) {
+      this.load.tilemapTiledJSON('map_starter_village_dark', `${cleanBase}/dark/map_starter_village_dark.json`);
+      this.load.image('tileset_dark', `${cleanBase}/dark/tileset_dark.png`);
+      this.load.spritesheet('hero_warrior', `${cleanBase}/dark/hero_warrior.png`, { frameWidth: 16, frameHeight: 24 });
+      this.load.spritesheet('hero_ranger', `${cleanBase}/dark/hero_ranger.png`, { frameWidth: 16, frameHeight: 24 });
+      this.load.spritesheet('hero_mage', `${cleanBase}/dark/hero_mage.png`, { frameWidth: 16, frameHeight: 24 });
+      this.load.spritesheet('hero_druid', `${cleanBase}/dark/hero_druid.png`, { frameWidth: 16, frameHeight: 24 });
+      this.load.spritesheet('mob_slime', `${cleanBase}/dark/mob_slime.png`, { frameWidth: 16, frameHeight: 16 });
+      this.load.spritesheet('mob_goblin', `${cleanBase}/dark/mob_goblin.png`, { frameWidth: 16, frameHeight: 24 });
+      this.load.spritesheet('mob_skeleton', `${cleanBase}/dark/mob_skeleton.png`, { frameWidth: 16, frameHeight: 24 });
+      this.load.spritesheet('npc_blacksmith', `${cleanBase}/dark/npc_blacksmith.png`, { frameWidth: 16, frameHeight: 24 });
+      this.load.spritesheet('npc_elder', `${cleanBase}/dark/npc_elder.png`, { frameWidth: 16, frameHeight: 24 });
+      this.load.spritesheet('npc_guard', `${cleanBase}/dark/npc_guard.png`, { frameWidth: 16, frameHeight: 24 });
+      this.load.spritesheet('npc_tavern', `${cleanBase}/dark/npc_tavern.png`, { frameWidth: 16, frameHeight: 24 });
+      this.load.image('portrait_blacksmith', `${cleanBase}/dark/portrait_blacksmith.png`);
+      this.load.image('portrait_elder', `${cleanBase}/dark/portrait_elder.png`);
+      this.load.image('portrait_guard', `${cleanBase}/dark/portrait_guard.png`);
+      this.load.image('portrait_tavern', `${cleanBase}/dark/portrait_tavern.png`);
+      this.load.image('fx_slash', `${cleanBase}/dark/fx_slash.png`);
+      this.load.image('fx_arrow', `${cleanBase}/dark/fx_arrow.png`);
+      this.load.image('fx_magic_orb', `${cleanBase}/dark/fx_magic_orb.png`);
+      this.load.image('fx_nature_burst', `${cleanBase}/dark/fx_nature_burst.png`);
+      this.load.image('fx_impact_spark', `${cleanBase}/dark/fx_impact_spark.png`);
+      this.load.image('fx_heal_aura', `${cleanBase}/dark/fx_heal_aura.png`);
+      this.load.image('ui_frames', `${cleanBase}/dark/ui_frames.png`);
+    }
+
     // Carregamento dos spritesheets pixel art das 4 classes de personagens (Fase 3.4)
     const heroSheets = [
       // Warrior
