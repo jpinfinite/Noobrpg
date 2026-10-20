@@ -1034,6 +1034,41 @@
    - Nenhum túnel ou chamada de rede remota foi executada.
    - Nenhum arquivo de carteira foi gerado e nenhuma operação on-chain foi executada.
 
+---
+
+## [2026-10-20 00:10 BRT] — Ciclo 34: Missão 31E — Execução e Validação ao Vivo do Quick Tunnel e Teste E2E de Conectividade Externa
+
+### Metas da Sessão
+- Commitar com segurança e atomicidade as alterações validadas das Missões 31C e 31D conforme decisão explícita do proprietário.
+- Limpar processos legados e inicializar o Cloudflare Quick Tunnel oficial a R$ 0,00 (`cloudflared.exe tunnel --url http://localhost:4000`).
+- Reiniciar o servidor backend NoobRPG em modo dev (`tsx watch src/server.ts`) com persistência SQLite e validação autoritativa de CORS/Anti-CSWSH.
+- Validar conectividade completa de ponta a ponta na rede pública (HTTPS e WSS) via chamadas reais através do endpoint gerado pelo Quick Tunnel.
+- Comprovar que o mecanismo de query param `?server=...` resolve dinamicamente as conexões sem exigir novos builds ou deploys no Cloudflare Pages.
+- Manter restrições invioláveis: zero transações on-chain, zero criação de carteiras, isolamento contábil e de segredos.
+
+### Ações Executadas
+1. **Commit Local Estruturado:**
+   - Executado `git commit` consolidando as Missões 31C e 31D: `feat(network): centralizar config de rede, erradicar endpoints efemeros e suportar quick tunnel dinamico (Missoes 31C e 31D)`.
+   - Branch `master` limpa e atualizada localmente sem arquivos pendentes.
+2. **Inicialização do Quick Tunnel e Servidor:**
+   - Finalizado processo antigo zumbi e iniciado `cloudflared.exe` apontando para `http://localhost:4000`.
+   - Túnel ativo provisionado na Cloudflare: `https://snake-parental-skiing-verified.trycloudflare.com`.
+   - Servidor Node.js backend inicializado e operando a 20 Hz na porta 4000 com SQLite íntegro.
+3. **Validação E2E On-Wire (Rede Externa via HTTPS e WSS):**
+   - **Health Check HTTPS:** `GET https://snake-parental-skiing-verified.trycloudflare.com/api/health` -> HTTP 200 `{"status":"ok","service":"noobrpg-server"}`.
+   - **Autenticação e Sessão HTTPS:** `POST https://snake-parental-skiing-verified.trycloudflare.com/api/auth/register` com `Origin: https://noobrpg.pages.dev` -> HTTP 201 `{"message":"Conta registrada com sucesso.","account":{"username":"tunneltest1"},"token":"..."}`.
+   - **Conexão Multiplayer WSS:** Teste real via cliente WebSocket conectando em `wss://snake-parental-skiing-verified.trycloudflare.com/ws?token=...` com `Origin: https://noobrpg.pages.dev` -> Handshake 101 aceito e evento `WS OPENED SUCCESSFULLY!` disparado.
+4. **Verificação de Resolução Dinâmica no Cliente:**
+   - Validada a função `resolveWsUrl` e `resolveApiUrl` do [networkConfig.ts](file:///d:/NoobRPG/packages/client/src/net/networkConfig.ts):
+     - Para `?server=snake-parental-skiing-verified.trycloudflare.com` em `https://noobrpg.pages.dev`:
+       - `wsUrl` resolvido: `wss://snake-parental-skiing-verified.trycloudflare.com/ws`
+       - `apiUrl` resolvido: `https://snake-parental-skiing-verified.trycloudflare.com/api`
+   - O link de teste dinâmico está 100% operacional para envio a testers sem necessidade de recompilar ou fazer deploy no Cloudflare Pages.
+5. **Salvaguarda Inviolável Confirmada:**
+   - Zero operações on-chain, zero criação de carteiras Solana, zero chaves privadas criadas.
+   - Bloqueios do NoobCoin (`WORKER_DRY_RUN=true`, `distribution_paused='1'`, NetworkGuard) 100% íntegros.
+
+
 
 
 

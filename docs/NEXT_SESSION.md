@@ -150,19 +150,21 @@ Todas as tarefas de alta prioridade da auditoria de prontidão e expansão de ga
 - Mapa Canônico de Produção (`map_prototype.json`): **100% Preservado**
 
 ## 3. Próximos Passos (Segurança Operacional, Rede e Governança)
-1. **Eliminação de Endpoints Temporários Concluída (Missão 31C):**
-   - Endpoints temporários `trycloudflare.com` erradicados de [MultiplayerClient.ts](file:///D:/NoobRPG/packages/client/src/net/MultiplayerClient.ts), [ApiClient.ts](file:///D:/NoobRPG/packages/client/src/net/ApiClient.ts) e [_redirects](file:///D:/NoobRPG/packages/client/public/_redirects).
-   - Resolução unificada via [networkConfig.ts](file:///D:/NoobRPG/packages/client/src/net/networkConfig.ts), garantindo `wss://` em `https:` e fail-fast com feedback visual no chat quando `VITE_WS_URL` não for fornecida.
-2. **Conectividade Externa Gratuita sem Domínio Validada (Missão 31D):**
-   - **Túnel Nomeado vs Quick Tunnel:** Confirmado que o Cloudflare Tunnel Nomeado exige obrigatoriamente um domínio próprio com Zona DNS ativa na Cloudflare (Cloudflare não concede rotas DNS em domínios públicos compartilhados como `pages.dev`).
-   - **Solução Viável a R$ 0,00:** Cloudflare Quick Tunnel (`.\bin\cloudflared.exe tunnel --url http://localhost:4000`) aliado à injeção dinâmica por query param no cliente (`https://noobrpg.pages.dev/?server=<tunel>.trycloudflare.com`).
-   - **Sanitização de Origin:** Removidas permissões genéricas a `trycloudflare.com` em `app.ts` (CORS) e `WebSocketServer.ts` (Anti-CSWSH), aceitando apenas origens legítimas (`localhost`, `*.pages.dev` e `CLIENT_ORIGIN`).
-   - **Testes de Rede:** 11/11 testes aprovados em [client_network_config.test.ts](file:///D:/NoobRPG/packages/server/tests/client_network_config.test.ts).
+1. **Quick Tunnel Ativo e Validado On-Wire (Missão 31E):**
+   - Cloudflare Quick Tunnel operando ao vivo: `https://snake-parental-skiing-verified.trycloudflare.com` apontando para o backend local `http://localhost:4000`.
+   - Backend ativo a 20 Hz na porta 4000 com SQLite íntegro e CORS/Anti-CSWSH restrito a `localhost`, `127.0.0.1`, `*.pages.dev` e `CLIENT_ORIGIN`.
+   - Testes de conectividade na rede pública aprovados:
+     - Health check HTTPS: HTTP 200 `{"status":"ok","service":"noobrpg-server"}`
+     - Registro de conta HTTPS: HTTP 201 com token de sessão
+     - Multiplayer WebSocket WSS: Handshake 101 Switching Protocols e conexão estabelecida.
+2. **Link de Teste para Amigos e Testers (R$ 0,00):**
+   - Para jogar via frontend publicado no Cloudflare Pages:
+     `https://noobrpg.pages.dev/?server=snake-parental-skiing-verified.trycloudflare.com`
+   - Para testar contra o frontend local em desenvolvimento:
+     `http://localhost:3000/?server=snake-parental-skiing-verified.trycloudflare.com`
 3. **Decisão Operacional Pendente do Proprietário:**
-   - Escolher entre:
-     - **Opção A (R$ 0,00):** Realizar testes externos com Quick Tunnel + link compartilhado com `?server=...`.
-     - **Opção B (Requer Domínio Próprio):** Adquirir um domínio registrado (~R$ 40/ano) para configurar um Túnel Nomeado fixo.
-   - Aguardar autorização antes de qualquer deploy no Cloudflare Pages ou execução de túneis.
+   - Realizar sessões de teste externo de gameplay multiplayer com testers usando o link compartilhado com `?server=...`.
+   - Caso decida migrar para Túnel Nomeado fixo definitivo futuramente, adquirir domínio registrado (~R$ 40/ano) com Zona DNS na Cloudflare.
 4. **Dossiê Canônico e Governança NoobCoin (Missões 30T/30V/30W):**
    - Dossiê canônico consolidado em [docs/NOOBCOIN_GOVERNANCE_DOSSIER.md](file:///D:/NoobRPG/docs/NOOBCOIN_GOVERNANCE_DOSSIER.md).
    - Matriz de 7 Portões de Autorização Independentes (A a G) formalizada na Missão 30W.
