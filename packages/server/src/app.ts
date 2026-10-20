@@ -66,14 +66,13 @@ export function createApp(db: IDatabase, simulationInstance?: GameSimulation): E
   app.use(
     cors({
       origin: (origin, callback) => {
-        // Permite requisições sem origin (como curl, mobile) ou se bater com localhost / pages.dev / túnel
+        // Permite requisições sem origin (como curl, mobile) ou se bater com localhost / pages.dev / CLIENT_ORIGIN
         if (
           !origin ||
           allowedList.includes(origin) ||
           origin.endsWith('.pages.dev') ||
           origin.includes('localhost') ||
-          origin.includes('127.0.0.1') ||
-          origin.includes('trycloudflare.com')
+          origin.includes('127.0.0.1')
         ) {
           callback(null, true);
         } else {

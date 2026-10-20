@@ -149,21 +149,25 @@ Todas as tarefas de alta prioridade da auditoria de prontidão e expansão de ga
 - Build de Produção do Cliente (Vite 5.4.21): **Aprovado com 0 erros em 8.12s** (221.61 kB index bundle)
 - Mapa Canônico de Produção (`map_prototype.json`): **100% Preservado**
 
-## 3. Próximos Passos (Segurança Operacional e Governança)
-1. **Dossiê Canônico Ajustado e Pronto para Avaliação Humana (Missão 30T):**
-   - Disponível em [docs/NOOBCOIN_GOVERNANCE_DOSSIER.md](file:///D:/NoobRPG/docs/NOOBCOIN_GOVERNANCE_DOSSIER.md).
-   - Ratificação humana pendente de deliberação expressa do proprietário.
-   - Parâmetros teóricos de projeto aprovados (6 decimais, supply teste 1M tNOOB).
-2. **Bloqueios Operacionais On-Chain Rigorosamente Preservados:**
-   - Geração de Carteira Devnet: 🔴 **BLOQUEADA** (Aguardando autorização humana explícita).
-   - Faucet Devnet: 🔴 **BLOQUEADO**.
-   - Criação de Mint e Emissão: 🔴 **BLOQUEADAS**.
-   - Assinatura e Transferências On-Chain: 🔴 **BLOQUEADAS**.
-   - Mainnet e Testnet: 🔴 **PROIBIDAS**.
-3. **Remediação Cloudflare R2:**
-   - Declaração humana do proprietário registrada confirmando a exclusão do token antigo; novas credenciais operacionais e validadas via [test_r2_connectivity.ts](file:///D:/NoobRPG/packages/server/scripts/test_r2_connectivity.ts).
-4. **Execução de Benchmark Progressivo de Carga:**
-   - Implementação de simulação progressiva (10 -> 25 -> 50 conexões) para mensurar tick rate a 20 Hz e saturação de persistência.
+## 3. Próximos Passos (Segurança Operacional, Rede e Governança)
+1. **Eliminação de Endpoints Temporários Concluída (Missão 31C):**
+   - Endpoints temporários `trycloudflare.com` erradicados de [MultiplayerClient.ts](file:///D:/NoobRPG/packages/client/src/net/MultiplayerClient.ts), [ApiClient.ts](file:///D:/NoobRPG/packages/client/src/net/ApiClient.ts) e [_redirects](file:///D:/NoobRPG/packages/client/public/_redirects).
+   - Resolução unificada via [networkConfig.ts](file:///D:/NoobRPG/packages/client/src/net/networkConfig.ts), garantindo `wss://` em `https:` e fail-fast com feedback visual no chat quando `VITE_WS_URL` não for fornecida.
+2. **Conectividade Externa Gratuita sem Domínio Validada (Missão 31D):**
+   - **Túnel Nomeado vs Quick Tunnel:** Confirmado que o Cloudflare Tunnel Nomeado exige obrigatoriamente um domínio próprio com Zona DNS ativa na Cloudflare (Cloudflare não concede rotas DNS em domínios públicos compartilhados como `pages.dev`).
+   - **Solução Viável a R$ 0,00:** Cloudflare Quick Tunnel (`.\bin\cloudflared.exe tunnel --url http://localhost:4000`) aliado à injeção dinâmica por query param no cliente (`https://noobrpg.pages.dev/?server=<tunel>.trycloudflare.com`).
+   - **Sanitização de Origin:** Removidas permissões genéricas a `trycloudflare.com` em `app.ts` (CORS) e `WebSocketServer.ts` (Anti-CSWSH), aceitando apenas origens legítimas (`localhost`, `*.pages.dev` e `CLIENT_ORIGIN`).
+   - **Testes de Rede:** 11/11 testes aprovados em [client_network_config.test.ts](file:///D:/NoobRPG/packages/server/tests/client_network_config.test.ts).
+3. **Decisão Operacional Pendente do Proprietário:**
+   - Escolher entre:
+     - **Opção A (R$ 0,00):** Realizar testes externos com Quick Tunnel + link compartilhado com `?server=...`.
+     - **Opção B (Requer Domínio Próprio):** Adquirir um domínio registrado (~R$ 40/ano) para configurar um Túnel Nomeado fixo.
+   - Aguardar autorização antes de qualquer deploy no Cloudflare Pages ou execução de túneis.
+4. **Dossiê Canônico e Governança NoobCoin (Missões 30T/30V/30W):**
+   - Dossiê canônico consolidado em [docs/NOOBCOIN_GOVERNANCE_DOSSIER.md](file:///D:/NoobRPG/docs/NOOBCOIN_GOVERNANCE_DOSSIER.md).
+   - Matriz de 7 Portões de Autorização Independentes (A a G) formalizada na Missão 30W.
+   - Bloqueios operacionais on-chain rigorosamente preservados (`WORKER_DRY_RUN=true`, `distribution_paused='1'`, zero carteiras).
+
 
 ## 4. Comandos de Inicialização Rápida
 ```powershell

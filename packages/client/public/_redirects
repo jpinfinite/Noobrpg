@@ -1,2 +1,4 @@
-# Cloudflare Pages Redirects / API Proxy
-/api/* https://len-bit-election-notebooks.trycloudflare.com/api/:splat 200
+# Cloudflare Pages Redirects
+# O cliente web do NoobRPG utiliza a variável de ambiente VITE_API_URL configurada no build para se comunicar com o backend via HTTPS.
+# Se um proxy reverso gerenciado pelo Cloudflare Pages for desejado em staging, defina a URL do túnel estável abaixo:
+# /api/* https://tunnel-backend.seu-dominio.com/api/:splat 200

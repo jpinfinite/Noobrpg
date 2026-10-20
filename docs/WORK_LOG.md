@@ -966,6 +966,75 @@
    - Zero operações on-chain, faucets, tokens emitidos ou transações submetidas.
    - Bloqueios do NetworkGuard, dryRun e distribution_paused 100% íntegros.
 
+## [2026-10-20 07:45 BRT] — Ciclo 32: Missão 31C — Eliminar Endpoints Temporários e Preparar o Cliente para Staging
+### Metas da Sessão
+- Auditar e eliminar todas as referências hardcoded ao túnel efêmero `trycloudflare.com` do cliente web.
+- Centralizar a resolução e normalização de endpoints de rede em módulo dedicado ([networkConfig.ts](file:///D:/NoobRPG/packages/client/src/net/networkConfig.ts)).
+- Garantir uso compulsório de `wss://` quando o protocolo da página for `https:` (prevenção contra bloqueio por Mixed Content).
+- Assegurar que em produção, caso `VITE_WS_URL` não esteja definida, o cliente falhe de forma controlada (`null` com feedback amigável no chat/UI) em vez de tentar conexões silenciosas contra hosts fantasmas.
+- Preservar 100% do comportamento de desenvolvimento local (`ws://localhost:4000/ws` e `/api`).
+- Atualizar [packages/client/public/_redirects](file:///D:/NoobRPG/packages/client/public/_redirects) removendo regra para túnel inativo.
+- Criar [packages/client/.env.example](file:///D:/NoobRPG/packages/client/.env.example) com documentação de variáveis públicas de conexão.
+- Criar suíte de testes unitários para a configuração de rede ([client_network_config.test.ts](file:///D:/NoobRPG/packages/server/tests/client_network_config.test.ts)).
+- Executar build oficial de produção e validar ausência de segredos ou endpoints temporários no bundle compilado.
+- Preservar integridade inviolável: zero deploy, zero alterações de DNS ou túneis, zero operações on-chain.
+
+### Ações Executadas
+1. **Módulo Centralizado de Resolução de Rede:**
+   - Criado [packages/client/src/net/networkConfig.ts](file:///D:/NoobRPG/packages/client/src/net/networkConfig.ts) com as funções `resolveWsUrl()`, `resolveApiUrl()`, `normalizeWsUrl()`, `isLocalEnvironment()` e `getNetworkConfig()`.
+2. **Refatoração do Cliente:**
+   - Atualizado [packages/client/src/net/MultiplayerClient.ts](file:///D:/NoobRPG/packages/client/src/net/MultiplayerClient.ts): substituído fallback hardcoded por `resolveWsUrl()` e adicionada validação defensiva no método `connect()`.
+   - Atualizado [packages/client/src/net/ApiClient.ts](file:///D:/NoobRPG/packages/client/src/net/ApiClient.ts): substituído fallback hardcoded por `resolveApiUrl()`.
+   - Atualizado [packages/client/public/_redirects](file:///D:/NoobRPG/packages/client/public/_redirects): removida regra para o túnel temporário morto.
+   - Criado [packages/client/.env.example](file:///D:/NoobRPG/packages/client/.env.example) documentando `VITE_API_URL` e `VITE_WS_URL`.
+   - Atualizado [docs/OPERATION_GUIDE.md](file:///D:/NoobRPG/docs/OPERATION_GUIDE.md) documentando o uso de Cloudflare Tunnel nomeado a custo zero e suas limitações operacionais.
+3. **Criação e Execução de Testes Automatizados:**
+   - Criada suíte [packages/server/tests/client_network_config.test.ts](file:///D:/NoobRPG/packages/server/tests/client_network_config.test.ts) com 8 testes cobrindo desenvolvimento local, produção, normalização de WSS, ausência de endpoints temporários e sanitização de exemplos de ambiente.
+   - Execução de testes (`node --test`): **31 testes PASS** (100% de sucesso).
+4. **Verificação de Compilação e Bundle de Produção:**
+   - Compilação do cliente via `tsc && vite build`: **código de saída 0** em 8.09s (bundle index de 222.81 kB).
+   - Verificação em `packages/client/dist/assets/*.js`: **0 ocorrências** de `trycloudflare` ou `len-bit`.
+5. **Salvaguarda Inviolável:**
+   - Zero deploys no Cloudflare Pages realizados.
+   - Zero alterações de DNS ou túneis criados remotamente.
+   - Zero arquivos de carteira ou chaves privadas geradas.
+   - Bloqueios do NoobCoin (`WORKER_DRY_RUN=true`, `distribution_paused='1'`, NetworkGuard) 100% íntegros.
+
+---
+
+## [Ciclo 33] — Missão 31D: Validação de Conectividade Externa Gratuita sem Domínio
+
+### Contexto e Objetivos
+- Avaliar as opções reais para disponibilizar o servidor backend local a outros jogadores com custo estrito de R$ 0,00 e sem compra de domínio.
+- Comparar os requisitos técnicos de Túnel Nomeado vs Quick Tunnel no ecossistema Cloudflare.
+- Determinar como o cliente pode conectar-se a URLs dinâmicas sem rebuild ou deploy contínuo no Pages.
+- Auditar e sanitizar a configuração de Origin do backend (CORS e Anti-CSWSH), eliminando permissões residuais a `trycloudflare.com`.
+- Preservar restrições invioláveis: zero deploy, zero operações on-chain, zero criação de túneis.
+
+### Conclusões Técnicas e Auditoria
+1. **Túnel Nomeado Exige Domínio Próprio:**
+   - A criação de rotas DNS para túneis nomeados (`cloudflared tunnel route dns`) exige obrigatoriamente que o domínio pertença a uma Zona DNS ativa na conta Cloudflare do usuário.
+   - A Cloudflare **não** fornece hostnames públicos gratuitos sob seus domínios (`pages.dev`, `workers.dev`, `trycloudflare.com`) para túneis nomeados. Logo, túnel nomeado sem domínio é tecnicamente inviável.
+2. **Quick Tunnel (`trycloudflare.com`) é a Solução Viável a R$ 0,00:**
+   - Executado via `.\bin\cloudflared.exe tunnel --url http://localhost:4000`.
+   - Custo R$ 0,00, sem domínio e sem necessidade de login. Suporta WebSocket e HTTPS nativamente.
+   - Limitação: URL efêmera que se renova a cada inicialização do processo.
+3. **Conexão Dinâmica no Cliente sem Rebuild:**
+   - Atualizado [packages/client/src/net/networkConfig.ts](file:///D:/NoobRPG/packages/client/src/net/networkConfig.ts) para suportar injeção via query parameter (`?server=<tunel>` ou `?ws=<url>&api=<url>`).
+   - Permite que o proprietário envie links diretos aos testers (ex.: `https://noobrpg.pages.dev/?server=exemplo.trycloudflare.com`), conectando o frontend ao backend local sem necessidade de novo deploy no Cloudflare Pages a cada alteração de túnel.
+4. **Sanitização de Origin no Backend:**
+   - Removidas tolerâncias arbitrárias a `trycloudflare.com` de [packages/server/src/app.ts](file:///D:/NoobRPG/packages/server/src/app.ts) (CORS) e [packages/server/src/multiplayer/WebSocketServer.ts](file:///D:/NoobRPG/packages/server/src/multiplayer/WebSocketServer.ts) (Anti-CSWSH).
+   - O backend aceita exclusivamente `localhost`, `127.0.0.1`, `*.pages.dev` (origem legítima do frontend) e as origens explicitamente declaradas em `CLIENT_ORIGIN`.
+5. **Testes Automatizados e Build:**
+   - Atualizada suíte [packages/server/tests/client_network_config.test.ts](file:///D:/NoobRPG/packages/server/tests/client_network_config.test.ts) com novos testes para query parameters e ausência de tolerâncias no backend (**11/11 PASS**).
+   - Execução integral de testes do servidor: **149 testes PASS** (100% de sucesso).
+   - Build do cliente (`tsc && vite build`): **código 0**, bundle de 223.62 kB limpo e sem credenciais.
+6. **Salvaguarda Inviolável Confirmada:**
+   - Nenhum deploy foi realizado no Cloudflare Pages.
+   - Nenhum túnel ou chamada de rede remota foi executada.
+   - Nenhum arquivo de carteira foi gerado e nenhuma operação on-chain foi executada.
+
+
 
 
 

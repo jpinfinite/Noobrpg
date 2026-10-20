@@ -35,12 +35,55 @@ npm --workspace=@noobrpg/client run dev
 ```
 - Aplicação web acessível em: `http://localhost:3000`
 
-### 2.3 Exposição Externa via Cloudflare Tunnel (Opcional)
-Para permitir que amigos ou testadores remotos acessem o backend local com HTTPS/WSS:
-```powershell
-npm run tunnel
-```
-O console exibirá uma URL pública (ex: `https://<nome-aleatorio>.trycloudflare.com`).
+### 2.3 Exposição Externa para Testes Multiplayer (Custo Zero vs Domínio Próprio)
+
+Para permitir que outros jogadores acessem o servidor local durante testes, existem duas abordagens documentadas:
+
+#### Opção A — Quick Tunnel Cloudflare (Custo Zero / Sem Domínio / Recomendado para Testes)
+- **Custo:** R$ 0,00.
+- **Domínio próprio:** Não necessário.
+- **Como funciona:** O `cloudflared` cria uma conexão segura provisória e atribui um hostname transitório no domínio `trycloudflare.com`.
+- **Passos manuais para execução:**
+  1. No terminal 1, inicie o backend:
+     ```powershell
+     npm --workspace=@noobrpg/server run dev
+     ```
+  2. No terminal 2, inicie o Quick Tunnel:
+     ```powershell
+     .\bin\cloudflared.exe tunnel --url http://localhost:4000
+     ```
+  3. O executável exibirá a URL gerada (ex.: `https://palavras-aleatorias.trycloudflare.com`).
+  4. Para que os jogadores acessem pelo frontend oficial sem necessidade de novo deploy, basta enviar o link com parâmetro dinâmico:
+     ```
+     https://noobrpg.pages.dev/?server=palavras-aleatorias.trycloudflare.com
+     ```
+  5. O cliente web conecta-se automaticamente via `wss://` e `https://`.
+- **Limitações:**
+  - A URL é efêmera e muda a cada reinício do comando `cloudflared`.
+  - O PC local, o backend e o `cloudflared` devem permanecer ligados durante todo o teste.
+
+#### Opção B — Túnel Nomeado Permanente (Exige Domínio Próprio Registrado)
+- **Custo:** Gratuito na Cloudflare, mas exige aquisição de um domínio (ex.: `.com`, `.com.br` a ~R$ 40/ano).
+- **Requisito Técnico Mandatório:** O Cloudflare Tunnel Nomeado **exige obrigatoriamente** que o domínio esteja ativo como Zona DNS na conta Cloudflare do proprietário. A Cloudflare **não** concede rotas DNS em domínios compartilhados (`*.pages.dev`, `*.workers.dev` ou `*.trycloudflare.com`).
+- **Passos para quando um domínio for adquirido:**
+  1. Autenticar no Cloudflare Zero Trust:
+     ```powershell
+     .\bin\cloudflared.exe tunnel login
+     ```
+  2. Criar o túnel nomeado:
+     ```powershell
+     .\bin\cloudflared.exe tunnel create noobrpg-backend
+     ```
+  3. Criar a rota DNS vinculada ao seu domínio:
+     ```powershell
+     .\bin\cloudflared.exe tunnel route dns noobrpg-backend api.meudominio.com
+     ```
+  4. Executar o túnel:
+     ```powershell
+     .\bin\cloudflared.exe tunnel run --url http://localhost:4000 noobrpg-backend
+     ```
+  5. Configurar `VITE_WS_URL=wss://api.meudominio.com/ws` e `VITE_API_URL=https://api.meudominio.com/api` no painel do Cloudflare Pages.
+
 
 ---
 

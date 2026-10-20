@@ -72,8 +72,7 @@ export class GameWebSocketServer {
       allowedList.includes(lowerOrigin) ||
       lowerOrigin.includes('localhost') ||
       lowerOrigin.includes('127.0.0.1') ||
-      lowerOrigin.endsWith('.pages.dev') ||
-      lowerOrigin.includes('trycloudflare.com')
+      lowerOrigin.endsWith('.pages.dev')
     );
   }
 

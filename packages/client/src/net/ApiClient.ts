@@ -1,4 +1,5 @@
 import { CharacterClass, PlayerData, InventorySlot } from '@noobrpg/shared';
+import { resolveApiUrl } from './networkConfig.js';
 
 export interface AuthAccount {
   id: string;
@@ -24,11 +25,15 @@ export interface CharacterSummary {
 }
 
 export class ApiClient {
-  private static baseUrl =
-    ((import.meta as any).env?.VITE_API_URL as string) ||
-    (typeof window !== 'undefined' && window.location.hostname.includes('pages.dev')
-      ? 'https://len-bit-election-notebooks.trycloudflare.com/api'
-      : '/api');
+  private static baseUrl = resolveApiUrl();
+
+  public static getBaseUrl(): string {
+    return this.baseUrl;
+  }
+
+  public static setBaseUrl(url: string): void {
+    this.baseUrl = url;
+  }
 
   private static tokenKey = 'noobrpg_session_token';
 

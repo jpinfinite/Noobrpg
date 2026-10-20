@@ -31,6 +31,8 @@ import {
   C2S_ClaimAchievementRewardPayload
 } from '@noobrpg/shared';
 
+import { resolveWsUrl } from './networkConfig.js';
+
 export interface MultiplayerCallbacks {
   onSnapshot?: (snapshot: WorldSnapshot) => void;
   onSnapshotDelta?: (delta: WorldSnapshotDelta) => void;
@@ -57,29 +59,16 @@ export class MultiplayerClient {
   private isIntentionalClose: boolean = false;
   private reconnectTimer: any = null;
   private callbacks: MultiplayerCallbacks = {};
-  private serverUrl: string;
+  private serverUrl: string | null = null;
   private activeMapKey: string = 'map_prototype';
 
   constructor(callbacks: MultiplayerCallbacks = {}, serverWsUrl?: string) {
     this.callbacks = callbacks;
-    if (serverWsUrl) {
-      this.serverUrl = serverWsUrl;
-    } else {
-      const customWsUrl = (import.meta as any).env?.VITE_WS_URL as string;
-      if (customWsUrl) {
-        this.serverUrl = customWsUrl;
-      } else if (typeof window !== 'undefined' && window.location.hostname.includes('pages.dev')) {
-        this.serverUrl = 'wss://len-bit-election-notebooks.trycloudflare.com/ws';
-      } else {
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const host = window.location.hostname || 'localhost';
-        this.serverUrl = `${protocol}//${host}:4000/ws`;
-      }
-    }
+    this.serverUrl = resolveWsUrl(serverWsUrl);
   }
 
   public getServerUrl(): string {
-    return this.serverUrl;
+    return this.serverUrl || 'não configurado';
   }
 
   public isConnected(): boolean {
@@ -96,11 +85,22 @@ export class MultiplayerClient {
       this.reconnectTimer = null;
     }
 
+    if (!this.serverUrl) {
+      const err = new Error('Endpoint WebSocket não configurado (VITE_WS_URL ausente em produção).');
+      if (this.callbacks.onError) {
+        this.callbacks.onError({
+          code: 'WS_NOT_CONFIGURED',
+          message: 'Servidor multiplayer não configurado para este ambiente de produção (VITE_WS_URL ausente).'
+        });
+      }
+      return Promise.reject(err);
+    }
+
     return new Promise((resolve, reject) => {
       let resolved = false;
 
       try {
-        let finalUrl = this.serverUrl;
+        let finalUrl = this.serverUrl!;
         const token = localStorage.getItem('noobrpg_session_token');
         if (token && !finalUrl.includes('token=')) {
           const sep = finalUrl.includes('?') ? '&' : '?';
